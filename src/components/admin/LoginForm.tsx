@@ -21,7 +21,7 @@ export default function LoginForm() {
       setError('Credenciales incorrectas')
       setLoading(false)
     } else {
-      window.location.href = '/admin/dashboard'
+      window.location.replace('/admin/dashboard')
     }
   }
 
