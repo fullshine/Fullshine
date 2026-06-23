@@ -1,0 +1,76 @@
+import { getDashboardStats, getBookings } from '@/actions/admin'
+import { formatCurrency, getStatusColor, getStatusLabel, formatDate, formatTime } from '@/lib/utils'
+
+export const metadata = { title: 'Dashboard | Fullshine Admin' }
+export const dynamic = 'force-dynamic'
+
+export default async function DashboardPage() {
+  const [statsResult, bookingsResult] = await Promise.all([
+    getDashboardStats(),
+    getBookings({ date: new Date().toISOString().split('T')[0] }),
+  ])
+
+  const stats = statsResult.data
+  const todayBookings = bookingsResult.data ?? []
+
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+
+      {/* Stats */}
+      {stats && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Reservas hoy" value={stats.bookings_today} />
+          <StatCard label="Esta semana" value={stats.bookings_week} />
+          <StatCard label="Pendientes" value={stats.pending_bookings} highlight />
+          <StatCard label="Ingresos del mes" value={formatCurrency(stats.revenue_month)} />
+        </div>
+      )}
+
+      {/* Today's bookings */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">
+          Agenda de hoy ({todayBookings.length} reservas)
+        </h2>
+        {todayBookings.length === 0 ? (
+          <div className="card text-center text-gray-500 py-8">No hay reservas para hoy.</div>
+        ) : (
+          <div className="space-y-3">
+            {todayBookings.map(booking => (
+              <div key={booking.id} className="card flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-gray-900">{formatTime(booking.scheduled_at)}</p>
+                    <p className="text-xs text-gray-400">{formatTime(booking.estimated_end_at)}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{booking.customer?.full_name}</p>
+                    <p className="text-sm text-gray-500">
+                      {booking.vehicle?.make} {booking.vehicle?.model} — {booking.service?.name}
+                    </p>
+                    <p className="text-xs text-gray-400">{booking.customer?.phone}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-gray-800">{formatCurrency(booking.total_price)}</span>
+                  <span className={`badge ${getStatusColor(booking.status)}`}>
+                    {getStatusLabel(booking.status)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function StatCard({ label, value, highlight }: { label: string; value: string | number; highlight?: boolean }) {
+  return (
+    <div className={`card ${highlight ? 'border-brand-200 bg-brand-50' : ''}`}>
+      <p className="text-sm text-gray-500 mb-1">{label}</p>
+      <p className={`text-2xl font-bold ${highlight ? 'text-brand-700' : 'text-gray-900'}`}>{value}</p>
+    </div>
+  )
+}
