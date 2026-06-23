@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from '@/actions/admin'
 import { cn } from '@/lib/utils'
 
@@ -15,6 +15,12 @@ const NAV_ITEMS = [
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleSignOut() {
+    await signOut()
+    router.push('/admin/login')
+  }
 
   return (
     <aside className="w-56 bg-gray-900 flex flex-col">
@@ -26,7 +32,6 @@ export default function AdminSidebar() {
           <span className="text-white font-bold">Fullshine</span>
         </div>
       </div>
-
       <nav className="flex-1 p-3 space-y-1">
         {NAV_ITEMS.map(item => (
           <Link key={item.href} href={item.href}
@@ -41,14 +46,11 @@ export default function AdminSidebar() {
           </Link>
         ))}
       </nav>
-
       <div className="p-3 border-t border-gray-700">
-        <form action={signOut}>
-          <button type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <span>🚪</span> Cerrar sesión
-          </button>
-        </form>
+        <button onClick={handleSignOut}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <span>🚪</span> Cerrar sesión
+        </button>
       </div>
     </aside>
   )
