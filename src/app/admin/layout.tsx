@@ -2,11 +2,23 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: { slug?: string[] }
+}) {
+  // No proteger la página de login
   const supabase = createClient()
   const { data: { session } } = await supabase.auth.getSession()
 
-  if (!session) redirect('/admin/login')
+  const isLoginPage = typeof window === 'undefined' &&
+    process.env.NEXT_RUNTIME === 'edge'
+
+  if (!session) {
+    redirect('/admin/login')
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
