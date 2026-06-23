@@ -19,7 +19,7 @@ export default function AdminSidebar() {
 
   async function handleSignOut() {
     await signOut()
-    router.push('/admin/login')
+    router.push('/login')
   }
 
   return (
