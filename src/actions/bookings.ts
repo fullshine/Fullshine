@@ -55,7 +55,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
       .from('services')
       .select('*, prices:service_prices(vehicle_type, price)')
       .eq('id', input.service_id)
-      .eq('is_active', true)
+      .eq('active', true)
       .single()
 
     if (serviceError || !service) {
