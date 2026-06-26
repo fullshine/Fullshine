@@ -253,8 +253,8 @@ export default function BookingForm({ services }: Props) {
                     </p>
                     <div className="space-y-2">
                       {grouped[cat].map(service => {
-                        const priceRecord = service.prices.find(p => p.vehicle_type === form.vehicle_type)
-                        const price = priceRecord?.price_clp
+                        const priceRecord = service.prices?.find(p => p.vehicle_type === form.vehicle_type)
+                        const price = priceRecord?.price
                         return (
                           <button key={service.id} type="button"
                             onClick={() => set('service_id', service.id)}
