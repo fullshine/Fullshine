@@ -13,10 +13,10 @@ export async function signIn(email: string, password: string): Promise<ActionRes
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) return { success: false, error: 'Credenciales incorrectas' }
+    return { success: true }
   } catch {
     return { success: false, error: 'Error de conexión' }
   }
-  redirect('/admin/dashboard')
 }
 
 export async function signOut(): Promise<ActionResult> {
