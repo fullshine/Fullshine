@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { signIn } from '@/actions/admin'
 
 export default function LoginForm() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -17,7 +19,7 @@ export default function LoginForm() {
       setError(result.error ?? 'Credenciales incorrectas')
       setLoading(false)
     } else {
-      window.location.href = '/admin/dashboard'
+      router.push('/admin/dashboard')
     }
   }
 
