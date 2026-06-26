@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { getServices } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
 import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
+import PromoModal from '@/components/PromoModal'
 
 export const dynamic = 'force-dynamic'
 
@@ -98,6 +99,8 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
+
+      <PromoModal />
 
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
