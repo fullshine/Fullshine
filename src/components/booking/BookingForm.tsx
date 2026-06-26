@@ -5,7 +5,7 @@ import { createBooking, getAvailableSlots } from '@/actions/bookings'
 import type { BookingFormData, VehicleType, TimeSlot } from '@/types'
 import { cn, formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
 
-const VEHICLE_TYPES: VehicleType[] = ['sedan', 'suv', 'pickup', 'van', 'hatchback', 'coupe']
+const VEHICLE_TYPES: VehicleType[] = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
 const STEPS = ['Cliente', 'Vehículo', 'Servicio', 'Fecha y Hora', 'Confirmar']
 
 interface Service {
@@ -14,7 +14,7 @@ interface Service {
   description?: string
   category: string
   duration_minutes: number
-  prices: Array<{ vehicle_type: string; price: number }>
+  prices: Array<{ vehicle_type: string; price_clp: number }>
 }
 
 interface Props {
@@ -30,7 +30,7 @@ const INITIAL_FORM: BookingFormData = {
   vehicle_year: new Date().getFullYear(),
   vehicle_color: '',
   vehicle_license_plate: '',
-  vehicle_type: 'sedan',
+  vehicle_type: 'hatch_sedan',
   service_id: '',
   scheduled_date: '',
   scheduled_time: '',
@@ -47,7 +47,7 @@ export default function BookingForm({ services }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const selectedService = services.find(s => s.id === form.service_id)
-  const servicePrice = selectedService?.prices.find(p => p.vehicle_type === form.vehicle_type)?.price
+  const servicePrice = selectedService?.prices.find(p => p.vehicle_type === form.vehicle_type)?.price_clp
 
   function set(field: keyof BookingFormData, value: string | number) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -225,35 +225,66 @@ export default function BookingForm({ services }: Props) {
         {step === 2 && (
           <>
             <h3 className="font-semibold text-gray-900">Elige tu servicio</h3>
-            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-              {services.map(service => {
-                const price = service.prices.find(p => p.vehicle_type === form.vehicle_type)?.price
-                return (
-                  <button key={service.id} type="button"
-                    onClick={() => set('service_id', service.id)}
-                    className={cn(
-                      'w-full text-left p-4 rounded-xl border-2 transition-all',
-                      form.service_id === service.id
-                        ? 'border-brand-500 bg-brand-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    )}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold text-gray-900">{service.name}</p>
-                        {service.description && <p className="text-sm text-gray-500 mt-0.5">{service.description}</p>}
-                        <p className="text-xs text-gray-400 mt-1">{service.duration_minutes} min</p>
-                      </div>
-                      <div className="text-right ml-4">
-                        {price ? (
-                          <span className="font-bold text-brand-600">{formatCurrency(price)}</span>
-                        ) : (
-                          <span className="text-sm text-gray-400">Consultar</span>
-                        )}
-                      </div>
+            <div className="space-y-4 max-h-[28rem] overflow-y-auto pr-1">
+              {(() => {
+                const CATEGORY_LABELS: Record<string, string> = {
+                  lavado_detallado: 'Lavado Detallado',
+                  tapiz:            'Tapiz',
+                  pulido:           'Pulidos',
+                  ceramico:         'Tratamiento Cerámico',
+                  adicional:        'Adicionales',
+                  precompra:        'Servicio Precompra',
+                }
+                const CATEGORY_ORDER = ['lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'adicional', 'precompra']
+                const grouped = services.reduce<Record<string, typeof services>>((acc, s) => {
+                  const cat = s.category ?? 'add_on'
+                  if (!acc[cat]) acc[cat] = []
+                  acc[cat].push(s)
+                  return acc
+                }, {})
+                const orderedKeys = [
+                  ...CATEGORY_ORDER.filter(k => grouped[k]),
+                  ...Object.keys(grouped).filter(k => !CATEGORY_ORDER.includes(k)),
+                ]
+                return orderedKeys.map(cat => (
+                  <div key={cat}>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5 px-1">
+                      {CATEGORY_LABELS[cat] ?? cat}
+                    </p>
+                    <div className="space-y-2">
+                      {grouped[cat].map(service => {
+                        const priceRecord = service.prices.find(p => p.vehicle_type === form.vehicle_type)
+                        const price = priceRecord?.price_clp
+                        return (
+                          <button key={service.id} type="button"
+                            onClick={() => set('service_id', service.id)}
+                            className={cn(
+                              'w-full text-left p-4 rounded-xl border-2 transition-all',
+                              form.service_id === service.id
+                                ? 'border-brand-500 bg-brand-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            )}>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-semibold text-gray-900">{service.name}</p>
+                                {service.description && <p className="text-sm text-gray-500 mt-0.5">{service.description}</p>}
+                                <p className="text-xs text-gray-400 mt-1">{(service as any).duration_hours ? `${(service as any).duration_hours}h` : service.duration_minutes ? `${service.duration_minutes} min` : ''}</p>
+                              </div>
+                              <div className="text-right ml-4 shrink-0">
+                                {price ? (
+                                  <span className="font-bold text-brand-600">{formatCurrency(price)}</span>
+                                ) : (
+                                  <span className="text-sm text-gray-400">Consultar</span>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      })}
                     </div>
-                  </button>
-                )
-              })}
+                  </div>
+                ))
+              })()}
             </div>
           </>
         )}
@@ -275,25 +306,48 @@ export default function BookingForm({ services }: Props) {
             </div>
             {form.scheduled_date && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Horario disponible *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Turno *</label>
                 {loadingSlots ? (
-                  <p className="text-sm text-gray-500">Cargando horarios...</p>
+                  <p className="text-sm text-gray-500">Cargando disponibilidad...</p>
                 ) : slots.length === 0 ? (
-                  <p className="text-sm text-gray-500">No hay horarios disponibles para esta fecha.</p>
+                  <p className="text-sm text-gray-500">No hay turnos disponibles para este día.</p>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-3">
                     {slots.map((slot, i) => {
-                      const timeStr = new Date(slot.start).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
+                      const startTime = slot.start.substring(11, 16)
+                      const endTime = slot.end.substring(11, 16)
+                      const hour = parseInt(startTime)
+                      const turno = hour < 13 ? 'Mañana' : 'Tarde'
+                      const spotsLeft = slot.spots_left ?? (slot.available ? 1 : 0)
+                      const isSelected = form.scheduled_time === startTime
+
                       return (
                         <button key={i} type="button" disabled={!slot.available}
-                          onClick={() => set('scheduled_time', timeStr.replace(':', ':'))}
+                          onClick={() => set('scheduled_time', startTime)}
                           className={cn(
-                            'py-2 rounded-lg text-sm font-medium transition-colors border',
-                            !slot.available ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200' :
-                            form.scheduled_time === timeStr ? 'bg-brand-500 text-white border-brand-500' :
-                            'bg-white text-gray-700 border-gray-300 hover:border-brand-400'
+                            'p-4 rounded-xl border-2 text-left transition-all',
+                            !slot.available
+                              ? 'bg-gray-50 border-gray-200 cursor-not-allowed opacity-60'
+                              : isSelected
+                                ? 'border-brand-500 bg-brand-50'
+                                : 'border-gray-200 hover:border-brand-300 bg-white'
                           )}>
-                          {timeStr}
+                          <p className="text-xs font-semibold uppercase tracking-wider mb-1
+                            text-gray-400">
+                            {turno}
+                          </p>
+                          <p className={cn('text-2xl font-bold', isSelected ? 'text-brand-600' : 'text-gray-900')}>
+                            {startTime}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">hasta las {endTime}</p>
+                          <div className={cn(
+                            'mt-2 text-xs font-medium',
+                            !slot.available ? 'text-red-500' :
+                            spotsLeft === 1 ? 'text-amber-600' : 'text-green-600'
+                          )}>
+                            {!slot.available ? '✕ Sin disponibilidad' :
+                             spotsLeft === 1 ? '● 1 cupo disponible' : '● 2 cupos disponibles'}
+                          </div>
                         </button>
                       )
                     })}

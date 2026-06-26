@@ -7,7 +7,7 @@ export default async function ServiciosPage() {
   const result = await getServices()
   const services = result.data ?? []
 
-  const vehicleTypes = ['sedan', 'suv', 'pickup', 'van', 'hatchback', 'coupe']
+  const vehicleTypes = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
 
   return (
     <div className="p-6 space-y-4">
@@ -35,9 +35,9 @@ export default async function ServiciosPage() {
                   {s.description && <div className="text-xs text-gray-400">{s.description}</div>}
                 </td>
                 <td className="px-4 py-3 text-gray-500">{s.category}</td>
-                <td className="px-4 py-3 text-gray-500">{s.duration_minutes} min</td>
+                <td className="px-4 py-3 text-gray-500">{(s as any).duration_hours ? `${(s as any).duration_hours}h` : '—'}</td>
                 {vehicleTypes.map(vt => {
-                  const price = s.prices.find(p => p.vehicle_type === vt)?.price
+                  const price = (s.prices as any[]).find(p => p.vehicle_type === vt)?.price_clp
                   return (
                     <td key={vt} className="px-3 py-3 text-right text-gray-700">
                       {price ? formatCurrency(price) : '—'}

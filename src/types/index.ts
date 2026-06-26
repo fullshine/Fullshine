@@ -4,7 +4,7 @@
 
 export type UserRole = 'admin' | 'staff'
 export type BookingStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
-export type VehicleType = 'sedan' | 'suv' | 'pickup' | 'van' | 'hatchback' | 'coupe'
+export type VehicleType = 'hatch_sedan' | 'suv_camioneta' | 'pickup_xl'
 export type ServiceCategory = 'exterior' | 'interior' | 'full' | 'premium' | 'add_on'
 
 // --- DATABASE TYPES ---
@@ -86,6 +86,7 @@ export interface TimeSlot {
   start: string
   end: string
   available: boolean
+  spots_left?: number
 }
 
 // --- FORM TYPES ---

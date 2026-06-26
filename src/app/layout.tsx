@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Fullshine Detailing | San Pedro de la Paz',
-  description: 'Reserva tu servicio de detailing profesional en San Pedro de la Paz, Chile.',
+  title: 'Fullshine Detailing | Concepción & San Pedro de la Paz',
+  description: 'Reserva tu servicio de detailing profesional en Concepción & San Pedro de la Paz, Chile.',
   icons: { icon: '/favicon.ico' },
 }
 

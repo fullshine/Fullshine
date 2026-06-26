@@ -51,10 +51,10 @@ export default async function VehiculosPage({ searchParams }: { searchParams: { 
             {filtered.map(v => (
               <tr key={v.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 font-medium text-gray-900">
-                  {v.make} {v.model} {v.year}
+                  {(v as any).brand ?? v.make} {v.model} {v.year}
                   {v.color && <span className="text-gray-400 font-normal"> · {v.color}</span>}
                 </td>
-                <td className="px-4 py-3 text-gray-600">{v.license_plate ?? '—'}</td>
+                <td className="px-4 py-3 text-gray-600">{(v as any).plate ?? v.license_plate ?? '—'}</td>
                 <td className="px-4 py-3 text-gray-500">{getVehicleTypeLabel(v.vehicle_type)}</td>
                 <td className="px-4 py-3">
                   <div className="text-gray-900">{v.customer?.full_name}</div>

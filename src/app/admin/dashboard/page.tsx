@@ -40,19 +40,19 @@ export default async function DashboardPage() {
               <div key={booking.id} className="card flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-lg font-bold text-gray-900">{formatTime(booking.scheduled_at)}</p>
-                    <p className="text-xs text-gray-400">{formatTime(booking.estimated_end_at)}</p>
+                    <p className="text-lg font-bold text-gray-900">{formatTime((booking as any).slot_start)}</p>
+                    <p className="text-xs text-gray-400">{formatTime((booking as any).slot_end)}</p>
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">{booking.customer?.full_name}</p>
                     <p className="text-sm text-gray-500">
-                      {booking.vehicle?.make} {booking.vehicle?.model} — {booking.service?.name}
+                      {(booking.vehicle as any)?.brand ?? booking.vehicle?.make} {booking.vehicle?.model} — {booking.service?.name}
                     </p>
                     <p className="text-xs text-gray-400">{booking.customer?.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="font-semibold text-gray-800">{formatCurrency(booking.total_price)}</span>
+                  <span className="font-semibold text-gray-800">{formatCurrency((booking as any).total_price_clp)}</span>
                   <span className={`badge ${getStatusColor(booking.status)}`}>
                     {getStatusLabel(booking.status)}
                   </span>

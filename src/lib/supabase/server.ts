@@ -30,6 +30,9 @@ export function createAdminClient() {
         getAll() { return [] },
         setAll(_cookiesToSet: { name: string; value: string; options?: object }[]) {},
       },
+      global: {
+        fetch: (url, options) => fetch(url, { ...options, cache: 'no-store' }),
+      },
     }
   )
 }

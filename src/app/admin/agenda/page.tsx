@@ -1,6 +1,7 @@
 import { getBookings } from '@/actions/admin'
 import BookingStatusUpdater from '@/components/admin/BookingStatusUpdater'
 import { formatCurrency, formatDate, formatTime, getStatusColor, getStatusLabel, getVehicleTypeLabel } from '@/lib/utils'
+import AgendaDatePicker from '@/components/admin/AgendaDatePicker'
 
 export const metadata = { title: 'Agenda | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -18,9 +19,7 @@ export default async function AgendaPage({
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Agenda</h1>
-        <input type="date" defaultValue={date}
-          onChange={e => { window.location.href = `/admin/agenda?date=${e.target.value}` }}
-          className="input-field w-auto" />
+        <AgendaDatePicker defaultDate={date} />
       </div>
 
       <p className="text-gray-500 text-sm">{formatDate(date + 'T12:00:00')} — {bookings.length} reservas</p>
@@ -34,23 +33,23 @@ export default async function AgendaPage({
               <div className="flex items-start justify-between gap-4">
                 <div className="flex gap-4">
                   <div className="text-center min-w-[60px]">
-                    <p className="text-xl font-bold text-gray-900">{formatTime(booking.scheduled_at)}</p>
-                    <p className="text-xs text-gray-400">→ {formatTime(booking.estimated_end_at)}</p>
+                    <p className="text-xl font-bold text-gray-900">{formatTime((booking as any).slot_start)}</p>
+                    <p className="text-xs text-gray-400">→ {formatTime((booking as any).slot_end)}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="font-semibold text-gray-900 text-lg">{booking.customer?.full_name}</p>
                     <p className="text-sm text-gray-600">📱 {booking.customer?.phone}</p>
                     <p className="text-sm text-gray-600">
-                      🚗 {booking.vehicle?.make} {booking.vehicle?.model} {booking.vehicle?.year}
-                      {booking.vehicle?.license_plate && ` · ${booking.vehicle.license_plate}`}
+                      🚗 {(booking.vehicle as any)?.brand ?? booking.vehicle?.make} {booking.vehicle?.model} {booking.vehicle?.year}
+                      {(booking.vehicle as any)?.plate && ` · ${(booking.vehicle as any).plate}`}
                       {' · '}{getVehicleTypeLabel(booking.vehicle?.vehicle_type ?? '')}
                     </p>
                     <p className="text-sm text-gray-600">✨ {booking.service?.name}</p>
-                    {booking.notes && <p className="text-sm text-gray-400 italic">"{booking.notes}"</p>}
+                    {(booking as any).customer_notes && <p className="text-sm text-gray-400 italic">"{(booking as any).customer_notes}"</p>}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <p className="font-bold text-gray-900">{formatCurrency(booking.total_price)}</p>
+                  <p className="font-bold text-gray-900">{formatCurrency((booking as any).total_price_clp)}</p>
                   <span className={`badge ${getStatusColor(booking.status)}`}>
                     {getStatusLabel(booking.status)}
                   </span>

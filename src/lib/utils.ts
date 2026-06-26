@@ -20,7 +20,11 @@ export function formatDate(dateStr: string): string {
 }
 
 export function formatTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString('es-CL', {
+  // Soporta strings de solo hora "09:00:00" o "09:00" además de ISO completos
+  const normalized = /^\d{2}:\d{2}/.test(dateStr) && !dateStr.includes('T')
+    ? `2000-01-01T${dateStr}`
+    : dateStr
+  return new Date(normalized).toLocaleTimeString('es-CL', {
     hour: '2-digit', minute: '2-digit',
   })
 }
@@ -31,12 +35,9 @@ export function formatDateTime(dateStr: string): string {
 
 export function getVehicleTypeLabel(type: string): string {
   const labels: Record<string, string> = {
-    sedan: 'Sedán',
-    suv: 'SUV',
-    pickup: 'Pickup',
-    van: 'Van',
-    hatchback: 'Hatchback',
-    coupe: 'Coupé',
+    hatch_sedan: 'Hatch / Sedán',
+    suv_camioneta: 'SUV / Camioneta',
+    pickup_xl: 'Pickup XL',
   }
   return labels[type] ?? type
 }

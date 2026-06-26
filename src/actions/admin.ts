@@ -4,6 +4,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { sendCancellationToClient } from '@/lib/whatsapp'
 import type { ActionResult, BookingStatus, DashboardStats, BookingWithRelations, Customer, Vehicle } from '@/types'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 // --- AUTH ---
 
@@ -34,23 +35,22 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
   try {
     const supabase = createAdminClient()
     const now = new Date()
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString()
-    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const today = now.toISOString().split('T')[0]
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString().split('T')[0]
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
 
     const [todayRes, weekRes, revenueRes, pendingRes, confirmedRes] = await Promise.all([
       supabase.from('bookings').select('id', { count: 'exact', head: true })
-        .gte('scheduled_at', todayStart).lte('scheduled_at', todayEnd),
+        .eq('booking_date', today),
       supabase.from('bookings').select('id', { count: 'exact', head: true })
-        .gte('scheduled_at', weekStart),
-      supabase.from('bookings').select('total_price')
-        .eq('status', 'completed').gte('scheduled_at', monthStart),
+        .gte('booking_date', weekStart),
+      supabase.from('bookings').select('total_price_clp')
+        .eq('status', 'completed').gte('booking_date', monthStart),
       supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed'),
     ])
 
-    const revenueMonth = (revenueRes.data ?? []).reduce((sum, b) => sum + (b.total_price ?? 0), 0)
+    const revenueMonth = (revenueRes.data ?? []).reduce((sum, b) => sum + (b.total_price_clp ?? 0), 0)
 
     return {
       success: true,
@@ -84,13 +84,11 @@ export async function getBookings(filters?: {
         vehicle:vehicles(*),
         service:services(*)
       `)
-      .order('scheduled_at', { ascending: true })
+      .order('slot_start', { ascending: true })
 
     if (filters?.status) query = query.eq('status', filters.status)
     if (filters?.date) {
-      const start = `${filters.date}T00:00:00`
-      const end = `${filters.date}T23:59:59`
-      query = query.gte('scheduled_at', start).lte('scheduled_at', end)
+      query = query.eq('booking_date', filters.date)
     }
 
     const { data, error } = await query
@@ -131,7 +129,7 @@ export async function updateBookingStatus(
           phone: booking.customer.phone,
           customerName: booking.customer.full_name,
           serviceName: booking.service?.name ?? '',
-          scheduledAt: booking.scheduled_at,
+          scheduledAt: booking.slot_start,
         }).catch(console.error)
       }
     }
