@@ -14,7 +14,7 @@ interface Service {
   description?: string
   category: string
   duration_minutes: number
-  prices: Array<{ vehicle_type: string; price_clp: number }>
+  prices?: Array<{ vehicle_type: string; price: number }>
 }
 
 interface Props {
@@ -47,7 +47,7 @@ export default function BookingForm({ services }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const selectedService = services.find(s => s.id === form.service_id)
-  const servicePrice = selectedService?.prices.find(p => p.vehicle_type === form.vehicle_type)?.price_clp
+  const servicePrice = selectedService?.prices?.find(p => p.vehicle_type === form.vehicle_type)?.price
 
   function set(field: keyof BookingFormData, value: string | number) {
     setForm(prev => ({ ...prev, [field]: value }))
