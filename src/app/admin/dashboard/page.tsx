@@ -17,13 +17,6 @@ export default async function DashboardPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
 
-      {/* Debug info */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
-        <p><strong>Stats:</strong> {statsResult.success ? 'OK' : `Error: ${statsResult.error}`}</p>
-        <p><strong>Bookings:</strong> {bookingsResult.success ? 'OK' : `Error: ${bookingsResult.error}`}</p>
-        <p><strong>Reservas hoy:</strong> {todayBookings.length}</p>
-      </div>
-
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Reservas hoy" value={stats.bookings_today} />
