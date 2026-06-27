@@ -2,29 +2,36 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { signIn } from '@/actions/admin'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setLoading(true)
     setError(null)
+
+    const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
     const password = formData.get('password') as string
-    const result = await signIn(email, password)
-    if (!result.success) {
-      setError(result.error ?? 'Credenciales incorrectas')
+
+    const supabase = createClient()
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (authError) {
+      setError('Credenciales incorrectas')
       setLoading(false)
     } else {
       router.push('/admin/dashboard')
+      router.refresh()
     }
   }
 
   return (
-    <form action={handleSubmit} className="bg-white rounded-2xl p-8 shadow-xl space-y-4">
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-xl space-y-4">
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">{error}</div>
       )}
@@ -38,7 +45,8 @@ export default function LoginForm() {
         <input className="input-field" type="password" name="password" required
           autoComplete="current-password" />
       </div>
-      <button type="submit" disabled={loading} className="btn-primary w-full">
+      <button type="submit" disabled={loading}
+        className="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
         {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
       </button>
     </form>
