@@ -38,7 +38,10 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
   const [msg, setMsg] = useState<string | null>(null)
   const status = booking.status
 
-  const scheduledAt = booking.scheduled_at ?? ''
+  const b = booking as any
+  const scheduledAt = b.scheduled_at ?? b.booking_date ?? ''
+  const slotStart = b.slot_start ?? ''
+  // use slotStart for time if available
   const date = scheduledAt.substring(0, 10) || '—'
   const time = scheduledAt.substring(11, 16) || '—'
   const vehicle = `${booking.vehicle?.make ?? ''} ${booking.vehicle?.model ?? ''}`.trim()
