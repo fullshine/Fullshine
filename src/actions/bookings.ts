@@ -114,12 +114,16 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
   try {
     const supabase = createAdminClient()
 
-    // Buscar cliente existente por teléfono
+    // Normalizar teléfono: solo dígitos, con prefijo 56 si es chileno
+    const rawPhone = input.customer.phone.replace(/\D/g, '')
+    const normalizedPhone = rawPhone.startsWith('56') ? rawPhone : `56${rawPhone}`
+
+    // Buscar cliente existente por teléfono (varias variantes)
     let customer: { id: string; full_name: string; phone: string } | null = null
     const { data: existing } = await supabase
       .from('customers')
       .select('id, full_name, phone')
-      .eq('phone', input.customer.phone)
+      .or(`phone.eq.${normalizedPhone},phone.eq.+${normalizedPhone},phone.eq.${rawPhone}`)
       .maybeSingle()
 
     if (existing) {
@@ -127,23 +131,22 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
     } else {
       const { data: newCustomer, error: insertError } = await supabase
         .from('customers')
-        .insert({ full_name: input.customer.full_name, phone: input.customer.phone, email: input.customer.email ?? null })
+        .insert({ full_name: input.customer.full_name, phone: normalizedPhone, email: input.customer.email ?? null })
         .select('id, full_name, phone')
         .single()
 
       if (insertError) {
-        // Código 23505 = unique violation: el cliente ya existe con teléfono normalizado distinto
         if (insertError.code === '23505') {
-          const digits = input.customer.phone.replace(/\D/g, '')
+          // Ya existe con otro formato — buscar de nuevo
           const { data: fallback } = await supabase
             .from('customers')
             .select('id, full_name, phone')
-            .or(`phone.eq.${input.customer.phone},phone.eq.+${digits},phone.eq.${digits}`)
+            .or(`phone.eq.${normalizedPhone},phone.eq.+${normalizedPhone},phone.eq.${rawPhone}`)
             .maybeSingle()
           if (fallback) {
             customer = fallback
           } else {
-            return { success: false, error: 'No se pudo registrar el cliente. Verifica el número de teléfono.' }
+            return { success: false, error: insertError.message }
           }
         } else {
           return { success: false, error: insertError.message }
@@ -266,8 +269,4 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
       }),
     ]).catch(console.error)
 
-    return { success: true, data: { bookingId: bookingId } }
-  } catch (err: any) {
-    return { success: false, error: err?.message ?? 'Error inesperado' }
-  }
-}
+    return { success: true, d
