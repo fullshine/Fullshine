@@ -241,9 +241,9 @@ export async function moveBookingStage(
     const supabase = createAdminClient()
     const { error } = await supabase
       .from('bookings')
-      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .update({ status: newStatus })
       .eq('id', bookingId)
-    if (error) return { success: false, error: 'Error al mover reserva' }
+    if (error) { console.error('[moveBookingStage]', error); return { success: false, error: error.message } }
     revalidatePath('/admin/kanban')
     return { success: true }
   } catch {
