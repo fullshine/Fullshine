@@ -215,3 +215,132 @@ export async function getVehiclesByCustomer(customerId: string): Promise<ActionR
     return { success: false, error: 'Error inesperado' }
   }
 }
+
+// --- CRM KANBAN ---
+
+export async function getAllBookings(): Promise<ActionResult<BookingWithRelations[]>> {
+  try {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*, customer:customers(*), vehicle:vehicles(*), service:services(*)')
+      .not('status', 'eq', 'cancelled')
+      .order('created_at', { ascending: false })
+    if (error) return { success: false, error: 'Error al cargar reservas' }
+    return { success: true, data: (data ?? []) as BookingWithRelations[] }
+  } catch {
+    return { success: false, error: 'Error inesperado' }
+  }
+}
+
+export async function moveBookingStage(
+  bookingId: string,
+  newStatus: string
+): Promise<ActionResult> {
+  try {
+    const supabase = createAdminClient()
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq('id', bookingId)
+    if (error) return { success: false, error: 'Error al mover reserva' }
+    revalidatePath('/admin/kanban')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Error inesperado' }
+  }
+}
+
+export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{ paymentUrl: string }>> {
+  try {
+    const supabase = createAdminClient()
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .select('*, customer:customers(*), service:services(*)')
+      .eq('id', bookingId)
+      .single()
+
+    if (error || !booking) return { success: false, error: 'Reserva no encontrada' }
+
+    const total = booking.total_price_clp ?? 0
+    const amount = Math.round(total * 0.2)
+    const orderId = `FS-${bookingId.substring(0, 8)}-${Date.now()}`
+
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fullshine.autos'
+
+    let paymentUrl = ''
+    try {
+      const { createPaymentLink } = await import('@/lib/flow')
+      const result = await createPaymentLink({
+        orderId,
+        amount,
+        subject: `Anticipo Fullshine - ${booking.service?.name ?? 'Detailing'}`,
+        customerEmail: booking.customer?.email ?? undefined,
+        urlReturn: `${baseUrl}/reservar/pago-exitoso`,
+        urlConfirmation: `${baseUrl}/api/flow/webhook`,
+      })
+      paymentUrl = result.url
+
+      await supabase.from('bookings').update({
+        payment_link: paymentUrl,
+        payment_amount: amount,
+        flow_order_id: orderId,
+        status: 'payment_sent',
+        updated_at: new Date().toISOString(),
+      }).eq('id', bookingId)
+    } catch (flowErr) {
+      console.error('[Flow]', flowErr)
+      return { success: false, error: 'Error al crear link de pago en Flow' }
+    }
+
+    if (booking.customer?.phone) {
+      const { sendPaymentLinkToClient } = await import('@/lib/whatsapp')
+      sendPaymentLinkToClient({
+        phone: booking.customer.phone,
+        customerName: booking.customer.full_name,
+        serviceName: booking.service?.name ?? '',
+        totalPrice: total,
+        paymentAmount: amount,
+        paymentLink: paymentUrl,
+        scheduledAt: booking.slot_start ?? '',
+      }).catch(console.error)
+    }
+
+    revalidatePath('/admin/kanban')
+    return { success: true, data: { paymentUrl } }
+  } catch {
+    return { success: false, error: 'Error inesperado' }
+  }
+}
+
+export async function sendReviewRequest(bookingId: string): Promise<ActionResult> {
+  try {
+    const supabase = createAdminClient()
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .select('*, customer:customers(*), service:services(*)')
+      .eq('id', bookingId)
+      .single()
+
+    if (error || !booking) return { success: false, error: 'Reserva no encontrada' }
+
+    if (booking.customer?.phone) {
+      const { sendReviewRequestToClient } = await import('@/lib/whatsapp')
+      await sendReviewRequestToClient({
+        phone: booking.customer.phone,
+        customerName: booking.customer.full_name,
+        serviceName: booking.service?.name ?? '',
+      })
+    }
+
+    await supabase.from('bookings').update({
+      status: 'review_sent',
+      updated_at: new Date().toISOString(),
+    }).eq('id', bookingId)
+
+    revalidatePath('/admin/kanban')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Error inesperado' }
+  }
+}

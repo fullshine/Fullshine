@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+  { href: '/admin/kanban', label: 'CRM Pipeline', icon: '🗂️' },
   { href: '/admin/agenda', label: 'Agenda', icon: '📅' },
   { href: '/admin/clientes', label: 'Clientes', icon: '👥' },
   { href: '/admin/vehiculos', label: 'Vehículos', icon: '🚗' },

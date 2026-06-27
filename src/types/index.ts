@@ -3,7 +3,7 @@
 // =============================================
 
 export type UserRole = 'admin' | 'staff'
-export type BookingStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
+export type BookingStatus = 'pending' | 'payment_sent' | 'payment_received' | 'confirmed' | 'in_progress' | 'completed' | 'review_sent' | 'cancelled'
 export type VehicleType = 'hatch_sedan' | 'suv_camioneta' | 'pickup_xl'
 export type ServiceCategory = 'exterior' | 'interior' | 'full' | 'premium' | 'add_on'
 

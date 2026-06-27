@@ -120,3 +120,45 @@ export async function sendCancellationToClient(params: {
 
   await sendMessage(params.phone, message)
 }
+
+// -------------------------------------------------------------------
+// Link de pago (20% anticipo) al cliente
+// -------------------------------------------------------------------
+export async function sendPaymentLinkToClient(params: {
+  phone: string
+  customerName: string
+  serviceName: string
+  totalPrice: number
+  paymentAmount: number
+  paymentLink: string
+  scheduledAt: string
+}): Promise<void> {
+  const date = params.scheduledAt.substring(0, 10)
+  const message =
+    `Hola ${params.customerName} 👋\n\n` +
+    `Para confirmar tu reserva de *${params.serviceName}* el ${date}, ` +
+    `te pedimos un anticipo del 20% (*$${params.paymentAmount.toLocaleString('es-CL')} CLP*).\n\n` +
+    `💳 *Paga aquí:*\n${params.paymentLink}\n\n` +
+    `El saldo restante (*$${(params.totalPrice - params.paymentAmount).toLocaleString('es-CL')} CLP*) ` +
+    `se cancela el día del servicio. ¡Gracias! 🚗✨`
+
+  await sendMessage(params.phone, message)
+}
+
+// -------------------------------------------------------------------
+// Solicitud de reseña en Google
+// -------------------------------------------------------------------
+export async function sendReviewRequestToClient(params: {
+  phone: string
+  customerName: string
+  serviceName: string
+}): Promise<void> {
+  const message =
+    `¡Hola ${params.customerName}! 🌟\n\n` +
+    `Gracias por confiar en *Fullshine Detailing*. Esperamos que hayas quedado feliz con tu *${params.serviceName}*.\n\n` +
+    `Si tienes un momento, nos ayudaría mucho que dejaras una opinión en Google:\n` +
+    `👉 https://g.page/r/CWuD0BGLfZCAEBM/review\n\n` +
+    `¡Solo toma 1 minuto y nos ayuda muchísimo! 🙏`
+
+  await sendMessage(params.phone, message)
+}

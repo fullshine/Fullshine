@@ -6,19 +6,25 @@ import { updateBookingStatus } from '@/actions/admin'
 import type { BookingStatus } from '@/types'
 
 const TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
-  pending: ['confirmed', 'cancelled'],
-  confirmed: ['in_progress', 'cancelled'],
-  in_progress: ['completed', 'cancelled'],
-  completed: [],
-  cancelled: [],
+  pending:          ['confirmed', 'cancelled'],
+  payment_sent:     ['payment_received', 'cancelled'],
+  payment_received: ['confirmed', 'cancelled'],
+  confirmed:        ['in_progress', 'cancelled'],
+  in_progress:      ['completed', 'cancelled'],
+  completed:        [],
+  review_sent:      [],
+  cancelled:        [],
 }
 
 const LABELS: Record<BookingStatus, string> = {
-  pending: 'Pendiente',
-  confirmed: 'Confirmar',
-  in_progress: 'Iniciar',
-  completed: 'Completar',
-  cancelled: 'Cancelar',
+  pending:          'Pendiente',
+  payment_sent:     'Link enviado',
+  payment_received: 'Pago recibido',
+  confirmed:        'Confirmar',
+  in_progress:      'Iniciar',
+  completed:        'Completar',
+  review_sent:      'Reseña enviada',
+  cancelled:        'Cancelar',
 }
 
 export default function BookingStatusUpdater({

@@ -63,3 +63,34 @@ export function getStatusColor(status: string): string {
   }
   return colors[status] ?? 'bg-gray-100 text-gray-800'
 }
+
+// Extended status maps for CRM kanban
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Nueva reserva',
+  payment_sent: 'Link enviado',
+  payment_received: 'Pago recibido',
+  confirmed: 'Confirmada',
+  in_progress: 'En trabajo',
+  completed: 'Completada',
+  review_sent: 'Reseña enviada',
+  cancelled: 'Cancelada',
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-yellow-100 text-yellow-800',
+  payment_sent: 'bg-orange-100 text-orange-800',
+  payment_received: 'bg-teal-100 text-teal-800',
+  confirmed: 'bg-blue-100 text-blue-800',
+  in_progress: 'bg-purple-100 text-purple-800',
+  completed: 'bg-green-100 text-green-800',
+  review_sent: 'bg-emerald-100 text-emerald-800',
+  cancelled: 'bg-red-100 text-red-800',
+}
+
+export function getStatusLabelFull(status: string): string {
+  return STATUS_LABELS[status] ?? status
+}
+
+export function getStatusColorFull(status: string): string {
+  return STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-800'
+}
