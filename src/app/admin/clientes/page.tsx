@@ -1,5 +1,6 @@
 import { getCustomers } from '@/actions/admin'
 import { formatDate } from '@/lib/utils'
+import ClienteActions from '@/components/admin/ClienteActions'
 
 export const metadata = { title: 'Clientes | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -28,16 +29,20 @@ export default async function ClientesPage({ searchParams }: { searchParams: { q
               <th className="text-left px-4 py-3 font-semibold text-gray-700">Teléfono</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-700">Email</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-700">Registrado</th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {customers.map(c => (
-              <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 font-medium text-gray-900">{c.full_name}</td>
-                <td className="px-4 py-3 text-gray-600">{c.phone}</td>
-                <td className="px-4 py-3 text-gray-500">{c.email ?? '—'}</td>
-                <td className="px-4 py-3 text-gray-400">{formatDate(c.created_at)}</td>
-              </tr>
+              <>
+                <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 font-medium text-gray-900">{c.full_name}</td>
+                  <td className="px-4 py-3 text-gray-600">{c.phone}</td>
+                  <td className="px-4 py-3 text-gray-500">{c.email ?? '—'}</td>
+                  <td className="px-4 py-3 text-gray-400">{formatDate(c.created_at)}</td>
+                  <ClienteActions customer={c} />
+                </tr>
+              </>
             ))}
           </tbody>
         </table>
