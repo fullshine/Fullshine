@@ -48,14 +48,14 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
   const total = booking.total_price ?? 0
   const amount20 = Math.round(total * 0.2)
 
-  function move(newStatus: string) {
+  function move(newStatus: string, isForward = true) {
     startTransition(async () => {
-      if (newStatus === 'payment_sent') {
+      if (newStatus === 'payment_sent' && isForward) {
         setMsg('Generando link de pago...')
         const res = await sendPaymentLink(booking.id)
         if (!res.success) { setMsg(`Error: ${res.error}`); return }
         setMsg('✅ Link enviado por WhatsApp')
-      } else if (newStatus === 'review_sent') {
+      } else if (newStatus === 'review_sent' && isForward) {
         setMsg('Enviando solicitud de reseña...')
         const res = await sendReviewRequest(booking.id)
         if (!res.success) { setMsg(`Error: ${res.error}`); return }
@@ -94,7 +94,7 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
       {msg && <p className="text-xs mt-1 text-blue-600">{msg}</p>}
       <div className="flex gap-1 mt-2 flex-wrap">
         {prevStage && (
-          <button onClick={() => move(prevStage)} disabled={pending}
+          <button onClick={() => move(prevStage, false)} disabled={pending}
             className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 disabled:opacity-50">
             ← Atrás
           </button>
