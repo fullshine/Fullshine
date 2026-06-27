@@ -9,16 +9,12 @@ const BUSINESS_HOURS = {
   saturday: { open: 8, close: 14 },
 }
 
-// Turnos fijos de atención
 const FIXED_SLOTS = [
   { hour: 9, minute: 0 },
   { hour: 14, minute: 0 },
 ]
 
-// Número de trabajadores = cupos simultáneos por turno
 const MAX_CONCURRENT = 2
-
-// Servicios que superan este tiempo se reservan solo en jornada de mañana (sin límite de cierre)
 const FULL_DAY_THRESHOLD_MINUTES = 6 * 60
 
 // --- SERVICES ---
@@ -60,23 +56,19 @@ export async function getAvailableSlots(date: string, serviceId: string): Promis
       .eq('booking_date', date)
       .not('status', 'eq', 'cancelled')
 
-    // 0=Sun, 6=Sat
     const dayOfWeek = new Date(`${date}T12:00:00`).getDay()
     if (dayOfWeek === 0) return { success: true, data: { date, slots: [] } }
 
     const hours = dayOfWeek === 6 ? BUSINESS_HOURS.saturday : BUSINESS_HOURS.weekday
     const slots: TimeSlot[] = []
-
     const isFullDay = durationMinutes > FULL_DAY_THRESHOLD_MINUTES
 
     for (const fixed of FIXED_SLOTS) {
-      // Servicios de jornada completa: solo turno de mañana
       if (isFullDay && fixed.hour >= 12) continue
 
       const startMinutes = fixed.hour * 60 + fixed.minute
       const endMinutes = startMinutes + durationMinutes
 
-      // Servicios normales: omitir si no caben dentro del horario comercial
       if (!isFullDay && endMinutes > hours.close * 60) continue
 
       const sh = fixed.hour.toString().padStart(2, '0')
@@ -87,7 +79,6 @@ export async function getAvailableSlots(date: string, serviceId: string): Promis
       const slotStartTime = `${sh}:${sm}:00`
       const slotEndTime = `${eh}:${emin}:00`
 
-      // Contar reservas que se solapan con este turno
       const overlappingCount = (bookings ?? []).filter((b: any) =>
         b.slot_start < slotEndTime && b.slot_end > slotStartTime
       ).length
@@ -114,11 +105,9 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
   try {
     const supabase = createAdminClient()
 
-    // Normalizar teléfono: solo dígitos, con prefijo 56 si es chileno
     const rawPhone = input.customer.phone.replace(/\D/g, '')
     const normalizedPhone = rawPhone.startsWith('56') ? rawPhone : `56${rawPhone}`
 
-    // Buscar cliente existente por teléfono (varias variantes)
     let customer: { id: string; full_name: string; phone: string } | null = null
     const { data: existing } = await supabase
       .from('customers')
@@ -137,7 +126,6 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
 
       if (insertError) {
         if (insertError.code === '23505') {
-          // Ya existe con otro formato — buscar de nuevo
           const { data: fallback } = await supabase
             .from('customers')
             .select('id, full_name, phone')
@@ -158,7 +146,6 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
       }
     }
 
-    // Buscar vehículo existente por patente (si tiene patente)
     let vehicle: { id: string } | null = null
     if (input.vehicle.license_plate) {
       const { data: existingVehicle } = await supabase
@@ -200,21 +187,19 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
     }
 
     const durationMinutes = Math.round((service.duration_hours ?? 1) * 60)
-    // input.scheduled_at = "2026-06-26T08:30:00"
-    const bookingDate = input.scheduled_at.substring(0, 10)           // "2026-06-26"
-    const slotStartTime = input.scheduled_at.substring(11, 19)        // "08:30:00"
+    const bookingDate = input.scheduled_at.substring(0, 10)
+    const slotStartTime = input.scheduled_at.substring(11, 19)
     const startMinutes = parseInt(slotStartTime.substring(0, 2)) * 60 + parseInt(slotStartTime.substring(3, 5))
     const endMinutes = startMinutes + durationMinutes
     const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0')
     const endM = (endMinutes % 60).toString().padStart(2, '0')
-    const slotEndTime = `${endH}:${endM}:00`                          // "09:30:00"
+    const slotEndTime = `${endH}:${endM}:00`
 
     const priceRecord = service.prices?.find(
       (p: any) => p.vehicle_type === input.vehicle.vehicle_type
     )
     const totalPrice = priceRecord?.price ?? priceRecord?.price_clp ?? 0
 
-    // Verificar solapamiento (mismo día, horas superpuestas)
     const { data: overlapping } = await supabase
       .from('bookings')
       .select('id')
@@ -269,4 +254,8 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
       }),
     ]).catch(console.error)
 
-    return { success: true, d
+    return { success: true, data: { bookingId } }
+  } catch (err: any) {
+    return { success: false, error: err?.message ?? 'Error inesperado' }
+  }
+}

@@ -4,7 +4,6 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { sendCancellationToClient } from '@/lib/whatsapp'
 import type { ActionResult, BookingStatus, DashboardStats, BookingWithRelations, Customer, Vehicle } from '@/types'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 // --- AUTH ---
 
@@ -40,12 +39,9 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
 
     const [todayRes, weekRes, revenueRes, pendingRes, confirmedRes] = await Promise.all([
-      supabase.from('bookings').select('id', { count: 'exact', head: true })
-        .eq('booking_date', today),
-      supabase.from('bookings').select('id', { count: 'exact', head: true })
-        .gte('booking_date', weekStart),
-      supabase.from('bookings').select('total_price_clp')
-        .eq('status', 'completed').gte('booking_date', monthStart),
+      supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_date', today),
+      supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('booking_date', weekStart),
+      supabase.from('bookings').select('total_price_clp').eq('status', 'completed').gte('booking_date', monthStart),
       supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed'),
     ])
@@ -67,6 +63,24 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
   }
 }
 
+// --- RECENT BOOKINGS (últimas 24h) ---
+
+export async function getRecentBookings(): Promise<ActionResult<BookingWithRelations[]>> {
+  try {
+    const supabase = createAdminClient()
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*, customer:customers(*), vehicle:vehicles(*), service:services(*)')
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+    if (error) return { success: false, error: 'Error al cargar reservas recientes' }
+    return { success: true, data: (data ?? []) as BookingWithRelations[] }
+  } catch {
+    return { success: false, error: 'Error inesperado' }
+  }
+}
+
 // --- BOOKINGS ---
 
 export async function getBookings(filters?: {
@@ -78,18 +92,11 @@ export async function getBookings(filters?: {
     const supabase = createAdminClient()
     let query = supabase
       .from('bookings')
-      .select(`
-        *,
-        customer:customers(*),
-        vehicle:vehicles(*),
-        service:services(*)
-      `)
+      .select('*, customer:customers(*), vehicle:vehicles(*), service:services(*)')
       .order('slot_start', { ascending: true })
 
     if (filters?.status) query = query.eq('status', filters.status)
-    if (filters?.date) {
-      query = query.eq('booking_date', filters.date)
-    }
+    if (filters?.date) query = query.eq('booking_date', filters.date)
 
     const { data, error } = await query
     if (error) return { success: false, error: 'Error al cargar reservas' }
@@ -173,6 +180,18 @@ export async function updateCustomer(
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
     if (error) return { success: false, error: 'Error al actualizar cliente' }
+    revalidatePath('/admin/clientes')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Error inesperado' }
+  }
+}
+
+export async function deleteCustomer(id: string): Promise<ActionResult> {
+  try {
+    const supabase = createAdminClient()
+    const { error } = await supabase.from('customers').delete().eq('id', id)
+    if (error) return { success: false, error: 'Error al eliminar cliente' }
     revalidatePath('/admin/clientes')
     return { success: true }
   } catch {
