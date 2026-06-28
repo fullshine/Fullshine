@@ -1,208 +1,141 @@
 // =============================================
-// FULLSHINE - Meta WhatsApp Cloud API
+// FULLSHINE - Green API WhatsApp
 // =============================================
 
-const WHATSAPP_API_URL = 'https://graph.facebook.com/v19.0'
-const PHONE_NUMBER_ID = process.env.META_PHONE_NUMBER_ID!
-const TOKEN = process.env.META_WHATSAPP_TOKEN!
+const INSTANCE_ID = process.env.GREEN_API_INSTANCE_ID!
+const TOKEN = process.env.GREEN_API_TOKEN!
+const API_URL = process.env.GREEN_API_URL ?? 'https://7107.api.greenapi.com'
 
-interface TemplateMessage {
-  to: string
-  templateName: string
-  languageCode: string
-  components?: object[]
+function normalizePhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  return digits.startsWith('56') ? digits : `56${digits}`
 }
 
-async function sendTemplateMessage({ to, templateName, languageCode, components = [] }: TemplateMessage) {
-  const phone = to.replace(/\D/g, '')
-  const normalizedPhone = phone.startsWith('56') ? phone : `56${phone}`
+async function sendMessage(phone: string, message: string): Promise<void> {
+  const chatId = `${normalizePhone(phone)}@c.us`
+  const url = `${API_URL}/waInstance${INSTANCE_ID}/sendMessage/${TOKEN}`
 
-  const body = {
-    messaging_product: 'whatsapp',
-    to: normalizedPhone,
-    type: 'template',
-    template: {
-      name: templateName,
-      language: { code: languageCode },
-      components,
-    },
-  }
-
-  const res = await fetch(`${WHATSAPP_API_URL}/${PHONE_NUMBER_ID}/messages`, {
+  const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chatId, message }),
   })
 
   if (!res.ok) {
     const err = await res.text()
-    throw new Error(`WhatsApp API error: ${res.status} - ${err}`)
+    throw new Error(`Green API error: ${res.status} - ${err}`)
   }
-
-  return res.json()
 }
 
-// --- TEMPLATE: Confirmación de reserva al cliente ---
+function formatDateTime(scheduledAt: string): { date: string; time: string } {
+  const d = new Date(scheduledAt)
+  const date = d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  const time = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
+  return { date, time }
+}
+
+// --- Confirmación de reserva al cliente ---
 export async function sendBookingConfirmationToClient({
-  phone,
-  customerName,
-  serviceName,
-  scheduledAt,
-  vehicleMake,
-  vehicleModel,
+  phone, customerName, serviceName, scheduledAt, vehicleMake, vehicleModel,
 }: {
-  phone: string
-  customerName: string
-  serviceName: string
-  scheduledAt: string
-  vehicleMake: string
-  vehicleModel: string
+  phone: string; customerName: string; serviceName: string
+  scheduledAt: string; vehicleMake: string; vehicleModel: string
 }) {
-  const date = new Date(scheduledAt)
-  const formattedDate = date.toLocaleDateString('es-CL', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-  })
-  const formattedTime = date.toLocaleTimeString('es-CL', {
-    hour: '2-digit', minute: '2-digit',
-  })
-
-  return sendTemplateMessage({
-    to: phone,
-    templateName: 'booking_confirmation_client',
-    languageCode: 'es',
-    components: [
-      {
-        type: 'body',
-        parameters: [
-          { type: 'text', text: customerName },
-          { type: 'text', text: serviceName },
-          { type: 'text', text: `${vehicleMake} ${vehicleModel}` },
-          { type: 'text', text: formattedDate },
-          { type: 'text', text: formattedTime },
-        ],
-      },
-    ],
-  })
+  const { date, time } = formatDateTime(scheduledAt)
+  const message =
+    `👋 ¡Hola ${customerName}!\n\n` +
+    `✅ Tu reserva en *Fullshine Detailing* ha sido confirmada.\n\n` +
+    `🚗 *Vehículo:* ${vehicleMake} ${vehicleModel}\n` +
+    `🛠️ *Servicio:* ${serviceName}\n` +
+    `📅 *Fecha:* ${date}\n` +
+    `🕐 *Hora:* ${time}\n\n` +
+    `Si tienes alguna pregunta, responde este mensaje. ¡Te esperamos! 🙌`
+  return sendMessage(phone, message)
 }
 
-// --- TEMPLATE: Nueva reserva al negocio ---
+// --- Nueva reserva al negocio ---
 export async function sendNewBookingToAdmin({
-  customerName,
-  customerPhone,
-  serviceName,
-  scheduledAt,
-  vehicleMake,
-  vehicleModel,
-  vehicleLicensePlate,
+  customerName, customerPhone, serviceName, scheduledAt, vehicleMake, vehicleModel, vehicleLicensePlate,
 }: {
-  customerName: string
-  customerPhone: string
-  serviceName: string
-  scheduledAt: string
-  vehicleMake: string
-  vehicleModel: string
-  vehicleLicensePlate?: string
+  customerName: string; customerPhone: string; serviceName: string
+  scheduledAt: string; vehicleMake: string; vehicleModel: string; vehicleLicensePlate?: string
 }) {
-  const branchPhone = process.env.NEXT_PUBLIC_BRANCH_PHONE || '+56933654943'
-  const date = new Date(scheduledAt)
-  const formattedDate = date.toLocaleDateString('es-CL', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-  })
-  const formattedTime = date.toLocaleTimeString('es-CL', {
-    hour: '2-digit', minute: '2-digit',
-  })
-
-  return sendTemplateMessage({
-    to: branchPhone,
-    templateName: 'new_booking_admin',
-    languageCode: 'es',
-    components: [
-      {
-        type: 'body',
-        parameters: [
-          { type: 'text', text: customerName },
-          { type: 'text', text: customerPhone },
-          { type: 'text', text: serviceName },
-          { type: 'text', text: `${vehicleMake} ${vehicleModel}${vehicleLicensePlate ? ` (${vehicleLicensePlate})` : ''}` },
-          { type: 'text', text: formattedDate },
-          { type: 'text', text: formattedTime },
-        ],
-      },
-    ],
-  })
+  const branchPhone = process.env.NEXT_PUBLIC_BRANCH_PHONE ?? '56933654943'
+  const { date, time } = formatDateTime(scheduledAt)
+  const message =
+    `🔔 *Nueva reserva Fullshine*\n\n` +
+    `👤 *Cliente:* ${customerName}\n` +
+    `📱 *Teléfono:* ${customerPhone}\n` +
+    `🚗 *Vehículo:* ${vehicleMake} ${vehicleModel}${vehicleLicensePlate ? ` (${vehicleLicensePlate})` : ''}\n` +
+    `🛠️ *Servicio:* ${serviceName}\n` +
+    `📅 *Fecha:* ${date}\n` +
+    `🕐 *Hora:* ${time}`
+  return sendMessage(branchPhone, message)
 }
 
-// --- TEMPLATE: Recordatorio 24h antes ---
+// --- Recordatorio 24h antes ---
 export async function sendReminderToClient({
-  phone,
-  customerName,
-  serviceName,
-  scheduledAt,
+  phone, customerName, serviceName, scheduledAt,
 }: {
-  phone: string
-  customerName: string
-  serviceName: string
-  scheduledAt: string
+  phone: string; customerName: string; serviceName: string; scheduledAt: string
 }) {
-  const date = new Date(scheduledAt)
-  const formattedDate = date.toLocaleDateString('es-CL', {
-    weekday: 'long', day: 'numeric', month: 'long',
-  })
-  const formattedTime = date.toLocaleTimeString('es-CL', {
-    hour: '2-digit', minute: '2-digit',
-  })
-
-  return sendTemplateMessage({
-    to: phone,
-    templateName: 'booking_reminder_client',
-    languageCode: 'es',
-    components: [
-      {
-        type: 'body',
-        parameters: [
-          { type: 'text', text: customerName },
-          { type: 'text', text: serviceName },
-          { type: 'text', text: formattedDate },
-          { type: 'text', text: formattedTime },
-        ],
-      },
-    ],
-  })
+  const { date, time } = formatDateTime(scheduledAt)
+  const message =
+    `⏰ *Recordatorio Fullshine*\n\n` +
+    `¡Hola ${customerName}! Mañana tienes tu cita:\n\n` +
+    `🛠️ *Servicio:* ${serviceName}\n` +
+    `📅 *Fecha:* ${date}\n` +
+    `🕐 *Hora:* ${time}\n\n` +
+    `¡Te esperamos! 🚗✨`
+  return sendMessage(phone, message)
 }
 
-// --- TEMPLATE: Cancelación al cliente ---
+// --- Cancelación al cliente ---
 export async function sendCancellationToClient({
-  phone,
-  customerName,
-  serviceName,
-  scheduledAt,
+  phone, customerName, serviceName, scheduledAt,
 }: {
-  phone: string
-  customerName: string
-  serviceName: string
-  scheduledAt: string
+  phone: string; customerName: string; serviceName: string; scheduledAt: string
 }) {
-  const date = new Date(scheduledAt)
-  const formattedDate = date.toLocaleDateString('es-CL', {
-    weekday: 'long', day: 'numeric', month: 'long',
-  })
+  const { date } = formatDateTime(scheduledAt)
+  const message =
+    `❌ *Reserva cancelada*\n\n` +
+    `Hola ${customerName}, tu reserva de *${serviceName}* del ${date} ha sido cancelada.\n\n` +
+    `Si quieres reagendar, visita fullshine.autos 🙌`
+  return sendMessage(phone, message)
+}
 
-  return sendTemplateMessage({
-    to: phone,
-    templateName: 'booking_cancelled_client',
-    languageCode: 'es',
-    components: [
-      {
-        type: 'body',
-        parameters: [
-          { type: 'text', text: customerName },
-          { type: 'text', text: serviceName },
-          { type: 'text', text: formattedDate },
-        ],
-      },
-    ],
-  })
+// --- Link de pago anticipo ---
+export async function sendPaymentLinkToClient({
+  phone, customerName, serviceName, totalPrice, paymentAmount, paymentLink, scheduledAt,
+}: {
+  phone: string; customerName: string; serviceName: string
+  totalPrice: number; paymentAmount: number; paymentLink: string; scheduledAt: string
+}) {
+  const { date, time } = formatDateTime(scheduledAt)
+  const fmt = (n: number) => n.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 })
+  const message =
+    `💳 *Anticipo Fullshine Detailing*\n\n` +
+    `Hola ${customerName}, para confirmar tu reserva necesitamos el 20% de anticipo:\n\n` +
+    `🛠️ *Servicio:* ${serviceName}\n` +
+    `📅 *Fecha:* ${date} a las ${time}\n` +
+    `💰 *Total:* ${fmt(totalPrice)}\n` +
+    `📩 *Anticipo (20%):* ${fmt(paymentAmount)}\n\n` +
+    `👉 Paga aquí: ${paymentLink}\n\n` +
+    `Una vez recibido el pago, tu reserva queda 100% confirmada. ✅`
+  return sendMessage(phone, message)
+}
+
+// --- Solicitud de reseña Google ---
+export async function sendReviewRequestToClient({
+  phone, customerName, serviceName,
+}: {
+  phone: string; customerName: string; serviceName: string
+}) {
+  const message =
+    `⭐ *¡Gracias ${customerName}!*\n\n` +
+    `Esperamos que hayas quedado muy satisfecho con tu *${serviceName}* en Fullshine Detailing.\n\n` +
+    `Si te gustó el resultado, nos ayudaría mucho si nos dejas una reseña en Google:\n` +
+    `👉 https://g.page/r/CWuD0BGLfZCAEBM/review\n\n` +
+    `¡Solo toma 1 minuto y nos ayuda mucho! 🙏`
+  return sendMessage(phone, message)
 }
