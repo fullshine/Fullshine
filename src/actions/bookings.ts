@@ -259,9 +259,19 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
           flow_order_id: orderId,
           status: 'payment_sent',
         }).eq('id', bookingId)
-      } catch (flowErr) {
-        console.error('[Flow] No se pudo crear link de pago:', flowErr)
-        // No bloquear la reserva si Flow falla
+      } catch (flowErr: any) {
+        const flowErrMsg = flowErr?.message ?? String(flowErr)
+        console.error('[Flow] No se pudo crear link de pago:', flowErrMsg)
+        // Notificar al admin del error para debug
+        await sendNewBookingToAdmin({
+          customerName: `⚠️ ERROR FLOW: ${flowErrMsg}`,
+          customerPhone: input.customer.phone,
+          serviceName: service.name,
+          scheduledAt: input.scheduled_at,
+          vehicleMake: input.vehicle.make ?? '',
+          vehicleModel: input.vehicle.model,
+          vehicleLicensePlate: input.vehicle.license_plate ?? '',
+        }).catch(() => {})
       }
     }
 

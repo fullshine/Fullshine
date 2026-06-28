@@ -27,10 +27,14 @@ export async function createPaymentLink(params: {
     subject: params.subject,
     currency: 'CLP',
     amount: Math.round(params.amount).toString(),
-    email: params.customerEmail ?? '',
     paymentMethod: '9',
     urlConfirmation: params.urlConfirmation,
     urlReturn: params.urlReturn,
+  }
+
+  // Only include email if provided — empty string breaks HMAC signature validation
+  if (params.customerEmail) {
+    p.email = params.customerEmail
   }
 
   p.s = sign(p)
