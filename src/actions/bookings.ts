@@ -265,7 +265,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
       }
     }
 
-    Promise.all([
+    await Promise.all([
       sendBookingConfirmationToClient({
         phone: input.customer.phone,
         customerName: input.customer.full_name,
@@ -288,7 +288,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
     ]).catch(console.error)
 
     // Notificación push al admin
-    sendPushToAdmin(
+    await sendPushToAdmin(
       '🔔 Nueva reserva',
       `${input.customer.full_name} · ${service.name}`,
       '/admin/kanban'
