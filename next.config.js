@@ -5,6 +5,7 @@ const nextConfig = {
       allowedOrigins: ['fullshine.autos', 'localhost:3000'],
     },
   },
+  serverExternalPackages: ['web-push'],
   images: {
     domains: [],
   },
