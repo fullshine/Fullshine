@@ -1,5 +1,6 @@
 import { getDashboardStats, getBookings, getRecentBookings } from '@/actions/admin'
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils'
+import PushSubscribeButton from '@/components/admin/PushSubscribe'
 
 export const metadata = { title: 'Dashboard | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -17,7 +18,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-5">
+      <div className="flex items-center justify-between gap-3">
       <h1 className="text-xl md:text-2xl font-bold text-gray-900">Dashboard</h1>
+      <PushSubscribeButton />
+    </div>
 
       {/* Stats */}
       {stats && (

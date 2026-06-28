@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendBookingConfirmationToClient, sendNewBookingToAdmin } from '@/lib/whatsapp'
+import { sendPushToAdmin } from '@/lib/push'
 import type { CreateBookingInput, ActionResult, AvailableSlotsResult, TimeSlot, Service } from '@/types'
 
 const BUSINESS_HOURS = {
@@ -285,6 +286,13 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         vehicleLicensePlate: input.vehicle.license_plate ?? '',
       }),
     ]).catch(console.error)
+
+    // Notificación push al admin
+    sendPushToAdmin(
+      '🔔 Nueva reserva',
+      `${input.customer.full_name} · ${service.name}`,
+      '/admin/kanban'
+    ).catch(console.error)
 
     return { success: true, data: { bookingId } }
   } catch (err: any) {
