@@ -190,8 +190,16 @@ export async function updateCustomer(
 export async function deleteCustomer(id: string): Promise<ActionResult> {
   try {
     const supabase = createAdminClient()
+    // Eliminar registros relacionados primero
+    const { data: vehicles } = await supabase.from('vehicles').select('id').eq('customer_id', id)
+    if (vehicles?.length) {
+      const vehicleIds = vehicles.map((v: any) => v.id)
+      await supabase.from('bookings').delete().in('vehicle_id', vehicleIds)
+      await supabase.from('vehicles').delete().eq('customer_id', id)
+    }
+    await supabase.from('bookings').delete().eq('customer_id', id)
     const { error } = await supabase.from('customers').delete().eq('id', id)
-    if (error) return { success: false, error: 'Error al eliminar cliente' }
+    if (error) return { success: false, error: error.message }
     revalidatePath('/admin/clientes')
     return { success: true }
   } catch {
