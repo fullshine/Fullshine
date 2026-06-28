@@ -234,6 +234,36 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
 
     const bookingId = bookingResult.id
 
+    // Generar link de pago Flow si hay precio
+    let paymentLink: string | undefined
+    if (totalPrice > 0) {
+      try {
+        const { createPaymentLink } = await import('@/lib/flow')
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fullshine.autos'
+        const orderId = `FS-${bookingId.substring(0, 8)}-${Date.now()}`
+        const amount = Math.round(totalPrice * 0.2)
+        const result = await createPaymentLink({
+          orderId,
+          amount,
+          subject: `Anticipo Fullshine - ${service.name}`,
+          customerEmail: input.customer.email ?? undefined,
+          urlReturn: `${baseUrl}/reservar/pago-exitoso`,
+          urlConfirmation: `${baseUrl}/api/flow/webhook`,
+        })
+        paymentLink = result.url
+        // Guardar link en la reserva
+        await supabase.from('bookings').update({
+          payment_link: paymentLink,
+          payment_amount: amount,
+          flow_order_id: orderId,
+          status: 'payment_sent',
+        }).eq('id', bookingId)
+      } catch (flowErr) {
+        console.error('[Flow] No se pudo crear link de pago:', flowErr)
+        // No bloquear la reserva si Flow falla
+      }
+    }
+
     Promise.all([
       sendBookingConfirmationToClient({
         phone: input.customer.phone,
@@ -242,6 +272,8 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         scheduledAt: input.scheduled_at,
         vehicleMake: input.vehicle.make ?? '',
         vehicleModel: input.vehicle.model,
+        totalPrice,
+        paymentLink,
       }),
       sendNewBookingToAdmin({
         customerName: input.customer.full_name,
