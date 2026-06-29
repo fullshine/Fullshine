@@ -15,7 +15,7 @@ const FIXED_SLOTS = [
   { hour: 14, minute: 0 },
 ]
 
-const MAX_CONCURRENT = 2
+const MAX_CONCURRENT = 1
 const FULL_DAY_THRESHOLD_MINUTES = 6 * 60
 
 // --- SERVICES ---

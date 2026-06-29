@@ -64,7 +64,7 @@ export default function BookingForm({ services }: Props) {
 
   function canGoNext(): boolean {
     if (step === 0) return !!(form.customer_name.trim() && form.customer_phone.trim())
-    if (step === 1) return !!(form.vehicle_make.trim() && form.vehicle_model.trim() && form.vehicle_year)
+    if (step === 1) return !!(form.vehicle_make.trim() && form.vehicle_model.trim() && form.vehicle_type)
     if (step === 2) return !!form.service_id
     if (step === 3) return !!(form.scheduled_date && form.scheduled_time)
     return true
@@ -183,23 +183,6 @@ export default function BookingForm({ services }: Props) {
                 <input className="input-field" placeholder="Corolla" value={form.vehicle_model}
                   onChange={e => set('vehicle_model', e.target.value)} />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Año *</label>
-                <input className="input-field" type="number" min={1990} max={new Date().getFullYear() + 1}
-                  value={form.vehicle_year} onChange={e => set('vehicle_year', parseInt(e.target.value))} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Patente</label>
-                <input className="input-field" placeholder="ABCD12" value={form.vehicle_license_plate}
-                  onChange={e => set('vehicle_license_plate', e.target.value.toUpperCase())} />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
-              <input className="input-field" placeholder="Blanco" value={form.vehicle_color}
-                onChange={e => set('vehicle_color', e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
@@ -342,11 +325,9 @@ export default function BookingForm({ services }: Props) {
                           <p className="text-xs text-gray-500 mt-0.5">hasta las {endTime}</p>
                           <div className={cn(
                             'mt-2 text-xs font-medium',
-                            !slot.available ? 'text-red-500' :
-                            spotsLeft === 1 ? 'text-amber-600' : 'text-green-600'
+                            !slot.available ? 'text-red-500' : 'text-green-600'
                           )}>
-                            {!slot.available ? '✕ Sin disponibilidad' :
-                             spotsLeft === 1 ? '● 1 cupo disponible' : '● 2 cupos disponibles'}
+                            {!slot.available ? '✕ Sin disponibilidad' : '● Disponible'}
                           </div>
                         </button>
                       )
@@ -370,9 +351,8 @@ export default function BookingForm({ services }: Props) {
             <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
               <Row label="Nombre" value={form.customer_name} />
               <Row label="WhatsApp" value={form.customer_phone} />
-              <Row label="Vehículo" value={`${form.vehicle_make} ${form.vehicle_model} ${form.vehicle_year}`} />
+              <Row label="Vehículo" value={`${form.vehicle_make} ${form.vehicle_model}`} />
               <Row label="Tipo" value={getVehicleTypeLabel(form.vehicle_type)} />
-              {form.vehicle_license_plate && <Row label="Patente" value={form.vehicle_license_plate} />}
               <Row label="Servicio" value={selectedService?.name ?? ''} />
               <Row label="Fecha" value={form.scheduled_date} />
               <Row label="Hora" value={form.scheduled_time} />
