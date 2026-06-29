@@ -397,4 +397,24 @@ export default async function HomePage() {
             <Image src="/logo.png" alt="Fullshine" width={36} height={36} className="rounded-full" />
             <div>
               <p className="font-bold text-sm text-white">FULLSHINE Detailing Premium</p>
-              <a href="https://maps.google.com/?q=Camilo+Henriquez+381,+Concepción" target="_blank" rel="noopener 
+              <a href="https://maps.google.com/?q=Camilo+Henriquez+381,+Concepci%C3%B3n" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+                Camilo Henríquez 381, Concepción
+              </a>
+            </div>
+          </div>
+          <div className="text-center text-sm text-gray-500">
+            <a href="https://wa.me/56933654943" target="_blank" rel="noopener noreferrer"
+              className="text-amber-500 hover:text-amber-400 transition-colors">
+              +56 9 3365 4943
+            </a>
+            <span className="mx-2">·</span>
+            <a href="mailto:fullshinechile@gmail.com" className="hover:text-gray-300 transition-colors">
+              fullshinechile@gmail.com
+            </a>
+          </div>
+          <p className="text-xs text-gray-600">© {new Date().getFullYear()} Fullshine. Todos los derechos reservados.</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
