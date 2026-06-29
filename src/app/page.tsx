@@ -121,22 +121,29 @@ export default async function HomePage() {
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center justify-center text-center px-4 pt-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#1a1a2e_0%,_#0a0a0f_70%)]" />
+        {/* Fondo negro cálido con halo ámbar — consistente con el logo */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,_#1c1100_0%,_#080808_100%)]" />
+        {/* Grain sutil para textura premium */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E')]" />
         <div className="relative z-10 max-w-3xl mx-auto">
           <FadeIn delay={0.1}>
+            {/* Logo con halo ámbar */}
             <Image src="/logo.png" alt="Fullshine Detailing Premium" width={160} height={160}
-              className="mx-auto mb-8 drop-shadow-[0_0_40px_rgba(255,255,255,0.1)]" />
+              className="mx-auto mb-8 drop-shadow-[0_0_60px_rgba(233,150,13,0.35)]" />
           </FadeIn>
           <FadeUp delay={0.25}>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4">
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4 leading-[1.05]">
               Tu auto merece<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-white">
+              {/* Gradiente metálico plata → blanco → plata */}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-chrome-400 via-white to-chrome-300">
                 brillar de verdad
               </span>
             </h1>
           </FadeUp>
           <FadeUp delay={0.4}>
-            <p className="text-gray-400 text-lg md:text-xl mb-10 max-w-xl mx-auto">
+            {/* Línea ámbar decorativa */}
+            <div className="w-16 h-0.5 bg-brand-500 mx-auto mb-6 rounded-full" />
+            <p className="text-chrome-500 text-lg md:text-xl mb-10 max-w-xl mx-auto">
               Detailing profesional en Concepción y San Pedro de la Paz.
               Desde un lavado completo hasta tratamiento cerámico.
             </p>
@@ -144,22 +151,22 @@ export default async function HomePage() {
           <FadeUp delay={0.55}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/reservar"
-                className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-lg px-8 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
+                className="bg-brand-500 hover:bg-brand-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-brand-500/25">
                 Reservar ahora
               </Link>
               <a href="#servicios"
-                className="border border-white/20 hover:border-white/40 text-white font-semibold text-lg px-8 py-4 rounded-full transition-colors">
+                className="border border-chrome-700 hover:border-chrome-500 text-chrome-300 hover:text-white font-semibold text-lg px-8 py-4 rounded-full transition-colors">
                 Ver servicios
               </a>
             </div>
-            <p className="mt-6 text-gray-500 text-sm">
+            <p className="mt-6 text-chrome-700 text-sm tracking-wide">
               Concepción y San Pedro de la Paz · Lun–Vie 09:00–18:00 · Sáb 09:00–14:00
             </p>
           </FadeUp>
         </div>
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/20 rounded-full flex items-start justify-center pt-2">
-            <div className="w-1 h-2 bg-white/40 rounded-full" />
+          <div className="w-6 h-10 border-2 border-brand-500/30 rounded-full flex items-start justify-center pt-2">
+            <div className="w-1 h-2 bg-brand-500/50 rounded-full" />
           </div>
         </div>
       </section>
@@ -391,25 +398,4 @@ export default async function HomePage() {
             <Image src="/logo.png" alt="Fullshine" width={36} height={36} className="rounded-full" />
             <div>
               <p className="font-bold text-sm text-white">FULLSHINE Detailing Premium</p>
-              <a href="https://maps.google.com/?q=Camilo+Henriquez+381,+Concepción" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-                Camilo Henríquez 381, Concepción
-              </a>
-            </div>
-          </div>
-          <div className="text-center text-sm text-gray-500">
-            <a href="https://wa.me/56933654943" target="_blank" rel="noopener noreferrer"
-              className="text-amber-500 hover:text-amber-400 transition-colors">
-              +56 9 3365 4943
-            </a>
-            <span className="mx-2">·</span>
-            <a href="mailto:fullshinechile@gmail.com" className="hover:text-gray-300 transition-colors">
-              fullshinechile@gmail.com
-            </a>
-          </div>
-          <p className="text-xs text-gray-600">© {new Date().getFullYear()} Fullshine. Todos los derechos reservados.</p>
-        </div>
-      </footer>
-    </div>
-  )
-}
-
+              <a href="https://maps.google.com/?q=Camilo+Henriquez+381,+Concepción" target="_blank" rel="noopener 
