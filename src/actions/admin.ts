@@ -5,6 +5,19 @@ import { sendCancellationToClient } from '@/lib/whatsapp'
 import type { ActionResult, BookingStatus, DashboardStats, BookingWithRelations, Customer, Vehicle } from '@/types'
 import { revalidatePath } from 'next/cache'
 
+// --- AUTH GUARD ---
+
+async function requireAuth(): Promise<{ authorized: true } | { authorized: false; error: string }> {
+  try {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { authorized: false, error: 'No autorizado' }
+    return { authorized: true }
+  } catch {
+    return { authorized: false, error: 'Error de autenticación' }
+  }
+}
+
 // --- AUTH ---
 
 export async function signIn(email: string, password: string): Promise<ActionResult> {
@@ -31,6 +44,8 @@ export async function signOut(): Promise<ActionResult> {
 // --- DASHBOARD ---
 
 export async function getDashboardStats(): Promise<ActionResult<DashboardStats>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     const now = new Date()
@@ -63,9 +78,11 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
   }
 }
 
-// --- RECENT BOOKINGS (últimas 24h) ---
+// --- RECENT BOOKINGS ---
 
 export async function getRecentBookings(): Promise<ActionResult<BookingWithRelations[]>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -88,6 +105,8 @@ export async function getBookings(filters?: {
   date?: string
   search?: string
 }): Promise<ActionResult<BookingWithRelations[]>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     let query = supabase
@@ -121,6 +140,8 @@ export async function updateBookingStatus(
   bookingId: string,
   status: BookingStatus
 ): Promise<ActionResult> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
 
@@ -157,6 +178,8 @@ export async function updateBookingStatus(
 // --- CUSTOMERS ---
 
 export async function getCustomers(search?: string): Promise<ActionResult<Customer[]>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     let query = supabase.from('customers').select('*').order('full_name')
@@ -173,6 +196,8 @@ export async function updateCustomer(
   id: string,
   updates: Partial<Pick<Customer, 'full_name' | 'email' | 'phone' | 'notes'>>
 ): Promise<ActionResult> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     const { error } = await supabase
@@ -188,9 +213,10 @@ export async function updateCustomer(
 }
 
 export async function deleteCustomer(id: string): Promise<ActionResult> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
-    // Eliminar registros relacionados primero
     const { data: vehicles } = await supabase.from('vehicles').select('id').eq('customer_id', id)
     if (vehicles?.length) {
       const vehicleIds = vehicles.map((v: any) => v.id)
@@ -210,6 +236,8 @@ export async function deleteCustomer(id: string): Promise<ActionResult> {
 // --- VEHICLES ---
 
 export async function getVehiclesByCustomer(customerId: string): Promise<ActionResult<Vehicle[]>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     const { data, error } = await supabase
@@ -227,6 +255,8 @@ export async function getVehiclesByCustomer(customerId: string): Promise<ActionR
 // --- CRM KANBAN ---
 
 export async function getAllBookings(): Promise<ActionResult<BookingWithRelations[]>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     const { data, error } = await supabase
@@ -245,6 +275,8 @@ export async function moveBookingStage(
   bookingId: string,
   newStatus: string
 ): Promise<ActionResult> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     const { error } = await supabase
@@ -260,6 +292,8 @@ export async function moveBookingStage(
 }
 
 export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{ paymentUrl: string }>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     const { data: booking, error } = await supabase
@@ -273,7 +307,6 @@ export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{
     const total = booking.total_price_clp ?? 0
     const amount = Math.round(total * 0.2)
     const orderId = `FS-${bookingId.substring(0, 8)}-${Date.now()}`
-
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fullshine.autos'
 
     let paymentUrl = ''
@@ -322,6 +355,8 @@ export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{
 }
 
 export async function sendReviewRequest(bookingId: string): Promise<ActionResult> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
   try {
     const supabase = createAdminClient()
     const { data: booking, error } = await supabase
