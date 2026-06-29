@@ -145,9 +145,8 @@ export default async function HomePage() {
           <FadeUp delay={0.4}>
             {/* Línea ámbar decorativa */}
             <div className="w-16 h-0.5 bg-brand-500 mx-auto mb-6 rounded-full" />
-            <p className="text-chrome-500 text-lg md:text-xl mb-10 max-w-xl mx-auto">
-              Detailing profesional en Concepción y San Pedro de la Paz.
-              Desde un lavado completo hasta tratamiento cerámico.
+            <p className="text-chrome-300 text-lg md:text-xl mb-10 max-w-xl mx-auto italic">
+              Porque manejar un auto impecable no es vanidad — es distinción.
             </p>
           </FadeUp>
           <FadeUp delay={0.55}>
