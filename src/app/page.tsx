@@ -4,6 +4,7 @@ import { getServices } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
 import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
 import PromoModal from '@/components/PromoModal'
+import FaqSection from '@/components/FaqSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -327,6 +328,8 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <FaqSection />
+
       {/* BUSINESS SUBSCRIPTION */}
       <section className="py-24 px-4 bg-gray-900/60 border-t border-white/5">
         <div className="max-w-5xl mx-auto">
@@ -404,7 +407,7 @@ export default async function HomePage() {
           <p className="text-xs text-gray-600">© {new Date().getFullYear()} Fullshine. Todos los derechos reservados.</p>
         </div>
       </footer>
-
     </div>
   )
 }
+
