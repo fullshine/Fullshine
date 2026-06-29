@@ -172,6 +172,23 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* SOCIAL PROOF STRIP */}
+      <div className="bg-midnight-800 border-y border-white/5 py-8 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="flex justify-center gap-0.5 mb-3">
+            {[0,1,2,3,4].map(i => <StarIcon key={i} size="sm" />)}
+          </div>
+          <p className="text-chrome-200 text-lg md:text-xl font-medium leading-relaxed mb-4">
+            &ldquo;El lavado y pulido dejó el auto como nuevo, hasta sacó manchas de pintura de topones. El dueño amable, explicó paso a paso lo que iba realizando.&rdquo;
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center font-bold text-black text-xs">J</div>
+            <p className="text-chrome-500 text-sm"><span className="text-white font-semibold">Jorge Bizama</span> · Cliente verificado en Google</p>
+            <GoogleIcon className="w-4 h-4" />
+          </div>
+        </div>
+      </div>
+
       {/* TRUCK SHOWCASE */}
       <section className="relative py-0 overflow-hidden bg-gray-950">
         <ParallaxSection className="relative w-full">
