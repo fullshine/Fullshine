@@ -21,6 +21,32 @@ const config: Config = {
           800: '#8c4010',
           900: '#743511',
         },
+        // Negro profundo — base del sitio
+        midnight: {
+          50:  '#f2f2f2',
+          100: '#d9d9d9',
+          200: '#b3b3b3',
+          300: '#808080',
+          400: '#4d4d4d',
+          500: '#1a1a1a',
+          600: '#141414',
+          700: '#0e0e0e',
+          800: '#080808',
+          900: '#030303',
+        },
+        // Plata/cromo — para detalles metálicos
+        chrome: {
+          50:  '#ffffff',
+          100: '#f5f5f5',
+          200: '#e8e8e8',
+          300: '#d4d4d4',
+          400: '#b8b8b8',
+          500: '#9a9a9a',
+          600: '#787878',
+          700: '#585858',
+          800: '#383838',
+          900: '#1e1e1e',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
