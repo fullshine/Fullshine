@@ -57,8 +57,8 @@ export async function createPaymentLink(params: {
   }
 
   return {
-    url: `${data.url}?token=${data.token}`,
+    url: data.url,
+    flowOrder: data.flowOrder,
     token: data.token,
-    flowOrder: data.flowOrder?.toString() ?? '',
   }
 }

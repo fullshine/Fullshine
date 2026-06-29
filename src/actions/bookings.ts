@@ -293,19 +293,12 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         scheduledAt: input.scheduled_at,
         vehicleMake: input.vehicle.make ?? '',
         vehicleModel: input.vehicle.model,
-        vehicleLicensePlate: input.vehicle.license_plate ?? '',
       }),
-    ]).catch(console.error)
-
-    // Notificación push al admin
-    await sendPushToAdmin(
-      '🔔 Nueva reserva',
-      `${input.customer.full_name} · ${service.name}`,
-      '/admin/kanban'
-    ).catch(console.error)
+    ])
 
     return { success: true, data: { bookingId } }
   } catch (err: any) {
+    console.error('[createBooking] unexpected error:', err)
     return { success: false, error: err?.message ?? 'Error inesperado' }
   }
 }

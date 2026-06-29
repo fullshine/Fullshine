@@ -6,7 +6,7 @@ import type { BookingFormData, VehicleType, TimeSlot } from '@/types'
 import { cn, formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
 
 const VEHICLE_TYPES: VehicleType[] = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
-const STEPS = ['Cliente', 'Vehículo', 'Servicio', 'Fecha y Hora', 'Confirmar']
+const STEPS = ['Tus datos', 'Servicio', 'Fecha y Hora', 'Confirmar']
 
 interface Service {
   id: string
@@ -45,6 +45,7 @@ export default function BookingForm({ services }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showErrors, setShowErrors] = useState(false)
 
   const selectedService = services.find(s => s.id === form.service_id)
   const servicePrice = selectedService?.prices?.find(p => p.vehicle_type === form.vehicle_type)?.price
@@ -63,10 +64,15 @@ export default function BookingForm({ services }: Props) {
   }
 
   function canGoNext(): boolean {
-    if (step === 0) return !!(form.customer_name.trim() && form.customer_phone.trim())
-    if (step === 1) return !!(form.vehicle_make.trim() && form.vehicle_model.trim() && form.vehicle_type)
-    if (step === 2) return !!form.service_id
-    if (step === 3) return !!(form.scheduled_date && form.scheduled_time)
+    if (step === 0) return !!(
+      form.customer_name.trim() &&
+      form.customer_phone.trim() &&
+      form.vehicle_make.trim() &&
+      form.vehicle_model.trim() &&
+      form.vehicle_type
+    )
+    if (step === 1) return !!form.service_id
+    if (step === 2) return !!(form.scheduled_date && form.scheduled_time)
     return true
   }
 
@@ -137,7 +143,7 @@ export default function BookingForm({ services }: Props) {
                 {i < step ? '✓' : i + 1}
               </div>
               {i < STEPS.length - 1 && (
-                <div className={cn('h-0.5 w-8 mx-1', i < step ? 'bg-green-500' : 'bg-gray-200')} />
+                <div className={cn('h-0.5 w-12 mx-1', i < step ? 'bg-green-500' : 'bg-gray-200')} />
               )}
             </div>
           ))}
@@ -146,68 +152,89 @@ export default function BookingForm({ services }: Props) {
       </div>
 
       <div className="p-6 space-y-4">
-        {/* Step 0: Customer */}
+
+        {/* Step 0: Cliente + Vehículo */}
         {step === 0 && (
           <>
             <h3 className="font-semibold text-gray-900">Tus datos de contacto</h3>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
-              <input className="input-field" placeholder="Juan Pérez" value={form.customer_name}
+              <input
+                className={cn('input-field', showErrors && !form.customer_name.trim() && 'border-red-400 focus:ring-red-300')}
+                placeholder="Juan Pérez" value={form.customer_name}
                 onChange={e => set('customer_name', e.target.value)} />
+              {showErrors && !form.customer_name.trim() && (
+                <p className="text-xs text-red-500 mt-1">Ingresa tu nombre completo</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp *</label>
-              <input className="input-field" placeholder="+56 9 1234 5678" value={form.customer_phone}
+              <input
+                className={cn('input-field', showErrors && !form.customer_phone.trim() && 'border-red-400 focus:ring-red-300')}
+                placeholder="+56 9 1234 5678" value={form.customer_phone}
                 onChange={e => set('customer_phone', e.target.value)} type="tel" />
+              {showErrors && !form.customer_phone.trim() && (
+                <p className="text-xs text-red-500 mt-1">Ingresa tu número de WhatsApp</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email (opcional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-gray-400 font-normal">(opcional — para recibir link de pago)</span></label>
               <input className="input-field" placeholder="juan@email.com" value={form.customer_email}
                 onChange={e => set('customer_email', e.target.value)} type="email" />
             </div>
+
+            <div className="border-t border-gray-100 pt-4 mt-2">
+              <h3 className="font-semibold text-gray-900 mb-3">Tu vehículo</h3>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
+                  <input
+                    className={cn('input-field', showErrors && !form.vehicle_make.trim() && 'border-red-400 focus:ring-red-300')}
+                    placeholder="Toyota" value={form.vehicle_make}
+                    onChange={e => set('vehicle_make', e.target.value)} />
+                  {showErrors && !form.vehicle_make.trim() && (
+                    <p className="text-xs text-red-500 mt-1">Ingresa la marca</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
+                  <input
+                    className={cn('input-field', showErrors && !form.vehicle_model.trim() && 'border-red-400 focus:ring-red-300')}
+                    placeholder="Corolla" value={form.vehicle_model}
+                    onChange={e => set('vehicle_model', e.target.value)} />
+                  {showErrors && !form.vehicle_model.trim() && (
+                    <p className="text-xs text-red-500 mt-1">Ingresa el modelo</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {VEHICLE_TYPES.map(type => (
+                    <button key={type} type="button"
+                      onClick={() => set('vehicle_type', type)}
+                      className={cn(
+                        'py-2 px-3 rounded-lg border text-sm font-medium transition-colors',
+                        form.vehicle_type === type
+                          ? 'bg-brand-500 border-brand-500 text-white'
+                          : 'bg-white border-gray-300 text-gray-700 hover:border-brand-400'
+                      )}>
+                      {getVehicleTypeLabel(type)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </>
         )}
 
-        {/* Step 1: Vehicle */}
+        {/* Step 1: Servicio */}
         {step === 1 && (
           <>
-            <h3 className="font-semibold text-gray-900">Datos de tu vehículo</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
-                <input className="input-field" placeholder="Toyota" value={form.vehicle_make}
-                  onChange={e => set('vehicle_make', e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
-                <input className="input-field" placeholder="Corolla" value={form.vehicle_model}
-                  onChange={e => set('vehicle_model', e.target.value)} />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
-              <div className="grid grid-cols-3 gap-2">
-                {VEHICLE_TYPES.map(type => (
-                  <button key={type} type="button"
-                    onClick={() => set('vehicle_type', type)}
-                    className={cn(
-                      'py-2 px-3 rounded-lg border text-sm font-medium transition-colors',
-                      form.vehicle_type === type
-                        ? 'bg-brand-500 border-brand-500 text-white'
-                        : 'bg-white border-gray-300 text-gray-700 hover:border-brand-400'
-                    )}>
-                    {getVehicleTypeLabel(type)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Step 2: Service */}
-        {step === 2 && (
-          <>
             <h3 className="font-semibold text-gray-900">Elige tu servicio</h3>
+            {showErrors && !form.service_id && (
+              <p className="text-xs text-red-500 -mt-1">Selecciona un servicio para continuar</p>
+            )}
             <div className="space-y-4 max-h-[28rem] overflow-y-auto pr-1">
               {(() => {
                 const CATEGORY_LABELS: Record<string, string> = {
@@ -250,8 +277,16 @@ export default function BookingForm({ services }: Props) {
                             <div className="flex justify-between items-start">
                               <div>
                                 <p className="font-semibold text-gray-900">{service.name}</p>
-                                {service.description && <p className="text-sm text-gray-500 mt-0.5">{service.description}</p>}
-                                <p className="text-xs text-gray-400 mt-1">{(service as any).duration_hours ? `${(service as any).duration_hours}h` : service.duration_minutes ? `${service.duration_minutes} min` : ''}</p>
+                                {service.description && (
+                                  <p className="text-sm text-gray-500 mt-0.5">{service.description}</p>
+                                )}
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {(service as any).duration_hours
+                                    ? `${(service as any).duration_hours}h`
+                                    : service.duration_minutes
+                                      ? `${service.duration_minutes} min`
+                                      : ''}
+                                </p>
                               </div>
                               <div className="text-right ml-4 shrink-0">
                                 {price ? (
@@ -272,13 +307,15 @@ export default function BookingForm({ services }: Props) {
           </>
         )}
 
-        {/* Step 3: Date & Time */}
-        {step === 3 && (
+        {/* Step 2: Fecha y Hora */}
+        {step === 2 && (
           <>
             <h3 className="font-semibold text-gray-900">Elige fecha y hora</h3>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
-              <input className="input-field" type="date"
+              <input
+                className={cn('input-field', showErrors && !form.scheduled_date && 'border-red-400 focus:ring-red-300')}
+                type="date"
                 min={new Date().toISOString().split('T')[0]}
                 value={form.scheduled_date}
                 onChange={e => {
@@ -286,6 +323,9 @@ export default function BookingForm({ services }: Props) {
                   set('scheduled_time', '')
                   if (e.target.value && form.service_id) loadSlots(e.target.value, form.service_id)
                 }} />
+              {showErrors && !form.scheduled_date && (
+                <p className="text-xs text-red-500 mt-1">Selecciona una fecha</p>
+              )}
             </div>
             {form.scheduled_date && (
               <div>
@@ -301,9 +341,7 @@ export default function BookingForm({ services }: Props) {
                       const endTime = slot.end.substring(11, 16)
                       const hour = parseInt(startTime)
                       const turno = hour < 13 ? 'Mañana' : 'Tarde'
-                      const spotsLeft = slot.spots_left ?? (slot.available ? 1 : 0)
                       const isSelected = form.scheduled_time === startTime
-
                       return (
                         <button key={i} type="button" disabled={!slot.available}
                           onClick={() => set('scheduled_time', startTime)}
@@ -315,18 +353,14 @@ export default function BookingForm({ services }: Props) {
                                 ? 'border-brand-500 bg-brand-50'
                                 : 'border-gray-200 hover:border-brand-300 bg-white'
                           )}>
-                          <p className="text-xs font-semibold uppercase tracking-wider mb-1
-                            text-gray-400">
+                          <p className="text-xs font-semibold uppercase tracking-wider mb-1 text-gray-400">
                             {turno}
                           </p>
                           <p className={cn('text-2xl font-bold', isSelected ? 'text-brand-600' : 'text-gray-900')}>
                             {startTime}
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">hasta las {endTime}</p>
-                          <div className={cn(
-                            'mt-2 text-xs font-medium',
-                            !slot.available ? 'text-red-500' : 'text-green-600'
-                          )}>
+                          <div className={cn('mt-2 text-xs font-medium', !slot.available ? 'text-red-500' : 'text-green-600')}>
                             {!slot.available ? '✕ Sin disponibilidad' : '● Disponible'}
                           </div>
                         </button>
@@ -344,8 +378,8 @@ export default function BookingForm({ services }: Props) {
           </>
         )}
 
-        {/* Step 4: Confirm */}
-        {step === 4 && (
+        {/* Step 3: Confirmar */}
+        {step === 3 && (
           <>
             <h3 className="font-semibold text-gray-900">Confirma tu reserva</h3>
             <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
@@ -368,18 +402,24 @@ export default function BookingForm({ services }: Props) {
             )}
           </>
         )}
+
       </div>
 
       {/* Navigation */}
       <div className="px-6 pb-6 flex justify-between gap-3">
         {step > 0 && (
-          <button type="button" onClick={() => setStep(s => s - 1)} className="btn-secondary flex-1">
+          <button type="button"
+            onClick={() => { setShowErrors(false); setStep(s => s - 1) }}
+            className="btn-secondary flex-1">
             Atrás
           </button>
         )}
         {step < STEPS.length - 1 ? (
-          <button type="button" onClick={() => setStep(s => s + 1)} disabled={!canGoNext()}
-            className="btn-primary flex-1">
+          <button type="button" onClick={() => {
+            if (!canGoNext()) { setShowErrors(true); return }
+            setShowErrors(false)
+            setStep(s => s + 1)
+          }} className="btn-primary flex-1">
             Siguiente
           </button>
         ) : (

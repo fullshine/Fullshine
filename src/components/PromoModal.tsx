@@ -9,10 +9,32 @@ export default function PromoModal() {
 
   useEffect(() => {
     const seen = sessionStorage.getItem('promo_inauguracion')
-    if (!seen) {
-      const timer = setTimeout(() => setOpen(true), 800)
-      return () => clearTimeout(timer)
+    if (seen) return
+
+    let fired = false
+
+    function show() {
+      if (fired) return
+      fired = true
+      setOpen(true)
+      cleanup()
     }
+
+    // Exit intent: mouse saliendo por arriba del viewport
+    function handleMouseLeave(e: MouseEvent) {
+      if (e.clientY <= 0) show()
+    }
+
+    // Fallback: mostrar después de 8 segundos
+    const timer = setTimeout(show, 8000)
+
+    function cleanup() {
+      clearTimeout(timer)
+      document.removeEventListener('mouseleave', handleMouseLeave)
+    }
+
+    document.addEventListener('mouseleave', handleMouseLeave)
+    return cleanup
   }, [])
 
   function close() {
