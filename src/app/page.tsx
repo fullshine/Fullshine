@@ -240,31 +240,41 @@ export default async function HomePage() {
                 <StaggerList className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {grouped[cat].map(service => {
                     const prices = (service as any).prices ?? []
-                    const minPrice = prices.length
-                      ? Math.min(...prices.map((p: any) => p.price_clp ?? Infinity))
-                      : null
+                    const priceByType: Record<string, number> = {}
+                    prices.forEach((p: any) => { if (p.price) priceByType[p.vehicle_type] = p.price })
+                    const VEHICLE_LABELS: Record<string, string> = {
+                      hatch_sedan: 'Hatch / Sedan',
+                      suv_camioneta: 'SUV / Camioneta',
+                      pickup_xl: 'Pickup XL',
+                    }
+                    const VEHICLE_ORDER = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
+                    const shownPrices = VEHICLE_ORDER.filter(t => priceByType[t])
                     return (
                       <StaggerItem key={service.id}>
-                        <HoverCard className="bg-gray-900 border border-white/5 rounded-2xl p-5 flex justify-between items-start hover:border-white/10 transition-colors">
-                          <div className="flex-1">
-                            <p className="font-semibold text-white">{service.name}</p>
-                            {service.description && (
-                              <p className="text-gray-500 text-sm mt-1">{service.description}</p>
-                            )}
-                            {(service as any).duration_hours && (
-                              <p className="text-gray-600 text-xs mt-1">⏱ {(service as any).duration_hours}h aprox.</p>
-                            )}
+                        <HoverCard className="bg-gray-900 border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-colors">
+                          <div className="flex justify-between items-start gap-4 mb-3">
+                            <div className="flex-1">
+                              <p className="font-semibold text-white">{service.name}</p>
+                              {service.description && (
+                                <p className="text-gray-500 text-sm mt-1">{service.description}</p>
+                              )}
+                              {(service as any).duration_hours && (
+                                <p className="text-gray-600 text-xs mt-1.5">⏱ {(service as any).duration_hours}h aprox.</p>
+                              )}
+                            </div>
                           </div>
-                          <div className="ml-4 text-right shrink-0">
-                            {minPrice ? (
-                              <>
-                                <p className="text-xs text-gray-500 mb-0.5">desde</p>
-                                <p className="font-bold text-amber-400">{formatCurrency(minPrice)}</p>
-                              </>
-                            ) : (
-                              <p className="text-gray-500 text-sm">Consultar</p>
-                            )}
-                          </div>
+                          {shownPrices.length > 0 ? (
+                            <div className="border-t border-white/5 pt-3 grid grid-cols-3 gap-2">
+                              {shownPrices.map(type => (
+                                <div key={type} className="text-center">
+                                  <p className="text-gray-500 text-xs mb-1">{VEHICLE_LABELS[type]}</p>
+                                  <p className="font-bold text-amber-400 text-sm">{formatCurrency(priceByType[type])}</p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm border-t border-white/5 pt-3">Consultar precio</p>
+                          )}
                         </HoverCard>
                       </StaggerItem>
                     )
