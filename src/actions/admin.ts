@@ -169,7 +169,7 @@ export async function updateBookingStatus(
           phone: booking.customer.phone,
           customerName: booking.customer.full_name,
           serviceName: booking.service?.name ?? '',
-          scheduledAt: booking.slot_start,
+          scheduledAt: booking.booking_date && booking.slot_start ? `${booking.booking_date}T${booking.slot_start}` : booking.slot_start ?? '',
         }).catch(console.error)
       }
     }
@@ -316,7 +316,11 @@ export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{
 
     if (error || !booking) return { success: false, error: 'Reserva no encontrada' }
 
-    const total = booking.total_price_clp ?? 0
+    const storedTotal = booking.total_price_clp ?? 0
+    const isCeramico = booking.service?.category === 'ceramico'
+    // total_price_clp already has the discount applied from createBooking
+    // but if booking was created manually or before the discount logic, recalculate
+    const total = storedTotal
     const amount = Math.round(total * 0.2)
     const orderId = `FS-${bookingId.substring(0, 8)}-${Date.now()}`
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fullshine.autos'
@@ -353,9 +357,12 @@ export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{
         customerName: booking.customer.full_name,
         serviceName: booking.service?.name ?? '',
         totalPrice: total,
+        basePrice: isCeramico ? Math.round(total / 0.6) : undefined,
         paymentAmount: amount,
         paymentLink: paymentUrl,
-        scheduledAt: booking.slot_start ?? '',
+        scheduledAt: booking.booking_date && booking.slot_start
+          ? `${booking.booking_date}T${booking.slot_start}`
+          : booking.slot_start ?? '',
       }).catch(console.error)
     }
 

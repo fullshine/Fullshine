@@ -145,23 +145,32 @@ export async function sendCancellationToClient({
 
 // --- Link de pago anticipo (desde Kanban) ---
 export async function sendPaymentLinkToClient({
-  phone, customerName, serviceName, totalPrice, paymentAmount, paymentLink, scheduledAt,
+  phone, customerName, serviceName, totalPrice, basePrice, paymentAmount, paymentLink, scheduledAt,
 }: {
   phone: string
   customerName: string
   serviceName: string
   totalPrice: number
+  basePrice?: number
   paymentAmount: number
   paymentLink: string
   scheduledAt: string
 }) {
   const { date, time } = formatDateTime(scheduledAt)
+  const hasDiscount = !!(basePrice && basePrice > totalPrice)
+  const discountAmt = hasDiscount ? basePrice! - totalPrice : 0
+
   const message =
     `💳 *Anticipo Fullshine Detailing*\n\n` +
     `Hola ${customerName}, para confirmar tu reserva necesitamos el 20% de anticipo:\n\n` +
     `🛠️ *Servicio:* ${serviceName}\n` +
     `📅 *Fecha:* ${date} a las ${time}\n` +
-    `💰 *Total:* ${fmtCLP(totalPrice)}\n` +
+    (hasDiscount
+      ? `🎉 *¡Precio especial de lanzamiento!*\n` +
+        `~~Precio normal: ${fmtCLP(basePrice!)}~~\n` +
+        `🔥 *Descuento 40%:* -${fmtCLP(discountAmt)}\n` +
+        `✅ *Tu precio:* ${fmtCLP(totalPrice)}\n`
+      : `💰 *Total:* ${fmtCLP(totalPrice)}\n`) +
     `📩 *Anticipo (20%):* ${fmtCLP(paymentAmount)}\n\n` +
     `👉 Paga aquí: ${paymentLink}\n\n` +
     `Una vez recibido el pago, tu reserva queda 100% confirmada. ✅`
