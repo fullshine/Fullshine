@@ -58,8 +58,11 @@ export interface ServicePrice {
   id: string
   service_id: string
   vehicle_type: VehicleType
-  price: number
+  price_clp: number
+  promo_price_clp?: number
+  promo_expires_at?: string
   created_at: string
+  updated_at?: string
 }
 
 export interface Booking {

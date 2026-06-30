@@ -246,7 +246,7 @@ export default function ManualBookingModal({ open, onClose, onSuccess }: Props) 
             </select>
             {selectedPrice && (
               <p className="text-xs text-brand-600 font-medium mt-1.5">
-                💰 Precio: ${selectedPrice.price.toLocaleString('es-CL')} CLP
+                💰 Precio: ${selectedPrice.price_clp.toLocaleString('es-CL')} CLP
               </p>
             )}
             {form.service_id && form.vehicle_type && !selectedPrice && (

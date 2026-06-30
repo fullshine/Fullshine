@@ -199,7 +199,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
     const priceRecord = service.prices?.find(
       (p: any) => p.vehicle_type === input.vehicle.vehicle_type
     )
-    const totalPrice = priceRecord?.price ?? priceRecord?.price_clp ?? 0
+    const totalPrice = priceRecord?.price_clp ?? 0
 
     const { data: overlapping } = await supabase
       .from('bookings')

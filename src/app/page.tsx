@@ -241,7 +241,7 @@ export default async function HomePage() {
                   {grouped[cat].map(service => {
                     const prices = (service as any).prices ?? []
                     const priceByType: Record<string, number> = {}
-                    prices.forEach((p: any) => { if (p.price) priceByType[p.vehicle_type] = p.price })
+                    prices.forEach((p: any) => { if (p.price_clp) priceByType[p.vehicle_type] = p.price_clp })
                     const VEHICLE_LABELS: Record<string, string> = {
                       hatch_sedan: 'Hatch / Sedan',
                       suv_camioneta: 'SUV / Camioneta',
