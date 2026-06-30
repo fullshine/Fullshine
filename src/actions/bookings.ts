@@ -275,7 +275,8 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
       }
     }
 
-    await Promise.all([
+    // WhatsApp: fallar silenciosamente si Green API no está disponible
+    Promise.all([
       sendBookingConfirmationToClient({
         phone: input.customer.phone,
         customerName: input.customer.full_name,
@@ -285,7 +286,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         vehicleModel: input.vehicle.model,
         totalPrice,
         paymentLink,
-      }),
+      }).catch(e => console.error('[WhatsApp cliente]', e?.message)),
       sendNewBookingToAdmin({
         customerName: input.customer.full_name,
         customerPhone: input.customer.phone,
@@ -293,7 +294,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         scheduledAt: input.scheduled_at,
         vehicleMake: input.vehicle.make ?? '',
         vehicleModel: input.vehicle.model,
-      }),
+      }).catch(e => console.error('[WhatsApp admin]', e?.message)),
     ])
 
     return { success: true, data: { bookingId } }
