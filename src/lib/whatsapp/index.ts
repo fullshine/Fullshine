@@ -40,7 +40,7 @@ function fmtCLP(n: number): string {
 
 // --- Confirmación de reserva al cliente ---
 export async function sendBookingConfirmationToClient({
-  phone, customerName, serviceName, scheduledAt, vehicleMake, vehicleModel, totalPrice, paymentLink,
+  phone, customerName, serviceName, scheduledAt, vehicleMake, vehicleModel, totalPrice, basePrice, discountPct, paymentLink,
 }: {
   phone: string
   customerName: string
@@ -49,10 +49,13 @@ export async function sendBookingConfirmationToClient({
   vehicleMake: string
   vehicleModel: string
   totalPrice?: number
+  basePrice?: number
+  discountPct?: number
   paymentLink?: string
 }) {
   const { date, time } = formatDateTime(scheduledAt)
   const anticipo = totalPrice ? Math.round(totalPrice * 0.2) : null
+  const hasDiscount = !!(basePrice && discountPct)
 
   const message =
     `👋 ¡Hola ${customerName}!\n\n` +
@@ -61,9 +64,14 @@ export async function sendBookingConfirmationToClient({
     `🛠️ *Servicio:* ${serviceName}\n` +
     `📅 *Fecha:* ${date}\n` +
     `🕐 *Hora:* ${time}\n\n` +
+    (hasDiscount
+      ? `🎉 *¡Precio especial de lanzamiento!*\n` +
+        `~~Precio normal: ${fmtCLP(basePrice!)}~~\n` +
+        `🔥 *Descuento ${Math.round(discountPct! * 100)}%:* -${fmtCLP(Math.round(basePrice! * discountPct!))}\n` +
+        `✅ *Tu precio: ${fmtCLP(totalPrice!)}*\n\n`
+      : '') +
     (anticipo
       ? `💳 *Para hacer efectiva tu reserva*, debes cancelar el 20% de anticipo:\n` +
-        `💰 *Total del servicio:* ${fmtCLP(totalPrice!)}\n` +
         `👉 *Anticipo a pagar (20%):* ${fmtCLP(anticipo)}\n` +
         (paymentLink ? `\n🔗 Paga aquí: ${paymentLink}\n` : '') +
         `\nUna vez recibido el pago tu reserva queda *100% confirmada*. ✅\n\n`

@@ -199,7 +199,10 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
     const priceRecord = service.prices?.find(
       (p: any) => p.vehicle_type === input.vehicle.vehicle_type
     )
-    const totalPrice = priceRecord?.price_clp ?? 0
+    const basePrice = priceRecord?.price_clp ?? 0
+    const isCeramico = service.category === 'ceramico'
+    const discountPct = isCeramico ? 0.40 : 0
+    const totalPrice = isCeramico ? Math.round(basePrice * 0.60) : basePrice
 
     const { data: overlapping } = await supabase
       .from('bookings')
@@ -285,6 +288,8 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         vehicleMake: input.vehicle.make ?? '',
         vehicleModel: input.vehicle.model,
         totalPrice,
+        basePrice: isCeramico ? basePrice : undefined,
+        discountPct: isCeramico ? discountPct : undefined,
         paymentLink,
       }).catch(e => console.error('[WhatsApp cliente]', e?.message)),
       sendNewBookingToAdmin({
