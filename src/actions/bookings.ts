@@ -152,7 +152,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
       const { data: existingVehicle } = await supabase
         .from('vehicles')
         .select('id')
-        .eq('plate', input.vehicle.license_plate)
+        .eq('license_plate', input.vehicle.license_plate)
         .maybeSingle()
       if (existingVehicle) vehicle = existingVehicle
     }
@@ -162,11 +162,11 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         .from('vehicles')
         .insert({
           customer_id: customer.id,
-          brand: input.vehicle.make,
+          make: input.vehicle.make,
           model: input.vehicle.model,
           year: input.vehicle.year,
           color: input.vehicle.color ?? null,
-          plate: input.vehicle.license_plate ?? null,
+          license_plate: input.vehicle.license_plate ?? null,
           vehicle_type: input.vehicle.vehicle_type,
         })
         .select('id')
