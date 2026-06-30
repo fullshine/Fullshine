@@ -10,10 +10,16 @@ import { revalidatePath } from 'next/cache'
 async function requireAuth(): Promise<{ authorized: true } | { authorized: false; error: string }> {
   try {
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { authorized: false, error: 'No autorizado' }
+    // getSession() reads from cookie without a network round-trip — more reliable in SSR context
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      // Fallback: try getUser() in case session needs refresh
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return { authorized: false, error: 'No autorizado' }
+    }
     return { authorized: true }
-  } catch {
+  } catch (e) {
+    console.error('[requireAuth]', e)
     return { authorized: false, error: 'Error de autenticación' }
   }
 }
