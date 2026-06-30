@@ -162,7 +162,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         .from('vehicles')
         .insert({
           customer_id: customer.id,
-          make: input.vehicle.make,
+          brand: input.vehicle.make,
           model: input.vehicle.model,
           year: input.vehicle.year,
           color: input.vehicle.color ?? null,
