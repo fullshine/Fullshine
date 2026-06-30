@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 import { sendCancellationToClient } from '@/lib/whatsapp'
 import type { ActionResult, BookingStatus, DashboardStats, BookingWithRelations, Customer, Vehicle } from '@/types'
 import { revalidatePath } from 'next/cache'
@@ -9,17 +10,22 @@ import { revalidatePath } from 'next/cache'
 
 async function requireAuth(): Promise<{ authorized: true } | { authorized: false; error: string }> {
   try {
-    const supabase = createClient()
-    // getSession() reads from cookie without a network round-trip — more reliable in SSR context
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      // Fallback: try getUser() in case session needs refresh
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return { authorized: false, error: 'No autorizado' }
+    // Read cookie directly — same check as middleware, no network round-trip
+    const cookieStore = cookies()
+    const allCookies = cookieStore.getAll()
+    const hasAuth = allCookies.some(c =>
+      c.value && (
+        (c.name.startsWith('sb-') && c.name.includes('auth-token')) ||
+        c.name === 'supabase-auth-token'
+      )
+    )
+    if (!hasAuth) {
+      console.error('[requireAuth] no auth cookie found. cookies:', allCookies.map(c => c.name))
+      return { authorized: false, error: 'No autorizado' }
     }
     return { authorized: true }
   } catch (e) {
-    console.error('[requireAuth]', e)
+    console.error('[requireAuth] error:', e)
     return { authorized: false, error: 'Error de autenticación' }
   }
 }
