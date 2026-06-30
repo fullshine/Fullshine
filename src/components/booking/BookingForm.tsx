@@ -69,7 +69,6 @@ export default function BookingForm({ services }: Props) {
       form.customer_phone.trim() &&
       form.vehicle_make.trim() &&
       form.vehicle_model.trim() &&
-      form.vehicle_license_plate.trim() &&
       form.vehicle_type
     )
     if (step === 1) return !!form.service_id
@@ -208,16 +207,7 @@ export default function BookingForm({ services }: Props) {
                   )}
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Patente *</label>
-                <input
-                  className={cn('input-field uppercase', showErrors && !form.vehicle_license_plate.trim() && 'border-red-400 focus:ring-red-300')}
-                  placeholder="ABCD12" value={form.vehicle_license_plate}
-                  onChange={e => set('vehicle_license_plate', e.target.value.toUpperCase())} />
-                {showErrors && !form.vehicle_license_plate.trim() && (
-                  <p className="text-xs text-red-500 mt-1">Ingresa la patente</p>
-                )}
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
                 <div className="grid grid-cols-3 gap-2">
