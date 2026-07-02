@@ -1,24 +1,22 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { moveBookingStage, sendPaymentLink, sendReviewRequest } from '@/actions/admin'
+import { moveBookingStage, sendReviewRequest } from '@/actions/admin'
 import { getStatusLabelFull, getStatusColorFull, formatCurrency } from '@/lib/utils'
 import type { BookingWithRelations } from '@/types'
 import ManualBookingModal from './ManualBookingModal'
 
 const COLUMNS = [
   { id: 'pending',          label: 'Nueva reserva',   color: 'border-yellow-400' },
-  { id: 'payment_sent',     label: 'Link enviado',     color: 'border-orange-400' },
-  { id: 'payment_received', label: 'Pago recibido',    color: 'border-teal-400'   },
-  { id: 'confirmed',        label: 'Confirmada',       color: 'border-blue-400'   },
-  { id: 'in_progress',      label: 'En trabajo',       color: 'border-purple-400' },
-  { id: 'completed',        label: 'Completada',       color: 'border-green-400'  },
-  { id: 'review_sent',      label: 'Resena enviada',   color: 'border-emerald-400'},
+  { id: 'payment_received', label: 'Pago recibido',   color: 'border-teal-400'   },
+  { id: 'confirmed',        label: 'Confirmada',      color: 'border-blue-400'   },
+  { id: 'in_progress',      label: 'En trabajo',      color: 'border-purple-400' },
+  { id: 'completed',        label: 'Completada',      color: 'border-green-400'  },
+  { id: 'review_sent',      label: 'Resena enviada',  color: 'border-emerald-400'},
 ]
 
 const NEXT_STAGE: Record<string, string> = {
-  pending:          'payment_sent',
-  payment_sent:     'payment_received',
+  pending:          'payment_received',
   payment_received: 'confirmed',
   confirmed:        'in_progress',
   in_progress:      'completed',
@@ -26,8 +24,7 @@ const NEXT_STAGE: Record<string, string> = {
 }
 
 const PREV_STAGE: Record<string, string> = {
-  payment_sent:     'pending',
-  payment_received: 'payment_sent',
+  payment_received: 'pending',
   confirmed:        'payment_received',
   in_progress:      'confirmed',
   completed:        'in_progress',
@@ -49,12 +46,7 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
 
   function move(newStatus: string, isForward = true) {
     startTransition(async () => {
-      if (newStatus === 'payment_sent' && isForward) {
-        setMsg('Generando link de pago...')
-        const res = await sendPaymentLink(booking.id)
-        if (!res.success) { setMsg(`Error: ${res.error}`); return }
-        setMsg('Link enviado por WhatsApp')
-      } else if (newStatus === 'review_sent' && isForward) {
+      if (newStatus === 'review_sent' && isForward) {
         setMsg('Enviando solicitud de resena...')
         const res = await sendReviewRequest(booking.id)
         if (!res.success) { setMsg(`Error: ${res.error}`); return }
@@ -101,12 +93,10 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
         {nextStage && (
           <button onClick={() => move(nextStage)} disabled={pending}
             className={`text-xs px-2 py-1 rounded text-white disabled:opacity-50 ${
-              nextStage === 'payment_sent' ? 'bg-orange-500 hover:bg-orange-600' :
               nextStage === 'review_sent'  ? 'bg-emerald-500 hover:bg-emerald-600' :
               'bg-blue-500 hover:bg-blue-600'
             }`}>
-            {nextStage === 'payment_sent' ? 'Enviar link pago' :
-             nextStage === 'review_sent'  ? 'Pedir resena' :
+            {nextStage === 'review_sent'  ? 'Pedir resena' :
              `-> ${COLUMNS.find(c => c.id === nextStage)?.label ?? nextStage}`}
           </button>
         )}
