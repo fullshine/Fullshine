@@ -237,6 +237,33 @@ export default async function HomePage() {
                   {CATEGORY_LABELS[cat] ?? cat}
                   <span className="flex-1 h-px bg-amber-500/20" />
                 </h3>
+                {cat === 'ceramico' && (() => {
+                  const CUPOS_TOTAL: number = 10      // ← cambia el total aquí
+                  const CUPOS_RESTANTES: number = 2   // ← cambia los restantes aquí
+                  const usados = CUPOS_TOTAL - CUPOS_RESTANTES
+                  const pct = Math.round((usados / CUPOS_TOTAL) * 100)
+                  return (
+                    <div className="mb-5 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-amber-400">
+                          🔥 Oferta de lanzamiento — 40% OFF
+                        </span>
+                        <span className="text-sm font-bold text-white">
+                          {CUPOS_RESTANTES} cupo{CUPOS_RESTANTES !== 1 ? 's' : ''} restante{CUPOS_RESTANTES !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-2">
+                        <div
+                          className="bg-amber-400 h-2 rounded-full transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1.5">
+                        {usados} de {CUPOS_TOTAL} cupos utilizados — precio válido solo al reservar
+                      </p>
+                    </div>
+                  )
+                })()}
                 <StaggerList className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {grouped[cat].map(service => {
                     const prices = (service as any).prices ?? []
