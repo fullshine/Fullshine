@@ -25,6 +25,25 @@ const CATEGORY_LABELS: Record<string, string> = {
   precompra: 'Servicio Precompra',
 }
 
+const CATEGORY_ICONS: Record<string, string> = {
+  lavado_detallado: '🚿',
+  tapiz: '🧹',
+  pulido: '✨',
+  ceramico: '💎',
+  adicional: '➕',
+  precompra: '🔍',
+}
+
+const SERVICE_ICONS: Record<string, string> = {
+  'platino': '🥈',
+  'gold':    '🥇',
+  'elite':   '👑',
+  'deluxe':  '⭐',
+  'supremo': '🌟',
+  'abrillantador': '✨',
+  'avanzado': '⚡',
+}
+
 const CATEGORY_ORDER = ['lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'adicional', 'precompra']
 
 const WHY_US = [
@@ -259,7 +278,10 @@ export default async function HomePage() {
                         <HoverCard className="bg-gray-900 border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-colors">
                           <div className="flex justify-between items-start gap-4 mb-3">
                             <div className="flex-1">
-                              <p className="font-semibold text-white">{service.name}</p>
+                              <p className="font-semibold text-white flex items-center gap-2">
+                                <span>{Object.entries(SERVICE_ICONS).find(([k]) => service.name.toLowerCase().includes(k))?.[1] ?? CATEGORY_ICONS[cat] ?? '🔧'}</span>
+                                {service.name}
+                              </p>
                               {service.description && (
                                 <ServiceDescription text={service.description} className="mt-1 block" />
                               )}
@@ -272,7 +294,7 @@ export default async function HomePage() {
                             <div className="border-t border-white/5 pt-3 grid grid-cols-3 gap-2">
                               {shownPrices.map(type => (
                                 <div key={type} className="text-center">
-                                  <p className="text-gray-500 text-xs mb-1">{VEHICLE_LABELS[type]}</p>
+                                  <p className="text-white text-xs mb-1 font-medium">{VEHICLE_LABELS[type]}</p>
                                   <p className="font-bold text-amber-400 text-sm">{formatCurrency(priceByType[type])}</p>
                                 </div>
                               ))}
