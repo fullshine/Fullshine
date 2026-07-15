@@ -9,6 +9,7 @@ import PromoBar from '@/components/PromoBar'
 import ExitIntentPopup from '@/components/ExitIntentPopup'
 import ServiceDescription from '@/components/ServiceDescription'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import StatsBar from '@/components/StatsBar'
 
 export const dynamic = 'force-dynamic'
 
@@ -199,6 +200,7 @@ export default async function HomePage() {
       </section>
 
       <SocialProofStrip />
+      <StatsBar />
 
       {/* TRUCK SHOWCASE */}
       <section className="relative py-0 overflow-hidden bg-gray-950">
