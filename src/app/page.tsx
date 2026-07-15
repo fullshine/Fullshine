@@ -7,6 +7,7 @@ import FaqSection from '@/components/FaqSection'
 import SocialProofStrip from '@/components/SocialProofStrip'
 import PromoBar from '@/components/PromoBar'
 import ExitIntentPopup from '@/components/ExitIntentPopup'
+import ServiceDescription from '@/components/ServiceDescription'
 
 export const dynamic = 'force-dynamic'
 
@@ -260,7 +261,7 @@ export default async function HomePage() {
                             <div className="flex-1">
                               <p className="font-semibold text-white">{service.name}</p>
                               {service.description && (
-                                <p className="text-gray-500 text-sm mt-1">{service.description}</p>
+                                <ServiceDescription text={service.description} className="mt-1 block" />
                               )}
                               {(service as any).duration_hours && (
                                 <p className="text-gray-600 text-xs mt-1.5">⏱ {(service as any).duration_hours}h aprox.</p>

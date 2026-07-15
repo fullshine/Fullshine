@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createBooking, getAvailableSlots } from '@/actions/bookings'
 import type { BookingFormData, VehicleType, TimeSlot } from '@/types'
 import { cn, formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
+import ServiceDescription from '@/components/ServiceDescription'
 
 const VEHICLE_TYPES: VehicleType[] = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
 const STEPS = ['Tus datos', 'Servicio', 'Fecha y Hora', 'Confirmar']
@@ -289,7 +290,7 @@ export default function BookingForm({ services }: Props) {
                               <div>
                                 <p className="font-semibold text-gray-900">{service.name}</p>
                                 {service.description && (
-                                  <p className="text-sm text-gray-500 mt-0.5">{service.description}</p>
+                                  <ServiceDescription text={service.description} className="mt-0.5 block" />
                                 )}
                                 <p className="text-xs text-gray-400 mt-1">
                                   {(service as any).duration_hours
