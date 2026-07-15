@@ -5,6 +5,8 @@ import { formatCurrency } from '@/lib/utils'
 import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
 import FaqSection from '@/components/FaqSection'
 import SocialProofStrip from '@/components/SocialProofStrip'
+import PromoBar from '@/components/PromoBar'
+import ExitIntentPopup from '@/components/ExitIntentPopup'
 
 export const dynamic = 'force-dynamic'
 
@@ -101,8 +103,12 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
 
+      <PromoBar />
+      <ExitIntentPopup />
+
       {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
+      <nav className="fixed left-0 right-0 z-[65] bg-gray-950/80 backdrop-blur-md border-b border-white/5"
+        style={{ top: 'var(--promo-h, 0px)' }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="Fullshine" width={44} height={44} className="rounded-full" />
