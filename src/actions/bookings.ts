@@ -26,6 +26,7 @@ export async function getServices(): Promise<ActionResult<Service[]>> {
     const { data, error } = await supabase
       .from('services')
       .select('*, prices:service_prices(*)')
+      .eq('is_active', true)
       .order('category')
       .order('name')
     if (error) return { success: false, error: error.message }
