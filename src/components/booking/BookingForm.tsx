@@ -50,6 +50,15 @@ export default function BookingForm({ services }: Props) {
   const selectedService = services.find(s => s.id === form.service_id)
   const servicePrice = selectedService?.prices?.find(p => p.vehicle_type === form.vehicle_type)?.price_clp
 
+  function getDiscount(price: number, category: string) {
+    const pct = category === 'ceramico' ? 0.25 : 0.10
+    return { discounted: Math.round(price * (1 - pct)), pct, label: category === 'ceramico' ? '25% OFF' : '10% OFF' }
+  }
+
+  const selectedDiscounted = selectedService && servicePrice
+    ? getDiscount(servicePrice, selectedService.category)
+    : null
+
   function set(field: keyof BookingFormData, value: string | number) {
     setForm(prev => ({ ...prev, [field]: value }))
   }
@@ -266,6 +275,7 @@ export default function BookingForm({ services }: Props) {
                       {grouped[cat].map(service => {
                         const priceRecord = service.prices?.find(p => p.vehicle_type === form.vehicle_type)
                         const price = priceRecord?.price_clp
+                        const disc = price ? getDiscount(price, service.category) : null
                         return (
                           <button key={service.id} type="button"
                             onClick={() => set('service_id', service.id)}
@@ -290,8 +300,14 @@ export default function BookingForm({ services }: Props) {
                                 </p>
                               </div>
                               <div className="text-right ml-4 shrink-0">
-                                {price ? (
-                                  <span className="font-bold text-brand-600">{formatCurrency(price)}</span>
+                                {disc ? (
+                                  <div>
+                                    <p className="text-xs text-gray-400 line-through">{formatCurrency(price!)}</p>
+                                    <p className="font-bold text-green-600">{formatCurrency(disc.discounted)}</p>
+                                    <span className="text-xs bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded">
+                                      {disc.label}
+                                    </span>
+                                  </div>
                                 ) : (
                                   <span className="text-sm text-gray-400">Consultar</span>
                                 )}
@@ -391,10 +407,20 @@ export default function BookingForm({ services }: Props) {
               <Row label="Servicio" value={selectedService?.name ?? ''} />
               <Row label="Fecha" value={form.scheduled_date} />
               <Row label="Hora" value={form.scheduled_time} />
-              {servicePrice && (
-                <div className="border-t pt-2 mt-2 flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span className="text-brand-600">{formatCurrency(servicePrice)}</span>
+              {servicePrice && selectedDiscounted && (
+                <div className="border-t pt-2 mt-2 space-y-1">
+                  <div className="flex justify-between text-sm text-gray-400">
+                    <span>Precio normal</span>
+                    <span className="line-through">{formatCurrency(servicePrice)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-green-600 font-medium">
+                    <span>Descuento ({selectedDiscounted.label})</span>
+                    <span>-{formatCurrency(servicePrice - selectedDiscounted.discounted)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-base">
+                    <span>Total</span>
+                    <span className="text-brand-600">{formatCurrency(selectedDiscounted.discounted)}</span>
+                  </div>
                 </div>
               )}
             </div>
