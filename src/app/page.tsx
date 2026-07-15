@@ -3,7 +3,6 @@ import Image from 'next/image'
 import { getServices } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
 import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
-import PromoModal from '@/components/PromoModal'
 import FaqSection from '@/components/FaqSection'
 import SocialProofStrip from '@/components/SocialProofStrip'
 
@@ -102,8 +101,6 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
 
-      <PromoModal />
-
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -174,37 +171,6 @@ export default async function HomePage() {
       </section>
 
       <SocialProofStrip />
-
-      {/* URGENCY BAR — DESCUENTO CERÁMICO */}
-      {(() => {
-        const CUPOS_TOTAL: number = 10      // ← cambia el total aquí
-        const CUPOS_RESTANTES: number = 2   // ← cambia los restantes aquí
-        const usados = CUPOS_TOTAL - CUPOS_RESTANTES
-        const pct = Math.round((usados / CUPOS_TOTAL) * 100)
-        return (
-          <div className="bg-gray-950 border-b border-amber-500/20 px-4 py-5">
-            <div className="max-w-2xl mx-auto">
-              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-amber-400 font-bold text-sm md:text-base">🔥 Oferta de lanzamiento</span>
-                  <span className="bg-amber-500 text-black text-xs font-black px-2 py-0.5 rounded-full">40% OFF</span>
-                  <span className="text-gray-400 text-sm">en Tratamientos Cerámicos</span>
-                </div>
-                <span className="text-white font-bold text-sm">
-                  {CUPOS_RESTANTES} cupo{CUPOS_RESTANTES !== 1 ? 's' : ''} disponible{CUPOS_RESTANTES !== 1 ? 's' : ''}
-                </span>
-              </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
-                <div className="bg-amber-400 h-2 rounded-full" style={{ width: `${pct}%` }} />
-              </div>
-              <div className="flex justify-between mt-1.5">
-                <p className="text-xs text-gray-500">{usados} de {CUPOS_TOTAL} cupos utilizados</p>
-                <a href="#servicios" className="text-xs text-amber-400 hover:text-amber-300 font-medium">Ver servicios →</a>
-              </div>
-            </div>
-          </div>
-        )
-      })()}
 
       {/* TRUCK SHOWCASE */}
       <section className="relative py-0 overflow-hidden bg-gray-950">

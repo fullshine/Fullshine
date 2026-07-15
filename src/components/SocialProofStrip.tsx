@@ -2,32 +2,18 @@
 
 import { useState, useEffect } from 'react'
 
-// ─── CONFIGURACIÓN DESCUENTO ───────────────────────────────
-const CUPOS_TOTAL: number = 10
-const CUPOS_RESTANTES: number = 2
-// ──────────────────────────────────────────────────────────
-
 const QUOTES = [
   {
-    type: 'review' as const,
     text: 'El lavado y pulido dejó el auto como nuevo, hasta sacó manchas de pintura de topones. El dueño amable, explicó paso a paso lo que iba realizando.',
     name: 'Jorge Bizama',
     avatar: 'J',
   },
   {
-    type: 'review' as const,
     text: 'Hace 3 años llevé mi auto a Fullshine y tuve una muy buena experiencia, por lo que volví a contratar sus servicios luego de un cambio de vehículo. Quedé encantada.',
     name: 'Cata Mayorga',
     avatar: 'C',
   },
   {
-    type: 'promo' as const,
-    text: `🔥 Oferta de lanzamiento — Solo quedan ${CUPOS_RESTANTES} cupo${CUPOS_RESTANTES !== 1 ? 's' : ''} con 40% de descuento en Tratamientos Cerámicos`,
-    name: '',
-    avatar: '',
-  },
-  {
-    type: 'review' as const,
     text: 'Trabajo prolijo, resultados de alto nivel y gran preocupación por los detalles. 100% recomendable.',
     name: 'Jonathan Ramírez',
     avatar: 'J',
@@ -69,57 +55,37 @@ export default function SocialProofStrip() {
   }, [])
 
   const q = QUOTES[current]
-  const isPromo = q.type === 'promo'
 
   return (
-    <div className={`border-y border-white/5 py-8 px-4 transition-colors duration-500 ${isPromo ? 'bg-amber-500/10' : 'bg-midnight-800'}`}>
+    <div className="border-y border-white/5 py-8 px-4 bg-midnight-800">
       <div className="max-w-3xl mx-auto text-center">
-        {isPromo ? (
-          <div
-            className="transition-opacity duration-400"
-            style={{ opacity: visible ? 1 : 0 }}
-          >
-            <p className="text-amber-400 text-lg md:text-xl font-bold leading-relaxed mb-3">
-              {q.text}
-            </p>
-            <a
-              href="#servicios"
-              className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-6 py-2 rounded-full transition-colors"
-            >
-              Ver tratamientos cerámicos →
-            </a>
+        <div className="flex justify-center gap-0.5 mb-3">
+          {[0,1,2,3,4].map(i => <StarIcon key={i} />)}
+        </div>
+        <p
+          className="text-chrome-200 text-lg md:text-xl font-medium leading-relaxed mb-4 transition-opacity duration-400"
+          style={{ opacity: visible ? 1 : 0 }}
+        >
+          &ldquo;{q.text}&rdquo;
+        </p>
+        <div
+          className="flex items-center justify-center gap-3 transition-opacity duration-400"
+          style={{ opacity: visible ? 1 : 0 }}
+        >
+          <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center font-bold text-black text-xs">
+            {q.avatar}
           </div>
-        ) : (
-          <>
-            <div className="flex justify-center gap-0.5 mb-3">
-              {[0,1,2,3,4].map(i => <StarIcon key={i} />)}
-            </div>
-            <p
-              className="text-chrome-200 text-lg md:text-xl font-medium leading-relaxed mb-4 transition-opacity duration-400"
-              style={{ opacity: visible ? 1 : 0 }}
-            >
-              &ldquo;{q.text}&rdquo;
-            </p>
-            <div
-              className="flex items-center justify-center gap-3 transition-opacity duration-400"
-              style={{ opacity: visible ? 1 : 0 }}
-            >
-              <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center font-bold text-black text-xs">
-                {q.avatar}
-              </div>
-              <p className="text-chrome-500 text-sm">
-                <span className="text-white font-semibold">{q.name}</span> · Cliente verificado en Google
-              </p>
-              <GoogleIcon />
-            </div>
-          </>
-        )}
+          <p className="text-chrome-500 text-sm">
+            <span className="text-white font-semibold">{q.name}</span> · Cliente verificado en Google
+          </p>
+          <GoogleIcon />
+        </div>
         <div className="flex justify-center gap-1.5 mt-5">
           {QUOTES.map((_, i) => (
             <button
               key={i}
               onClick={() => { setVisible(false); setTimeout(() => { setCurrent(i); setVisible(true) }, 400) }}
-              className={`w-1.5 h-1.5 rounded-full transition-colors ${i === current ? (isPromo ? 'bg-amber-400' : 'bg-brand-500') : 'bg-chrome-700'}`}
+              className={`w-1.5 h-1.5 rounded-full transition-colors ${i === current ? 'bg-brand-500' : 'bg-chrome-700'}`}
             />
           ))}
         </div>
