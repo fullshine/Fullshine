@@ -8,6 +8,7 @@ import SocialProofStrip from '@/components/SocialProofStrip'
 import PromoBar from '@/components/PromoBar'
 import ExitIntentPopup from '@/components/ExitIntentPopup'
 import ServiceDescription from '@/components/ServiceDescription'
+import WhatsAppButton from '@/components/WhatsAppButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -125,6 +126,7 @@ export default async function HomePage() {
 
       <PromoBar />
       <ExitIntentPopup />
+      <WhatsAppButton />
 
       {/* NAV */}
       <nav className="fixed left-0 right-0 z-[65] bg-gray-950/80 backdrop-blur-md border-b border-white/5"
@@ -315,6 +317,76 @@ export default async function HomePage() {
               <Link href="/reservar"
                 className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold text-lg px-10 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
                 Reservar mi turno
+              </Link>
+            </div>
+          </FadeUp>
+        </div>
+      </section>
+
+      {/* COMPARATIVA CERÁMICOS */}
+      <section className="py-24 px-4 bg-gray-900/40 border-t border-white/5">
+        <div className="max-w-5xl mx-auto">
+          <FadeUp>
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-2 text-center">Tratamientos Cerámicos</p>
+            <h2 className="text-3xl font-bold text-white text-center mb-3">¿Cuál es el indicado para ti?</h2>
+            <p className="text-gray-400 text-center mb-12">Todos incluyen Nasiol ZR53 con 3 a 5 años de protección</p>
+          </FadeUp>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  <th className="text-left text-gray-400 font-medium pb-4 pr-4 w-1/3">Incluye</th>
+                  <th className="text-center pb-4 px-2">
+                    <div className="bg-gray-800 rounded-xl p-3 border border-white/10">
+                      <p className="text-lg mb-0.5">🥈</p>
+                      <p className="font-bold text-white text-sm">Platino</p>
+                      <p className="text-gray-500 text-xs">desde $300.000</p>
+                    </div>
+                  </th>
+                  <th className="text-center pb-4 px-2">
+                    <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/40 relative">
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black text-xs font-black px-3 py-0.5 rounded-full">Popular</span>
+                      <p className="text-lg mb-0.5">🥇</p>
+                      <p className="font-bold text-amber-400 text-sm">Gold</p>
+                      <p className="text-gray-400 text-xs">desde $350.000</p>
+                    </div>
+                  </th>
+                  <th className="text-center pb-4 px-2">
+                    <div className="bg-gray-800 rounded-xl p-3 border border-white/10">
+                      <p className="text-lg mb-0.5">👑</p>
+                      <p className="font-bold text-white text-sm">Elite</p>
+                      <p className="text-gray-500 text-xs">desde $500.000</p>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {[
+                  ['Lavado técnico + descontaminación',   true,  true,  true ],
+                  ['Pulido avanzado de pintura',          true,  true,  true ],
+                  ['Cerámica Nasiol ZR53 (3-5 años)',     true,  true,  true ],
+                  ['Limpieza interior de cortesía',       true,  true,  true ],
+                  ['Sellado cerámico de vidrios',         false, true,  true ],
+                  ['Sellado cerámico de plásticos',       false, false, true ],
+                  ['Sellado cerámico de llantas',         false, false, true ],
+                ].map(([feature, p, g, e], i) => (
+                  <tr key={i} className="group">
+                    <td className="py-3 pr-4 text-gray-400 group-hover:text-white transition-colors">{feature as string}</td>
+                    <td className="py-3 px-2 text-center">{p ? <span className="text-green-400 font-bold text-base">✓</span> : <span className="text-gray-700">—</span>}</td>
+                    <td className="py-3 px-2 text-center bg-amber-500/5">{g ? <span className="text-green-400 font-bold text-base">✓</span> : <span className="text-gray-700">—</span>}</td>
+                    <td className="py-3 px-2 text-center">{e ? <span className="text-green-400 font-bold text-base">✓</span> : <span className="text-gray-700">—</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <FadeUp delay={0.2}>
+            <div className="text-center mt-10">
+              <Link href="/reservar"
+                className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold text-lg px-10 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
+                Reservar tratamiento cerámico
               </Link>
             </div>
           </FadeUp>
