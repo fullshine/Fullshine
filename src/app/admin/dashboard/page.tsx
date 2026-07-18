@@ -23,14 +23,34 @@ export default async function DashboardPage() {
       <PushSubscribeButton />
     </div>
 
-      {/* Stats */}
+      {/* Panel ventas del mes */}
       {stats && (
-        <div className="grid grid-cols-2 gap-3">
-          <StatCard label="Reservas hoy" value={stats.bookings_today} />
-          <StatCard label="Esta semana" value={stats.bookings_week} />
-          <StatCard label="Pendientes" value={stats.pending_bookings} highlight />
-          <StatCard label="Ingresos mes" value={formatCurrency(stats.revenue_month)} />
-        </div>
+        <>
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-5 text-white">
+            <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Ventas del mes · clientes finalizados</p>
+            <p className="text-4xl font-black tracking-tight text-amber-400">
+              {formatCurrency(stats.revenue_month)}
+            </p>
+            <div className="flex gap-4 mt-3 pt-3 border-t border-white/10">
+              <div>
+                <p className="text-xs text-gray-400">Clientes finalizados</p>
+                <p className="text-xl font-bold">{stats.finalized_month}</p>
+              </div>
+              <div className="w-px bg-white/10" />
+              <div>
+                <p className="text-xs text-gray-400">Ticket promedio</p>
+                <p className="text-xl font-bold">{formatCurrency(stats.avg_ticket_month)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard label="Reservas hoy" value={stats.bookings_today} />
+            <StatCard label="Esta semana" value={stats.bookings_week} />
+            <StatCard label="Pendientes pago" value={stats.pending_bookings} highlight />
+            <StatCard label="Confirmadas" value={stats.confirmed_bookings} />
+          </div>
+        </>
       )}
 
       {/* Nuevas reservas (últimas 24h) */}

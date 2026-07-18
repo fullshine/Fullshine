@@ -153,6 +153,8 @@ export interface DashboardStats {
   bookings_today: number
   bookings_week: number
   revenue_month: number
+  finalized_month: number
+  avg_ticket_month: number
   pending_bookings: number
   confirmed_bookings: number
 }

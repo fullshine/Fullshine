@@ -68,12 +68,17 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
     const [todayRes, weekRes, revenueRes, pendingRes, confirmedRes] = await Promise.all([
       supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_date', today),
       supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('booking_date', weekStart),
-      supabase.from('bookings').select('total_price_clp').eq('status', 'completed').gte('booking_date', monthStart),
+      supabase.from('bookings').select('total_price_clp')
+        .in('status', ['completed', 'review_sent'])
+        .gte('booking_date', monthStart),
       supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed'),
     ])
 
-    const revenueMonth = (revenueRes.data ?? []).reduce((sum, b) => sum + (b.total_price_clp ?? 0), 0)
+    const finalizedBookings = revenueRes.data ?? []
+    const revenueMonth = finalizedBookings.reduce((sum, b) => sum + (b.total_price_clp ?? 0), 0)
+    const finalizedMonth = finalizedBookings.length
+    const avgTicketMonth = finalizedMonth > 0 ? Math.round(revenueMonth / finalizedMonth) : 0
 
     return {
       success: true,
@@ -81,6 +86,8 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
         bookings_today: todayRes.count ?? 0,
         bookings_week: weekRes.count ?? 0,
         revenue_month: revenueMonth,
+        finalized_month: finalizedMonth,
+        avg_ticket_month: avgTicketMonth,
         pending_bookings: pendingRes.count ?? 0,
         confirmed_bookings: confirmedRes.count ?? 0,
       },
