@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
-import { StaggerList, StaggerItem, HoverCard } from '@/components/animations'
 import ServiceDescription from '@/components/ServiceDescription'
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -84,50 +83,48 @@ export default function ServicesTabs({
       </div>
 
       {/* Service cards */}
-      <StaggerList key={active} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {services.map(service => {
           const prices = service.prices ?? []
           const priceByType: Record<string, number> = {}
-          prices.forEach(p => { if (p.price_clp) priceByType[p.vehicle_type] = p.price_clp })
+          prices.forEach((p: any) => { if (p.price_clp) priceByType[p.vehicle_type] = p.price_clp })
           const shownPrices = VEHICLE_ORDER.filter(t => priceByType[t])
           const icon = Object.entries(SERVICE_ICONS).find(([k]) =>
             service.name.toLowerCase().includes(k)
           )?.[1] ?? CATEGORY_ICONS[active] ?? '🔧'
 
           return (
-            <StaggerItem key={service.id}>
-              <HoverCard className="bg-gray-900 border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-colors h-full">
-                <div className="flex justify-between items-start gap-4 mb-3">
-                  <div className="flex-1">
-                    <p className="font-semibold text-white flex items-center gap-2">
-                      <span>{icon}</span>
-                      {service.name}
-                    </p>
-                    {service.description && (
-                      <ServiceDescription text={service.description} className="mt-1 block" />
-                    )}
-                    {service.duration_hours && (
-                      <p className="text-gray-600 text-xs mt-1.5">⏱ {service.duration_hours}h aprox.</p>
-                    )}
-                  </div>
+            <div key={service.id} className="bg-gray-900 border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-colors h-full">
+              <div className="flex justify-between items-start gap-4 mb-3">
+                <div className="flex-1">
+                  <p className="font-semibold text-white flex items-center gap-2">
+                    <span>{icon}</span>
+                    {service.name}
+                  </p>
+                  {service.description && (
+                    <ServiceDescription text={service.description} className="mt-1 block" />
+                  )}
+                  {service.duration_hours && (
+                    <p className="text-gray-600 text-xs mt-1.5">⏱ {service.duration_hours}h aprox.</p>
+                  )}
                 </div>
-                {shownPrices.length > 0 ? (
-                  <div className="border-t border-white/5 pt-3 grid grid-cols-3 gap-2">
-                    {shownPrices.map(type => (
-                      <div key={type} className="text-center">
-                        <p className="text-white text-xs mb-1 font-medium">{VEHICLE_LABELS[type]}</p>
-                        <p className="font-bold text-amber-400 text-sm">{formatCurrency(priceByType[type])}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm border-t border-white/5 pt-3">Consultar precio</p>
-                )}
-              </HoverCard>
-            </StaggerItem>
+              </div>
+              {shownPrices.length > 0 ? (
+                <div className="border-t border-white/5 pt-3 grid grid-cols-3 gap-2">
+                  {shownPrices.map(type => (
+                    <div key={type} className="text-center">
+                      <p className="text-white text-xs mb-1 font-medium">{VEHICLE_LABELS[type]}</p>
+                      <p className="font-bold text-amber-400 text-sm">{formatCurrency(priceByType[type])}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm border-t border-white/5 pt-3">Consultar precio</p>
+              )}
+            </div>
           )
         })}
-      </StaggerList>
+      </div>
 
       <div className="text-center mt-10">
         <Link
