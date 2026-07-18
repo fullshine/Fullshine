@@ -32,6 +32,7 @@ export default async function FinanzasPage() {
         revenueMonth={stats?.revenue_month ?? 0}
         initialExpenses={expenses}
         initialPeriod={taxPeriod}
+        currentMonth={currentMonth}
       />
     </div>
   )

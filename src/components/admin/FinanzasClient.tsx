@@ -12,14 +12,17 @@ export default function FinanzasClient({
   revenueMonth,
   initialExpenses,
   initialPeriod,
+  currentMonth,
 }: {
   revenueMonth: number
   initialExpenses: Expense[]
   initialPeriod: TaxPeriod
+  currentMonth: string
 }) {
   // Estado único compartido por todos los paneles
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses)
-  const [ivaFromRCV, setIvaFromRCV] = useState(0)
+  // Inicializar desde DB (persiste entre navegaciones)
+  const [ivaFromRCV, setIvaFromRCV] = useState(initialPeriod.iva_credito_rcv ?? 0)
 
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0)
   const netProfit     = revenueMonth - totalExpenses
@@ -59,8 +62,12 @@ export default function FinanzasClient({
         onDelete={handleDelete}
       />
 
-      {/* RCV compras SII — su IVA fluye al TaxPanel */}
-      <RCVImport onIVAChange={setIvaFromRCV} />
+      {/* RCV compras SII — su IVA fluye al TaxPanel y se persiste en DB */}
+      <RCVImport
+        onIVAChange={setIvaFromRCV}
+        month={currentMonth}
+        initialFileName={initialPeriod.rcv_filename}
+      />
 
       {/* F29 — recibe gastos en vivo + IVA del RCV */}
       <TaxPanel

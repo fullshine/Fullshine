@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useTransition } from 'react'
+import { saveRCVData, clearRCVData } from '@/actions/tax'
 
 interface RCVRow {
   nro: string
@@ -32,10 +33,20 @@ function parseCSV(text: string): RCVRow[] {
   }).filter(r => r.razonSocial)
 }
 
-export default function RCVImport({ onIVAChange }: { onIVAChange: (iva: number) => void }) {
+export default function RCVImport({
+  onIVAChange,
+  month,
+  initialFileName = null,
+}: {
+  onIVAChange: (iva: number) => void
+  month: string
+  initialFileName?: string | null
+}) {
   const [rows, setRows]       = useState<RCVRow[]>([])
-  const [fileName, setFileName] = useState<string | null>(null)
+  const [fileName, setFileName] = useState<string | null>(initialFileName)
   const [error, setError]     = useState<string | null>(null)
+  const [saving, setSaving]   = useState(false)
+  const [, startTransition]   = useTransition()
   const inputRef = useRef<HTMLInputElement>(null)
 
   const totalNeto  = rows.reduce((s, r) => s + r.montoNeto, 0)
@@ -59,6 +70,12 @@ export default function RCVImport({ onIVAChange }: { onIVAChange: (iva: number) 
         setRows(parsed)
         const ivaTotal = parsed.reduce((s, r) => s + r.ivaRecuperable, 0)
         onIVAChange(ivaTotal)
+        // Guardar en DB automáticamente para persistir entre navegaciones
+        setSaving(true)
+        startTransition(async () => {
+          await saveRCVData(month, ivaTotal, file.name)
+          setSaving(false)
+        })
       } catch {
         setError('Error al leer el archivo — verifica que sea el RCV de compras del SII')
       }
@@ -72,15 +89,30 @@ export default function RCVImport({ onIVAChange }: { onIVAChange: (iva: number) 
     setError(null)
     onIVAChange(0)
     if (inputRef.current) inputRef.current.value = ''
+    startTransition(async () => {
+      await clearRCVData(month)
+    })
   }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <div>
-          <p className="text-sm font-semibold text-gray-800">RCV Compras — SII</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-gray-800">RCV Compras — SII</p>
+            {saving && <span className="text-xs text-gray-400">Guardando…</span>}
+            {!saving && fileName && rows.length === 0 && (
+              <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                📂 {fileName} — sube el archivo para ver los detalles
+              </span>
+            )}
+          </div>
           <p className="text-xs text-gray-400">
-            {fileName ?? 'Sube el archivo CSV del Registro de Compras del SII'}
+            {fileName && rows.length > 0
+              ? `✓ ${fileName}`
+              : fileName
+              ? 'IVA crédito guardado del mes anterior'
+              : 'Sube el archivo CSV del Registro de Compras del SII'}
           </p>
         </div>
         {rows.length > 0 ? (
