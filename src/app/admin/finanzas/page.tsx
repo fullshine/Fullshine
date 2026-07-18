@@ -2,8 +2,7 @@ import { getDashboardStats } from '@/actions/admin'
 import { getExpensesMonth } from '@/actions/expenses'
 import { getTaxPeriod } from '@/actions/tax'
 import { formatCurrency } from '@/lib/utils'
-import ExpensesPanel from '@/components/admin/ExpensesPanel'
-import TaxPanel from '@/components/admin/TaxPanel'
+import FinanzasClient from '@/components/admin/FinanzasClient'
 
 export const metadata = { title: 'Finanzas | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -51,13 +50,9 @@ export default async function FinanzasPage() {
         </div>
       </div>
 
-      {/* Panel de gastos */}
-      <ExpensesPanel initialExpenses={expenses} />
-
-      {/* Estimación F29 */}
-      <TaxPanel
+      <FinanzasClient
         revenueMonth={stats?.revenue_month ?? 0}
-        expenses={expenses}
+        initialExpenses={expenses}
         initialPeriod={taxPeriod}
       />
     </div>

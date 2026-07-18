@@ -36,10 +36,12 @@ export default function TaxPanel({
   revenueMonth,
   expenses,
   initialPeriod,
+  ivaFromRCV = 0,
 }: {
   revenueMonth: number
   expenses: Expense[]
   initialPeriod: TaxPeriod
+  ivaFromRCV?: number
 }) {
   const [pending, startTransition] = useTransition()
   const [saved, setSaved] = useState(false)
@@ -49,10 +51,7 @@ export default function TaxPanel({
   const [remanenteStr, setRemanenteStr]   = useState(
     initialPeriod.remanente > 0 ? initialPeriod.remanente.toString() : ''
   )
-  const [ivaComprasExt, setIvaComprasExt] = useState('')
-
-  const remanente    = parseCLP(remanenteStr)
-  const comprasExtra = parseCLP(ivaComprasExt)
+  const remanente = parseCLP(remanenteStr)
 
   // ── Cálculos ──────────────────────────────────────────────────────
   const ventasBrutas  = revenueMonth
@@ -60,14 +59,15 @@ export default function TaxPanel({
     ? Math.round(ventasBrutas / (1 + IVA_RATE))
     : ventasBrutas
 
-  const ivaDebito     = Math.round(ventasNetas * IVA_RATE)
+  const ivaDebito = Math.round(ventasNetas * IVA_RATE)
 
-  // IVA crédito: gastos con factura registrados en Fullshine
-  const gastosFactura = expenses.filter(e => e.has_factura).reduce((s, e) => s + e.amount, 0)
+  // IVA crédito: RCV del SII (preferente) o gastos manuales con factura
+  const gastosFactura    = expenses.filter(e => e.has_factura).reduce((s, e) => s + e.amount, 0)
   const ivaCreditoGastos = Math.round(gastosFactura / (1 + IVA_RATE) * IVA_RATE)
+  const ivaCreditoCompras = ivaFromRCV > 0 ? ivaFromRCV : ivaCreditoGastos
 
-  // IVA crédito total: gastos + compras externas + remanente anterior
-  const ivaCreditoTotal = ivaCreditoGastos + comprasExtra + remanente
+  // IVA crédito total: compras + remanente anterior
+  const ivaCreditoTotal = ivaCreditoCompras + remanente
   const ivaNeto         = ivaDebito - ivaCreditoTotal
 
   // PPM
@@ -150,34 +150,32 @@ export default function TaxPanel({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1">
-                Remanente mes anterior
-              </label>
-              <input
-                type="text" inputMode="numeric"
-                placeholder="$0"
-                value={remanenteStr}
-                onChange={e => setRemanenteStr(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white"
-              />
-              <p className="text-xs text-gray-400 mt-1">Del F29 del mes pasado</p>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1">
-                IVA compras externas
-              </label>
-              <input
-                type="text" inputMode="numeric"
-                placeholder="$0"
-                value={ivaComprasExt}
-                onChange={e => setIvaComprasExt(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white"
-              />
-              <p className="text-xs text-gray-400 mt-1">IVA de facturas fuera del sistema</p>
-            </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">
+              Remanente mes anterior (Código 77 del F29)
+            </label>
+            <input
+              type="text" inputMode="numeric"
+              placeholder="$0 — ver tu último F29 declarado"
+              value={remanenteStr}
+              onChange={e => setRemanenteStr(e.target.value)}
+              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white"
+            />
           </div>
+
+          {ivaFromRCV > 0 ? (
+            <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-green-700">IVA Crédito desde RCV SII</p>
+                <p className="text-xs text-green-600">Calculado del archivo CSV subido arriba</p>
+              </div>
+              <p className="text-lg font-black text-green-700">{fmtCLP(ivaFromRCV)}</p>
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
+              📂 Sube el RCV de Compras del SII arriba para calcular el IVA crédito automáticamente
+            </p>
+          )}
 
           <button
             onClick={handleSave} disabled={pending}
@@ -216,18 +214,19 @@ export default function TaxPanel({
 
           <div className="mt-3">
             <p className="text-xs font-semibold text-green-600 uppercase mb-1">IVA Crédito</p>
-            <CalcRow
-              label="Gastos con factura"
-              sub={`${fmtCLP(gastosFactura)} registrados en sistema`}
-              value={fmtCLP(ivaCreditoGastos)}
-              color="text-green-600"
-              negative
-            />
-            {comprasExtra > 0 && (
+            {ivaFromRCV > 0 ? (
               <CalcRow
-                label="Compras externas"
-                sub="IVA ingresado manualmente"
-                value={fmtCLP(comprasExtra)}
+                label="IVA Crédito RCV SII"
+                sub="Calculado del archivo CSV oficial"
+                value={fmtCLP(ivaFromRCV)}
+                color="text-green-600"
+                negative
+              />
+            ) : (
+              <CalcRow
+                label="Gastos con factura"
+                sub={`${fmtCLP(gastosFactura)} registrados en sistema`}
+                value={fmtCLP(ivaCreditoGastos)}
                 color="text-green-600"
                 negative
               />
