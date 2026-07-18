@@ -3,13 +3,15 @@ import Image from 'next/image'
 import { getServices } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
 import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
+// ServiceDescription moved to ServicesTabs
 import FaqSection from '@/components/FaqSection'
 import SocialProofStrip from '@/components/SocialProofStrip'
 import PromoBar from '@/components/PromoBar'
 import ExitIntentPopup from '@/components/ExitIntentPopup'
-import ServiceDescription from '@/components/ServiceDescription'
 import WhatsAppButton from '@/components/WhatsAppButton'
 import StatsBar from '@/components/StatsBar'
+import ServicesTabs from '@/components/ServicesTabs'
+// ServiceDescription is used inside ServicesTabs
 
 export const dynamic = 'force-dynamic'
 
@@ -132,15 +134,22 @@ export default async function HomePage() {
       {/* NAV */}
       <nav className="fixed left-0 right-0 z-[65] bg-gray-950/80 backdrop-blur-md border-b border-white/5"
         style={{ top: 'var(--promo-h, 0px)' }}>
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
             <Image src="/logo.png" alt="Fullshine" width={44} height={44} className="rounded-full" />
-            <div>
+            <div className="hidden sm:block">
               <p className="font-bold text-white leading-none tracking-wide">FULLSHINE</p>
               <p className="text-xs text-gray-400 tracking-widest uppercase">Detailing Premium</p>
             </div>
           </div>
-          <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-5 py-2 rounded-full transition-colors">
+          {/* Anclas de navegación */}
+          <div className="hidden md:flex items-center gap-6 text-sm text-gray-400">
+            <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
+            <a href="#reseñas" className="hover:text-white transition-colors">Reseñas</a>
+            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+            <a href="#empresas" className="hover:text-white transition-colors">Empresas</a>
+          </div>
+          <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-5 py-2 rounded-full transition-colors shrink-0">
             Reservar
           </Link>
         </div>
@@ -254,74 +263,9 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto">
           <FadeUp>
             <h2 className="text-3xl font-bold text-center mb-3">Nuestros servicios</h2>
-            <p className="text-gray-400 text-center mb-12">Precios por tipo de vehículo. Selecciona al reservar.</p>
+            <p className="text-gray-400 text-center mb-10">Precios por tipo de vehículo. Selecciona al reservar.</p>
           </FadeUp>
-          <div className="space-y-12">
-            {orderedCategories.map(cat => (
-              <FadeUp key={cat}>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-4 flex items-center gap-3">
-                  <span className="flex-1 h-px bg-amber-500/20" />
-                  {CATEGORY_LABELS[cat] ?? cat}
-                  <span className="flex-1 h-px bg-amber-500/20" />
-                </h3>
-
-                <StaggerList className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {grouped[cat].map(service => {
-                    const prices = (service as any).prices ?? []
-                    const priceByType: Record<string, number> = {}
-                    prices.forEach((p: any) => { if (p.price_clp) priceByType[p.vehicle_type] = p.price_clp })
-                    const VEHICLE_LABELS: Record<string, string> = {
-                      hatch_sedan: 'Hatch / Sedan',
-                      suv_camioneta: 'SUV / Camioneta',
-                      pickup_xl: 'Pickup XL',
-                    }
-                    const VEHICLE_ORDER = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
-                    const shownPrices = VEHICLE_ORDER.filter(t => priceByType[t])
-                    return (
-                      <StaggerItem key={service.id}>
-                        <HoverCard className="bg-gray-900 border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-colors">
-                          <div className="flex justify-between items-start gap-4 mb-3">
-                            <div className="flex-1">
-                              <p className="font-semibold text-white flex items-center gap-2">
-                                <span>{Object.entries(SERVICE_ICONS).find(([k]) => service.name.toLowerCase().includes(k))?.[1] ?? CATEGORY_ICONS[cat] ?? '🔧'}</span>
-                                {service.name}
-                              </p>
-                              {service.description && (
-                                <ServiceDescription text={service.description} className="mt-1 block" />
-                              )}
-                              {(service as any).duration_hours && (
-                                <p className="text-gray-600 text-xs mt-1.5">⏱ {(service as any).duration_hours}h aprox.</p>
-                              )}
-                            </div>
-                          </div>
-                          {shownPrices.length > 0 ? (
-                            <div className="border-t border-white/5 pt-3 grid grid-cols-3 gap-2">
-                              {shownPrices.map(type => (
-                                <div key={type} className="text-center">
-                                  <p className="text-white text-xs mb-1 font-medium">{VEHICLE_LABELS[type]}</p>
-                                  <p className="font-bold text-amber-400 text-sm">{formatCurrency(priceByType[type])}</p>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-gray-500 text-sm border-t border-white/5 pt-3">Consultar precio</p>
-                          )}
-                        </HoverCard>
-                      </StaggerItem>
-                    )
-                  })}
-                </StaggerList>
-              </FadeUp>
-            ))}
-          </div>
-          <FadeUp delay={0.2}>
-            <div className="text-center mt-12">
-              <Link href="/reservar"
-                className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold text-lg px-10 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
-                Reservar mi turno
-              </Link>
-            </div>
-          </FadeUp>
+          <ServicesTabs grouped={grouped as any} orderedCategories={orderedCategories} />
         </div>
       </section>
 
@@ -396,7 +340,7 @@ export default async function HomePage() {
       </section>
 
       {/* GOOGLE REVIEWS */}
-      <section className="py-24 px-4 bg-gray-950">
+      <section id="reseñas" className="py-24 px-4 bg-gray-950">
         <div className="max-w-5xl mx-auto">
           <FadeUp>
             <div className="text-center mb-12">
@@ -450,10 +394,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <FaqSection />
+      <div id="faq"><FaqSection /></div>
 
       {/* BUSINESS SUBSCRIPTION */}
-      <section className="py-24 px-4 bg-gray-900/60 border-t border-white/5">
+      <section id="empresas" className="py-24 px-4 bg-gray-900/60 border-t border-white/5">
         <div className="max-w-5xl mx-auto">
           <FadeUp>
             <div className="text-center mb-12">
