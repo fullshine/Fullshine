@@ -19,8 +19,15 @@ function getCatInfo(cat: ExpenseCategory) {
   return CATEGORIES.find(c => c.value === cat) ?? CATEGORIES[3]
 }
 
-export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Expense[] }) {
-  const [expenses, setExpenses] = useState<Expense[]>(initialExpenses)
+export default function ExpensesPanel({
+  expenses,
+  onAdd,
+  onDelete,
+}: {
+  expenses: Expense[]
+  onAdd: (e: Expense) => void
+  onDelete: (id: string) => void
+}) {
   const [pending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
@@ -54,7 +61,7 @@ export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Ex
         expense_date: form.expense_date,
       })
       if (!res.success) { setMsg(res.error ?? 'Error'); return }
-      setExpenses(prev => [{
+      onAdd({
         id: crypto.randomUUID(),
         category: form.category,
         description: form.description.trim() || null,
@@ -62,7 +69,7 @@ export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Ex
         has_factura: form.has_factura,
         expense_date: form.expense_date,
         created_at: new Date().toISOString(),
-      }, ...prev])
+      })
       setForm(f => ({ ...f, description: '', amount: '', has_factura: false }))
       setOpen(false)
       setMsg(null)
@@ -72,7 +79,7 @@ export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Ex
   function handleDelete(id: string) {
     startTransition(async () => {
       const res = await deleteExpense(id)
-      if (res.success) setExpenses(prev => prev.filter(e => e.id !== id))
+      if (res.success) onDelete(id)
     })
   }
 
