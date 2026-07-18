@@ -91,6 +91,7 @@ export default function TaxPanel({
         precios_con_iva: preciosConIva,
         iva_credito_rcv: initialPeriod.iva_credito_rcv ?? 0,
         rcv_filename: initialPeriod.rcv_filename ?? null,
+        rcv_total: initialPeriod.rcv_total ?? 0,
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
