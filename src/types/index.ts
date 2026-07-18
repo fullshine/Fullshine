@@ -164,3 +164,14 @@ export interface BookingWithRelations extends Booking {
   vehicle: Vehicle
   service: Service
 }
+
+export type ExpenseCategory = 'ayudante' | 'insumos' | 'herramientas' | 'otros'
+
+export interface Expense {
+  id: string
+  category: ExpenseCategory
+  description: string | null
+  amount: number
+  expense_date: string
+  created_at: string
+}

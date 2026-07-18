@@ -1,20 +1,26 @@
 import { getDashboardStats, getBookings, getRecentBookings } from '@/actions/admin'
+import { getExpensesMonth } from '@/actions/expenses'
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils'
 import PushSubscribeButton from '@/components/admin/PushSubscribe'
+import ExpensesPanel from '@/components/admin/ExpensesPanel'
 
 export const metadata = { title: 'Dashboard | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const [statsResult, bookingsResult, recentResult] = await Promise.all([
+  const [statsResult, bookingsResult, recentResult, expensesResult] = await Promise.all([
     getDashboardStats(),
     getBookings({ date: new Date().toISOString().split('T')[0] }),
     getRecentBookings(),
+    getExpensesMonth(),
   ])
 
   const stats = statsResult.data
   const todayBookings = bookingsResult.data ?? []
   const recentBookings = recentResult.data ?? []
+  const expenses = expensesResult.data ?? []
+  const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0)
+  const netProfit = (stats?.revenue_month ?? 0) - totalExpenses
 
   return (
     <div className="p-4 md:p-6 space-y-5">
@@ -26,14 +32,14 @@ export default async function DashboardPage() {
       {/* Panel ventas del mes */}
       {stats && (
         <>
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-5 text-white">
-            <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Ventas del mes · clientes finalizados</p>
+          <div className="bg-gray-900 rounded-2xl p-5 text-white">
+            <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Ventas brutas · mes actual</p>
             <p className="text-4xl font-black tracking-tight text-amber-400">
               {formatCurrency(stats.revenue_month)}
             </p>
-            <div className="flex gap-4 mt-3 pt-3 border-t border-white/10">
+            <div className="flex gap-4 mt-3 pt-3 border-t border-white/10 text-sm">
               <div>
-                <p className="text-xs text-gray-400">Clientes finalizados</p>
+                <p className="text-xs text-gray-400">Finalizados</p>
                 <p className="text-xl font-bold">{stats.finalized_month}</p>
               </div>
               <div className="w-px bg-white/10" />
@@ -41,6 +47,18 @@ export default async function DashboardPage() {
                 <p className="text-xs text-gray-400">Ticket promedio</p>
                 <p className="text-xl font-bold">{formatCurrency(stats.avg_ticket_month)}</p>
               </div>
+              <div className="w-px bg-white/10" />
+              <div>
+                <p className="text-xs text-gray-400">Gastos</p>
+                <p className="text-xl font-bold text-red-400">-{formatCurrency(totalExpenses)}</p>
+              </div>
+            </div>
+            {/* Utilidad neta */}
+            <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between">
+              <p className="text-xs text-gray-400 uppercase tracking-wider">Utilidad neta</p>
+              <p className={`text-2xl font-black ${netProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {formatCurrency(netProfit)}
+              </p>
             </div>
           </div>
 
@@ -52,6 +70,9 @@ export default async function DashboardPage() {
           </div>
         </>
       )}
+
+      {/* Panel de gastos */}
+      <ExpensesPanel initialExpenses={expenses} />
 
       {/* Nuevas reservas (últimas 24h) */}
       {recentBookings.length > 0 && (
