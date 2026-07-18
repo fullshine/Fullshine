@@ -100,7 +100,15 @@ export default function TaxPanel({
 
       {/* Header */}
       <div className="px-5 py-4 border-b border-gray-100 bg-gray-900 text-white">
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-0.5">Estimación F29</p>
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-xs text-gray-400 uppercase tracking-widest">Estimación F29</p>
+          {ivaFromRCV > 0 && (
+            <span className="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full font-medium">
+              ✓ RCV SII aplicado
+            </span>
+          )}
+        </div>
+
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-3xl font-black text-amber-400">{fmtCLP(totalF29)}</p>
@@ -112,6 +120,40 @@ export default function TaxPanel({
               <p className="text-lg font-bold text-green-400">{fmtCLP(remanenteNuevo)}</p>
             </div>
           )}
+        </div>
+
+        {/* Mini desglose siempre visible */}
+        <div className="flex gap-3 mt-3 pt-3 border-t border-white/10 flex-wrap">
+          <div>
+            <p className="text-xs text-gray-500">IVA Débito</p>
+            <p className="text-sm font-bold text-orange-400">{fmtCLP(ivaDebito)}</p>
+          </div>
+          <div className="text-gray-600 self-center">−</div>
+          <div>
+            <p className="text-xs text-gray-500">
+              IVA Crédito {ivaFromRCV > 0 ? '(RCV)' : '(gastos)'}
+            </p>
+            <p className="text-sm font-bold text-green-400">{fmtCLP(ivaCreditoTotal - remanente)}</p>
+          </div>
+          {remanente > 0 && (
+            <>
+              <div className="text-gray-600 self-center">−</div>
+              <div>
+                <p className="text-xs text-gray-500">Remanente</p>
+                <p className="text-sm font-bold text-green-400">{fmtCLP(remanente)}</p>
+              </div>
+            </>
+          )}
+          <div className="text-gray-600 self-center">+</div>
+          <div>
+            <p className="text-xs text-gray-500">PPM ({ppmRate}%)</p>
+            <p className="text-sm font-bold text-orange-400">{fmtCLP(ppm)}</p>
+          </div>
+          <div className="text-gray-600 self-center">=</div>
+          <div>
+            <p className="text-xs text-gray-500">Total F29</p>
+            <p className="text-sm font-bold text-amber-400">{fmtCLP(totalF29)}</p>
+          </div>
         </div>
       </div>
 
