@@ -75,6 +75,25 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
 
   const nextStage = NEXT_STAGE[status]
   const prevStage = PREV_STAGE[status]
+  const isCeramico = (booking.service as any)?.category === 'ceramico' ||
+    booking.service?.name?.toLowerCase().includes('cerámico') ||
+    booking.service?.name?.toLowerCase().includes('ceramico')
+  const showCertBtn = (status === 'completed' || status === 'review_sent') && isCeramico
+
+  function handleCertificate() {
+    startTransition(async () => {
+      setMsg('Generando certificado...')
+      const res = await generateCertificate(booking.id)
+      if (!res.success) { setMsg(`Error: ${res.error}`); return }
+      if (res.already_existed) {
+        setMsg(`✅ Certificado existente: ${res.code}`)
+      } else if (res.skipped) {
+        setMsg('No aplica (servicio no cerámico)')
+      } else {
+        setMsg(`✅ Certificado ${res.code} enviado por WhatsApp`)
+      }
+    })
+  }
 
   return (
     <div className={`bg-white rounded-lg border border-gray-200 p-3 shadow-sm text-sm ${pending ? 'opacity-60' : ''}`}>
@@ -106,11 +125,17 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
         {nextStage && (
           <button onClick={() => move(nextStage)} disabled={pending}
             className={`text-xs px-2 py-1 rounded text-white disabled:opacity-50 ${
-              nextStage === 'review_sent'  ? 'bg-emerald-500 hover:bg-emerald-600' :
+              nextStage === 'review_sent' ? 'bg-emerald-500 hover:bg-emerald-600' :
               'bg-blue-500 hover:bg-blue-600'
             }`}>
-            {nextStage === 'review_sent'  ? 'Pedir resena' :
+            {nextStage === 'review_sent' ? 'Pedir resena' :
              `-> ${COLUMNS.find(c => c.id === nextStage)?.label ?? nextStage}`}
+          </button>
+        )}
+        {showCertBtn && (
+          <button onClick={handleCertificate} disabled={pending}
+            className="text-xs px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 disabled:opacity-50">
+            🏅 Certificado
           </button>
         )}
         <button onClick={() => move('cancelled')} disabled={pending}
