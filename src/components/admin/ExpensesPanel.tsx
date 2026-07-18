@@ -29,6 +29,7 @@ export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Ex
     category: 'insumos' as ExpenseCategory,
     description: '',
     amount: '',
+    has_factura: false,
     expense_date: new Date().toISOString().split('T')[0],
   })
 
@@ -49,6 +50,7 @@ export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Ex
         category: form.category,
         description: form.description.trim(),
         amount,
+        has_factura: form.has_factura,
         expense_date: form.expense_date,
       })
       if (!res.success) { setMsg(res.error ?? 'Error'); return }
@@ -57,10 +59,11 @@ export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Ex
         category: form.category,
         description: form.description.trim() || null,
         amount,
+        has_factura: form.has_factura,
         expense_date: form.expense_date,
         created_at: new Date().toISOString(),
       }, ...prev])
-      setForm(f => ({ ...f, description: '', amount: '' }))
+      setForm(f => ({ ...f, description: '', amount: '', has_factura: false }))
       setOpen(false)
       setMsg(null)
     })
@@ -137,6 +140,15 @@ export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Ex
               required
             />
           </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.has_factura}
+              onChange={e => setForm(f => ({ ...f, has_factura: e.target.checked }))}
+              className="w-4 h-4 rounded"
+            />
+            <span className="text-xs text-gray-600">Tiene factura (genera IVA crédito)</span>
+          </label>
           {msg && <p className="text-xs text-red-600">{msg}</p>}
           <div className="flex gap-2">
             <button type="submit" disabled={pending}
@@ -176,6 +188,7 @@ export default function ExpensesPanel({ initialExpenses }: { initialExpenses: Ex
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-gray-800 truncate">
                       {exp.description || cat.label}
+                      {exp.has_factura && <span className="ml-1 text-blue-500 text-[10px] font-bold">FCT</span>}
                     </p>
                     <p className="text-xs text-gray-400">{exp.expense_date}</p>
                   </div>

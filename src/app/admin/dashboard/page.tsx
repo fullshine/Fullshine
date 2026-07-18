@@ -3,6 +3,7 @@ import { getExpensesMonth } from '@/actions/expenses'
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils'
 import PushSubscribeButton from '@/components/admin/PushSubscribe'
 import ExpensesPanel from '@/components/admin/ExpensesPanel'
+import TaxPanel from '@/components/admin/TaxPanel'
 
 export const metadata = { title: 'Dashboard | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -73,6 +74,9 @@ export default async function DashboardPage() {
 
       {/* Panel de gastos */}
       <ExpensesPanel initialExpenses={expenses} />
+
+      {/* Estimación F29 */}
+      <TaxPanel revenueMonth={stats?.revenue_month ?? 0} expenses={expenses} />
 
       {/* Nuevas reservas (últimas 24h) */}
       {recentBookings.length > 0 && (

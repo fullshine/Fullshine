@@ -20,6 +20,7 @@ export async function addExpense(data: {
   category: ExpenseCategory
   description: string
   amount: number
+  has_factura: boolean
   expense_date: string
 }): Promise<ActionResult> {
   if (!(await requireAuth())) return { success: false, error: 'No autorizado' }
