@@ -1,5 +1,6 @@
 import { getDashboardStats, getBookings, getRecentBookings } from '@/actions/admin'
 import { getExpensesMonth } from '@/actions/expenses'
+import { getTaxPeriod } from '@/actions/tax'
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils'
 import PushSubscribeButton from '@/components/admin/PushSubscribe'
 
@@ -7,18 +8,23 @@ export const metadata = { title: 'Dashboard | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const [statsResult, bookingsResult, recentResult, expensesResult] = await Promise.all([
+  const now = new Date()
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+
+  const [statsResult, bookingsResult, recentResult, expensesResult, taxResult] = await Promise.all([
     getDashboardStats(),
-    getBookings({ date: new Date().toISOString().split('T')[0] }),
+    getBookings({ date: now.toISOString().split('T')[0] }),
     getRecentBookings(),
     getExpensesMonth(),
+    getTaxPeriod(currentMonth),
   ])
 
   const stats = statsResult.data
   const todayBookings = bookingsResult.data ?? []
   const recentBookings = recentResult.data ?? []
   const expenses = expensesResult.data ?? []
-  const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0)
+  const rcvTotal = taxResult.data?.rcv_total ?? 0
+  const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0) + rcvTotal
   const netProfit = (stats?.revenue_month ?? 0) - totalExpenses
 
   return (
@@ -50,6 +56,9 @@ export default async function DashboardPage() {
               <div>
                 <p className="text-xs text-gray-400">Gastos</p>
                 <p className="text-xl font-bold text-red-400">-{formatCurrency(totalExpenses)}</p>
+                {rcvTotal > 0 && (
+                  <p className="text-xs text-gray-500 mt-0.5">RCV: -{formatCurrency(rcvTotal)}</p>
+                )}
               </div>
             </div>
             {/* Utilidad neta */}
