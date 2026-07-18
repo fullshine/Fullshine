@@ -89,6 +89,8 @@ export default function TaxPanel({
         remanente,
         ppm_rate: ppmRate,
         precios_con_iva: preciosConIva,
+        iva_credito_rcv: initialPeriod.iva_credito_rcv ?? 0,
+        rcv_filename: initialPeriod.rcv_filename ?? null,
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
