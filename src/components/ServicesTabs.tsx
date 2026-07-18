@@ -11,6 +11,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   tapiz: 'Tapiz',
   pulido: 'Pulidos',
   ceramico: 'Cerámico',
+  mantencion: 'Mantención',
   adicional: 'Adicionales',
   precompra: 'Precompra',
 }
@@ -20,6 +21,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   tapiz: '🧹',
   pulido: '✨',
   ceramico: '💎',
+  mantencion: '🔄',
   adicional: '➕',
   precompra: '🔍',
 }

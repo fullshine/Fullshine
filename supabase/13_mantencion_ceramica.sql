@@ -9,7 +9,7 @@ VALUES
     'mc000001-0000-0000-0000-000000000001',
     'Mantención Cerámica Essential',
     E'Lavado técnico · Descontaminación química · Booster cerámico · Limpieza de vidrios · Revitalizador de neumáticos · Informe del estado del coating · Limpieza interior',
-    'ceramico',
+    'mantencion',
     5,
     true
   ),
@@ -17,7 +17,7 @@ VALUES
     'mc000002-0000-0000-0000-000000000002',
     'Mantención Cerámica Signature',
     E'Todo lo del Essential más: Clay Bar (si corresponde) · Pulido de realce ultrafino · Booster cerámico premium · Limpieza técnica de vidrios · Revitalización de plásticos · Aspirado interior · Aromatización Premium · Reporte fotográfico · Revisión integral del tratamiento',
-    'ceramico',
+    'mantencion',
     8,
     true
   )

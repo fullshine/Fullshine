@@ -48,7 +48,7 @@ const SERVICE_ICONS: Record<string, string> = {
   'avanzado': '⚡',
 }
 
-const CATEGORY_ORDER = ['lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'adicional', 'precompra']
+const CATEGORY_ORDER = ['lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'mantencion', 'adicional', 'precompra']
 
 const WHY_US = [
   { icon: '🏆', title: 'Calidad premium', desc: 'Productos de primera línea y técnicas profesionales en cada servicio.' },
