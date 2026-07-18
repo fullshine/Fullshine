@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/admin/agenda', label: 'Agenda', icon: '📅' },
   { href: '/admin/clientes', label: 'Clientes', icon: '👥' },
   { href: '/admin/servicios', label: 'Servicios', icon: '✨' },
+  { href: '/admin/finanzas', label: 'Finanzas', icon: '💰' },
 ]
 
 export default function AdminSidebar() {

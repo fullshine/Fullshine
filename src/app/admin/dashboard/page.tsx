@@ -2,8 +2,6 @@ import { getDashboardStats, getBookings, getRecentBookings } from '@/actions/adm
 import { getExpensesMonth } from '@/actions/expenses'
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils'
 import PushSubscribeButton from '@/components/admin/PushSubscribe'
-import ExpensesPanel from '@/components/admin/ExpensesPanel'
-import TaxPanel from '@/components/admin/TaxPanel'
 
 export const metadata = { title: 'Dashboard | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -72,11 +70,18 @@ export default async function DashboardPage() {
         </>
       )}
 
-      {/* Panel de gastos */}
-      <ExpensesPanel initialExpenses={expenses} />
-
-      {/* Estimación F29 */}
-      <TaxPanel revenueMonth={stats?.revenue_month ?? 0} expenses={expenses} />
+      {/* Acceso rápido a Finanzas */}
+      <a href="/admin/finanzas"
+        className="flex items-center justify-between bg-white rounded-xl border border-gray-200 px-4 py-3 hover:bg-gray-50 transition-colors">
+        <div className="flex items-center gap-3">
+          <span className="text-xl">💰</span>
+          <div>
+            <p className="text-sm font-semibold text-gray-800">Gastos y estimación F29</p>
+            <p className="text-xs text-gray-400">Ver detalle completo en Finanzas</p>
+          </div>
+        </div>
+        <span className="text-gray-400 text-lg">→</span>
+      </a>
 
       {/* Nuevas reservas (últimas 24h) */}
       {recentBookings.length > 0 && (
