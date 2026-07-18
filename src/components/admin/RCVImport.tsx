@@ -35,10 +35,12 @@ function parseCSV(text: string): RCVRow[] {
 
 export default function RCVImport({
   onIVAChange,
+  onTotalChange,
   month,
   initialFileName = null,
 }: {
   onIVAChange: (iva: number) => void
+  onTotalChange?: (total: number) => void
   month: string
   initialFileName?: string | null
 }) {
@@ -68,12 +70,14 @@ export default function RCVImport({
         const parsed = parseCSV(text)
         if (parsed.length === 0) { setError('No se encontraron registros en el archivo'); return }
         setRows(parsed)
-        const ivaTotal = parsed.reduce((s, r) => s + r.ivaRecuperable, 0)
+        const ivaTotal   = parsed.reduce((s, r) => s + r.ivaRecuperable, 0)
+        const brutoTotal = parsed.reduce((s, r) => s + r.montoTotal, 0)
         onIVAChange(ivaTotal)
+        onTotalChange?.(brutoTotal)
         // Guardar en DB automáticamente para persistir entre navegaciones
         setSaving(true)
         startTransition(async () => {
-          await saveRCVData(month, ivaTotal, file.name)
+          await saveRCVData(month, ivaTotal, brutoTotal, file.name)
           setSaving(false)
         })
       } catch {
@@ -88,6 +92,7 @@ export default function RCVImport({
     setFileName(null)
     setError(null)
     onIVAChange(0)
+    onTotalChange?.(0)
     if (inputRef.current) inputRef.current.value = ''
     startTransition(async () => {
       await clearRCVData(month)

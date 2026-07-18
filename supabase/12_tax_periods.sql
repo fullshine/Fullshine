@@ -12,4 +12,5 @@ CREATE TABLE IF NOT EXISTS tax_periods (
 -- Migración: agregar columnas a tabla existente (idempotente)
 ALTER TABLE tax_periods
   ADD COLUMN IF NOT EXISTS iva_credito_rcv INTEGER NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS rcv_filename TEXT;
+  ADD COLUMN IF NOT EXISTS rcv_filename TEXT,
+  ADD COLUMN IF NOT EXISTS rcv_total INTEGER NOT NULL DEFAULT 0;

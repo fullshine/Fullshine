@@ -23,6 +23,7 @@ export interface TaxPeriod {
   precios_con_iva: boolean
   iva_credito_rcv: number
   rcv_filename: string | null
+  rcv_total: number
 }
 
 export async function getTaxPeriod(month: string): Promise<ActionResult<TaxPeriod>> {
@@ -44,6 +45,7 @@ export async function getTaxPeriod(month: string): Promise<ActionResult<TaxPerio
         precios_con_iva: false,
         iva_credito_rcv: 0,
         rcv_filename: null,
+        rcv_total: 0,
       },
     }
   } catch {
@@ -69,6 +71,7 @@ export async function saveTaxPeriod(period: TaxPeriod): Promise<ActionResult> {
 export async function saveRCVData(
   month: string,
   ivaCredito: number,
+  rcvTotal: number,
   filename: string,
 ): Promise<ActionResult> {
   if (!(await requireAuth())) return { success: false, error: 'No autorizado' }
@@ -80,9 +83,9 @@ export async function saveRCVData(
         {
           month,
           iva_credito_rcv: ivaCredito,
+          rcv_total: rcvTotal,
           rcv_filename: filename,
           updated_at: new Date().toISOString(),
-          // defaults for required fields on first insert
           remanente: 0,
           ppm_rate: 1.0,
           precios_con_iva: false,
