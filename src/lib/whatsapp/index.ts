@@ -177,6 +177,34 @@ export async function sendPaymentLinkToClient({
   return sendMessage(phone, message)
 }
 
+// --- Certificado digital cerámico ---
+export async function sendCertificateToClient({
+  phone, customerName, serviceName, certCode, certUrl, expiresAt,
+}: {
+  phone: string
+  customerName: string
+  serviceName: string
+  certCode: string
+  certUrl: string
+  expiresAt: string
+}) {
+  const expires = new Date(expiresAt + 'T12:00:00').toLocaleDateString('es-CL', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  })
+  const message =
+    `💎 *Certificado de Garantía Fullshine*\n\n` +
+    `¡Hola ${customerName}! Tu *${serviceName}* con Nasiol ZR53 ha sido completado. 🚗✨\n\n` +
+    `📋 *N° Certificado:* ${certCode}\n` +
+    `🛡️ *Garantía:* 3 años · Válida hasta: ${expires}\n\n` +
+    `👉 Tu certificado digital: ${certUrl}\n\n` +
+    `*Para mantener tu garantía vigente:*\n` +
+    `🚿 Realiza los lavados de tu vehículo en nuestras instalaciones\n` +
+    `💎 Aplica el *Booster Cerámico* cada 6 meses\n\n` +
+    `Cada visita queda registrada y mantiene tu garantía activa. ✅\n` +
+    `¡Gracias por confiar en Fullshine! 🙌`
+  return sendMessage(phone, message)
+}
+
 // --- Solicitud de reseña Google ---
 export async function sendReviewRequestToClient({
   phone, customerName, serviceName,

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { moveBookingStage, sendReviewRequest } from '@/actions/admin'
+import { generateCertificate } from '@/actions/certificates'
 import { getStatusLabelFull, getStatusColorFull, formatCurrency } from '@/lib/utils'
 import type { BookingWithRelations } from '@/types'
 import ManualBookingModal from './ManualBookingModal'
@@ -54,7 +55,19 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
       } else {
         const res = await moveBookingStage(booking.id, newStatus)
         if (!res.success) { setMsg(`Error: ${res.error}`); return }
-        setMsg(null)
+
+        // Generar certificado automáticamente al completar (solo cerámicos)
+        if (newStatus === 'completed' && isForward) {
+          setMsg('Generando certificado...')
+          const certRes = await generateCertificate(booking.id)
+          if (certRes.success && !certRes.skipped) {
+            setMsg(`✅ Certificado ${certRes.code} generado y enviado por WhatsApp`)
+          } else {
+            setMsg(null)
+          }
+        } else {
+          setMsg(null)
+        }
       }
       onAction()
     })
