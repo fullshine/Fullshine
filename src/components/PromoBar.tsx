@@ -6,7 +6,7 @@ import Link from 'next/link'
 const DURATION = 20 * 60 // 20 minutos en segundos
 const START_KEY = 'promo25_start'
 const DISMISSED_KEY = 'promo25_dismissed'
-const BAR_H = 44 // px
+const BAR_H = 44 // px (desktop); mobile uses auto height via min-height
 
 export default function PromoBar() {
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
@@ -25,7 +25,9 @@ export default function PromoBar() {
       sessionStorage.setItem(START_KEY, start.toString())
     }
 
-    document.documentElement.style.setProperty('--promo-h', `${BAR_H}px`)
+    // Use 56px on mobile (auto-detected later), 44px on desktop
+    const isMobile = window.innerWidth < 768
+    document.documentElement.style.setProperty('--promo-h', isMobile ? '56px' : `${BAR_H}px`)
 
     const tick = () => {
       const elapsed = Math.floor((Date.now() - start) / 1000)
@@ -56,13 +58,27 @@ export default function PromoBar() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-[70] bg-amber-500 text-black flex items-center justify-between gap-2 px-4"
-      style={{ height: BAR_H }}
+      className="fixed top-0 left-0 right-0 z-[70] bg-amber-500 text-black flex items-center justify-between gap-2 px-3 md:px-4 py-2 md:py-0"
+      style={{ minHeight: BAR_H }}
     >
-      <div className="flex items-center gap-2 md:gap-4 flex-1 justify-center flex-wrap text-sm">
+      {/* Mobile layout */}
+      <div className="flex md:hidden items-center gap-2 flex-1 justify-center text-sm flex-wrap">
+        <span className="font-black text-xs">🔥 25% OFF cerámico</span>
+        <div className="bg-black text-amber-400 font-black px-2 py-0.5 rounded-full tabular-nums text-xs tracking-wider">
+          {pad(m)}:{pad(s)}
+        </div>
+        <Link
+          href="/reservar"
+          className="bg-black text-amber-400 font-bold text-xs px-3 py-1 rounded-full"
+        >
+          Reservar →
+        </Link>
+      </div>
+
+      {/* Desktop layout */}
+      <div className="hidden md:flex items-center gap-4 flex-1 justify-center text-sm">
         <span className="font-black">🔥 OFERTA ESPECIAL</span>
-        <span className="hidden md:inline font-medium">Cerámico <strong>25% OFF</strong> · Otros servicios <strong>10% OFF</strong></span>
-        <span className="inline md:hidden font-medium">Cerámico 25% · Otros 10%</span>
+        <span className="font-medium">Cerámico <strong>25% OFF</strong> · Otros servicios <strong>10% OFF</strong></span>
         <div className="bg-black text-amber-400 font-black px-3 py-0.5 rounded-full tabular-nums text-sm tracking-wider">
           {pad(m)}:{pad(s)}
         </div>
@@ -73,7 +89,8 @@ export default function PromoBar() {
           Reservar →
         </Link>
       </div>
-      <button onClick={dismiss} className="text-black/50 hover:text-black shrink-0 text-lg font-bold leading-none">
+
+      <button onClick={dismiss} className="text-black/50 hover:text-black shrink-0 text-lg font-bold leading-none ml-1">
         ✕
       </button>
     </div>
