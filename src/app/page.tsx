@@ -145,7 +145,7 @@ export default async function HomePage() {
           {/* Anclas de navegación */}
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-400">
             <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
-            <a href="#reseñas" className="hover:text-white transition-colors">Reseñas</a>
+            <a href="#resenas" className="hover:text-white transition-colors">Reseñas</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
             <a href="#empresas" className="hover:text-white transition-colors">Empresas</a>
           </div>
@@ -340,7 +340,7 @@ export default async function HomePage() {
       </section>
 
       {/* GOOGLE REVIEWS */}
-      <section id="reseñas" className="py-24 px-4 bg-gray-950">
+      <section id="resenas" className="py-24 px-4 bg-gray-950">
         <div className="max-w-5xl mx-auto">
           <FadeUp>
             <div className="text-center mb-12">
