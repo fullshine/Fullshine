@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { Metadata } from 'next'
 import { getServices } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
 import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
@@ -13,11 +14,39 @@ import StatsBar from '@/components/StatsBar'
 import ServicesTabs from '@/components/ServicesTabs'
 // ServiceDescription is used inside ServicesTabs
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // ISR: revalida cada hora
 
-export const metadata = {
-  title: 'Fullshine Detailing Premium | Concepción & San Pedro de la Paz',
-  description: 'Detailing profesional en Concepción y San Pedro de la Paz.',
+export const metadata: Metadata = {
+  title: 'Detailing Premium Concepción | Lavado, Cerámico, Pulido — Fullshine',
+  description: 'Detailing premium en Concepción y San Pedro de la Paz ✔ Lavado detallado, sellado cerámico Nasiol ZR53, pulido de pintura y tapiz. Reserva online 24/7.',
+  keywords: [
+    'detailing Concepción', 'sellado cerámico Concepción', 'pulido auto Concepción',
+    'lavado auto San Pedro de la Paz', 'lavado tapiz Concepción', 'detailing premium Chile',
+    'lavado domicilio Concepción', 'cerámica auto Concepción',
+  ],
+  openGraph: {
+    title: 'Fullshine Detailing Premium — Concepción & San Pedro de la Paz',
+    description: 'Lavado detallado, sellado cerámico, pulido y tapiz profesional en Concepción. Reserva online 24/7.',
+    url: 'https://www.fullshine.autos',
+    siteName: 'Fullshine Detailing Premium',
+    locale: 'es_CL',
+    type: 'website',
+    images: [{
+      url: 'https://www.fullshine.autos/hero-jaguar.jpg',
+      width: 1600,
+      height: 900,
+      alt: 'Fullshine Detailing Premium — Concepción',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Fullshine Detailing Premium — Concepción',
+    description: 'Lavado, cerámico, pulido y tapiz en Concepción y San Pedro de la Paz.',
+    images: ['https://www.fullshine.autos/hero-jaguar.jpg'],
+  },
+  alternates: {
+    canonical: 'https://www.fullshine.autos',
+  },
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -170,19 +199,25 @@ export default async function HomePage() {
               className="mx-auto mb-8 drop-shadow-[0_0_60px_rgba(233,150,13,0.35)]" />
           </FadeIn>
           <FadeUp delay={0.25}>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-4">
+              Concepción &amp; San Pedro de la Paz
+            </p>
             <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4 leading-[1.05]">
-              Tu auto merece<br />
+              Detailing Premium<br />
               {/* Gradiente metálico plata → blanco → plata */}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-chrome-400 via-white to-chrome-300">
-                brillar de verdad
+                en Concepción
               </span>
             </h1>
           </FadeUp>
           <FadeUp delay={0.4}>
             {/* Línea ámbar decorativa */}
-            <div className="w-16 h-0.5 bg-brand-500 mx-auto mb-6 rounded-full" />
-            <p className="text-chrome-300 text-lg md:text-xl mb-10 max-w-xl mx-auto italic">
-              Porque manejar un auto impecable no es vanidad — es distinción.
+            <div className="w-16 h-0.5 bg-brand-500 mx-auto mb-4 rounded-full" />
+            <p className="text-chrome-200 text-xl md:text-2xl mb-2 max-w-xl mx-auto font-semibold italic">
+              Tu auto merece brillar de verdad.
+            </p>
+            <p className="text-chrome-400 text-base md:text-lg mb-10 max-w-xl mx-auto">
+              Lavado detallado, sellado cerámico, pulido y tapiz — a domicilio o en taller.
             </p>
           </FadeUp>
           <FadeUp delay={0.55}>
@@ -449,6 +484,119 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* SCHEMA JSON-LD — LocalBusiness + FAQPage */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "AutoBodyShop",
+            "name": "Fullshine Detailing Premium",
+            "url": "https://www.fullshine.autos",
+            "telephone": "+56933654943",
+            "email": "fullshinechile@gmail.com",
+            "image": "https://www.fullshine.autos/logo.png",
+            "description": "Detailing premium en Concepción y San Pedro de la Paz. Lavado detallado, sellado cerámico Nasiol ZR53, pulido de pintura, tapiz y más. Reserva online 24/7.",
+            "priceRange": "$$",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Camilo Henríquez 381",
+              "addressLocality": "Concepción",
+              "addressRegion": "Biobío",
+              "postalCode": "4030000",
+              "addressCountry": "CL"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": -36.8202,
+              "longitude": -73.0437
+            },
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+                "opens": "09:00",
+                "closes": "18:00"
+              },
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Saturday"],
+                "opens": "09:00",
+                "closes": "14:00"
+              }
+            ],
+            "areaServed": [
+              { "@type": "City", "name": "Concepción", "sameAs": "https://www.wikidata.org/wiki/Q177541" },
+              { "@type": "City", "name": "San Pedro de la Paz" }
+            ],
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "5",
+              "reviewCount": "3",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
+            "sameAs": [
+              "https://www.instagram.com/fullshine_detailing/"
+            ]
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "¿Qué pasa si llueve el día de mi cita?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Si el servicio es a domicilio y llueve, te contactamos el día anterior para reagendar sin costo. Si es en nuestro taller, el trabajo se realiza igual — tenemos espacio techado."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Tengo que dejar el auto o puedo esperar?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Depende del servicio. Los lavados (3-5h) tienen zona de espera en el taller. Para pulidos y cerámicos (6-12h) recomendamos dejar el vehículo y retirarlo al finalizar. Te avisamos por WhatsApp cuando esté listo."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿El servicio a domicilio tiene costo adicional?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. El precio es el mismo tanto en taller como a domicilio dentro de Concepción y San Pedro de la Paz. Solo necesitamos un espacio con acceso al auto."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Cómo funciona el pago? ¿Debo pagar todo por adelantado?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Solo se requiere un anticipo del 20% para confirmar la reserva, que se paga por link de pago seguro (tarjeta o transferencia). El 80% restante se cancela al finalizar el servicio."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Los precios que muestran son exactos?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Los precios mostrados son desde porque varían según el tipo de vehículo (Hatch/Sedan, SUV/Camioneta, Pickup XL). Al reservar seleccionas tu tipo de vehículo y verás el precio exacto antes de confirmar."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Trabajan los fines de semana?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sí. Atendemos de lunes a viernes de 09:00 a 18:00 y los sábados de 09:00 a 14:00. Puedes reservar online en cualquier momento y tu turno queda confirmado al instante."
+                }
+              }
+            ]
+          }
+        ]) }}
+      />
 
       {/* FOOTER */}
       <footer className="border-t border-white/5 py-10 px-4 bg-gray-950">
