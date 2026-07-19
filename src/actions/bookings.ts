@@ -36,6 +36,22 @@ export async function getServices(): Promise<ActionResult<Service[]>> {
   }
 }
 
+export async function getServicesByCategory(category: string): Promise<ActionResult<Service[]>> {
+  try {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('services')
+      .select('*, prices:service_prices(*)')
+      .eq('is_active', true)
+      .eq('category', category)
+      .order('name')
+    if (error) return { success: false, error: error.message }
+    return { success: true, data: (data ?? []) as Service[] }
+  } catch {
+    return { success: false, error: 'Error inesperado' }
+  }
+}
+
 // --- AVAILABLE SLOTS ---
 
 export async function getAvailableSlots(date: string, serviceId: string): Promise<ActionResult<AvailableSlotsResult>> {

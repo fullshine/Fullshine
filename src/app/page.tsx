@@ -301,6 +301,20 @@ export default async function HomePage() {
             <p className="text-gray-400 text-center mb-10">Precios por tipo de vehículo. Selecciona al reservar.</p>
           </FadeUp>
           <ServicesTabs grouped={grouped as any} orderedCategories={orderedCategories} />
+          {/* Links internos a páginas de servicio — importante para SEO */}
+          <div className="mt-10 flex flex-wrap justify-center gap-3 text-sm">
+            {[
+              { href: '/lavado-detallado-concepcion',  label: 'Lavado Detallado' },
+              { href: '/lavado-tapiz-concepcion',      label: 'Lavado de Tapiz' },
+              { href: '/pulido-auto-concepcion',       label: 'Pulido y Corrección' },
+              { href: '/sellado-ceramico-concepcion',  label: 'Sellado Cerámico' },
+            ].map(link => (
+              <Link key={link.href} href={link.href}
+                className="text-gray-500 hover:text-amber-400 underline underline-offset-4 transition-colors text-xs">
+                → {link.label} en Concepción
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
