@@ -10,5 +10,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/pulido-auto-concepcion`,                       lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
     { url: `${base}/lavado-tapiz-concepcion`,                      lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
     { url: `${base}/lavado-detallado-concepcion`,                  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
+    { url: `${base}/blog`,                                          lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8  },
+    { url: `${base}/blog/cuanto-cuesta-sellado-ceramico-concepcion`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.75 },
+    { url: `${base}/blog/pulido-vs-ceramico-auto`,                  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.75 },
   ]
 }
