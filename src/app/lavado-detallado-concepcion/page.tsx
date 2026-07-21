@@ -68,7 +68,7 @@ export default async function LavadoDetalladoPage() {
     '@type': 'Service',
     name: 'Lavado Detallado Concepción',
     provider: {
-      '@type': 'AutoBodyShop',
+      '@type': 'AutomotiveBusiness',
       name: 'Fullshine Detailing Premium',
       url: 'https://www.fullshine.autos',
       telephone: '+56933654943',
@@ -99,7 +99,7 @@ export default async function LavadoDetalladoPage() {
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-4">Concepción &amp; San Pedro de la Paz</p>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
-            Lavado Detallado<br />
+            Lavado Detallado{' '}<br />
             <span className="text-amber-400">en Concepción</span>
           </h1>
           <p className="text-gray-300 text-lg mb-8 max-w-xl mx-auto">

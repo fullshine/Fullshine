@@ -10,7 +10,9 @@ const STATS = [
 ]
 
 function Counter({ target, suffix, decimals = 0 }: { target: number; suffix: string; decimals?: number }) {
-  const [count, setCount] = useState(0)
+  // Inicia en el valor FINAL: el HTML servido (SSR) y lo que indexa Google
+  // siempre muestran el valor real. La animación solo ocurre en cliente.
+  const [count, setCount] = useState(target)
   const [started, setStarted] = useState(false)
   const ref = useRef<HTMLSpanElement>(null)
 
@@ -29,6 +31,7 @@ function Counter({ target, suffix, decimals = 0 }: { target: number; suffix: str
     const steps = 60
     const increment = target / steps
     let current = 0
+    setCount(0)
     const timer = setInterval(() => {
       current += increment
       if (current >= target) {
@@ -41,9 +44,13 @@ function Counter({ target, suffix, decimals = 0 }: { target: number; suffix: str
     return () => clearInterval(timer)
   }, [started, target, decimals])
 
+  const finalText = `${decimals > 0 ? target.toFixed(decimals) : target}${suffix}`
+
   return (
-    <span ref={ref}>
-      {decimals > 0 ? count.toFixed(decimals) : Math.floor(count)}{suffix}
+    <span ref={ref} aria-label={finalText}>
+      <span aria-hidden="true">
+        {decimals > 0 ? count.toFixed(decimals) : Math.floor(count)}{suffix}
+      </span>
     </span>
   )
 }

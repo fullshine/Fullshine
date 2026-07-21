@@ -31,7 +31,7 @@ const TIPOS = [
 const PROCESO = [
   { n: '01', title: 'Lavado y evaluación', desc: 'Lavado técnico completo y evaluación del estado real de la pintura con luz de inspección.' },
   { n: '02', title: 'Descontaminación', desc: 'Eliminamos contaminantes ferrosos y barro bituminoso adherido a la pintura.' },
-  { n: '03', title: 'Pulido a máquina', desc: 'Trabajo con pulidoras de orbita doble y pastas de diferentes cortes según la profundidad del daño.' },
+  { n: '03', title: 'Pulido a máquina', desc: 'Trabajo con pulidoras de órbita doble y pastas de diferentes cortes según la profundidad del daño.' },
   { n: '04', title: 'Inspección bajo luz', desc: 'Revisamos cada panel bajo luz de inspección para asegurar que no queden marcas.' },
   { n: '05', title: 'Sellado protector', desc: 'Opcional: aplicamos cera carnauba o sellado sintético para proteger el trabajo recién realizado.' },
 ]
@@ -52,7 +52,7 @@ export default async function PulidoAutoPage() {
     '@type': 'Service',
     name: 'Pulido Auto Concepción',
     provider: {
-      '@type': 'AutoBodyShop',
+      '@type': 'AutomotiveBusiness',
       name: 'Fullshine Detailing Premium',
       url: 'https://www.fullshine.autos',
       telephone: '+56933654943',
@@ -79,7 +79,7 @@ export default async function PulidoAutoPage() {
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-4">Concepción &amp; San Pedro de la Paz</p>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
-            Pulido y Corrección<br />
+            Pulido y Corrección{' '}<br />
             <span className="text-amber-400">de Pintura</span>
           </h1>
           <p className="text-gray-300 text-lg mb-8 max-w-xl mx-auto">

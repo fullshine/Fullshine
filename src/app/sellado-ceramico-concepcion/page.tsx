@@ -10,11 +10,11 @@ export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Sellado Cerámico en Concepción | Nasiol ZR53 — Fullshine',
-  description: 'Sellado cerámico profesional en Concepción y San Pedro de la Paz. Nasiol ZR53 con 3 a 5 años de protección. Platino, Gold y Elite. Reserva online.',
+  description: 'Sellado cerámico profesional en Concepción y San Pedro de la Paz. Nasiol ZR53 (10H): 3 años de fábrica, extensible a 5 con mantenciones. Reserva online.',
   alternates: { canonical: 'https://www.fullshine.autos/sellado-ceramico-concepcion' },
   openGraph: {
     title: 'Sellado Cerámico en Concepción | Nasiol ZR53 — Fullshine',
-    description: 'Sellado cerámico profesional con Nasiol ZR53. 3 a 5 años de protección. Platino desde $300.000, Gold desde $350.000, Elite desde $500.000.',
+    description: 'Sellado cerámico profesional con Nasiol ZR53 (10H). Platino desde $300.000, Gold desde $350.000, Elite desde $500.000.',
     url: 'https://www.fullshine.autos/sellado-ceramico-concepcion',
     siteName: 'Fullshine Detailing Premium',
     locale: 'es_CL',
@@ -25,17 +25,17 @@ export const metadata: Metadata = {
 const TIERS = [
   {
     icon: '🥈', name: 'Platino', price: 'desde $300.000',
-    features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 (3-5 años)', 'Limpieza interior de cortesía'],
+    features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 10H (3 años + extensión)', 'Limpieza interior de cortesía'],
     extras: [],
   },
   {
     icon: '🥇', name: 'Gold', price: 'desde $350.000', popular: true,
-    features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 (3-5 años)', 'Limpieza interior de cortesía'],
+    features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 10H (3 años + extensión)', 'Limpieza interior de cortesía'],
     extras: ['Sellado cerámico de vidrios'],
   },
   {
     icon: '👑', name: 'Elite', price: 'desde $500.000',
-    features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 (3-5 años)', 'Limpieza interior de cortesía'],
+    features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 10H (3 años + extensión)', 'Limpieza interior de cortesía'],
     extras: ['Sellado cerámico de vidrios', 'Sellado cerámico de plásticos', 'Sellado cerámico de llantas'],
   },
 ]
@@ -49,8 +49,8 @@ const PROCESS = [
 ]
 
 const FAQS = [
-  { q: '¿Cuánto dura el sellado cerámico?', a: 'El Nasiol ZR53 tiene una duración de 3 a 5 años con el cuidado adecuado. No necesitas encerar el auto nunca más.' },
-  { q: '¿El sellado cerámico protege contra rayones?', a: 'La cerámica endurece la pintura y protege contra rayones finos del lavado y ramas. No reemplaza el PPF contra impactos fuertes, pero reduce significativamente los daños cotidianos.' },
+  { q: '¿Cuánto dura el sellado cerámico?', a: 'El Nasiol ZR53 tiene una duración de fábrica de 3 años, extensible hasta 5 con nuestro programa de mantenciones Fullshine. Mientras la protección esté vigente, reduce significativamente la necesidad de aplicar ceras.' },
+  { q: '¿El sellado cerámico protege contra rayones?', a: 'La cerámica aporta mayor resistencia frente a micro-rayas y daños leves del lavado cotidiano. No reemplaza el PPF contra impactos fuertes ni rayones profundos.' },
   { q: '¿Cuánto tiempo demora el proceso completo?', a: 'Depende del paquete: Platino toma 1 día, Gold 1-2 días y Elite hasta 2 días. El auto queda listo para retirar cuando el curado esté completo.' },
   { q: '¿Puedo mojar el auto después del sellado?', a: 'Recomendamos no mojar el auto por 48-72 horas después del tratamiento para que el curado sea óptimo.' },
   { q: '¿Qué diferencia hay entre cerámica y cera?', a: 'La cera dura 1-3 meses y no endurece la pintura. La cerámica dura años, crea una capa dura que protege, y el agua rebota en perlas perfectas (efecto lotus).' },
@@ -65,10 +65,11 @@ export default async function SelladoCeramicoPage() {
     '@type': 'Service',
     name: 'Sellado Cerámico Concepción',
     provider: {
-      '@type': 'AutoBodyShop',
+      '@type': 'AutomotiveBusiness',
       name: 'Fullshine Detailing Premium',
       url: 'https://www.fullshine.autos',
       telephone: '+56933654943',
+      sameAs: ['https://www.instagram.com/fullshinespp'],
       address: {
         '@type': 'PostalAddress',
         streetAddress: 'Camilo Henríquez 381',
@@ -78,7 +79,7 @@ export default async function SelladoCeramicoPage() {
       },
     },
     areaServed: ['Concepción', 'San Pedro de la Paz'],
-    description: 'Sellado cerámico profesional con Nasiol ZR53. 3 a 5 años de protección. Tres paquetes: Platino, Gold y Elite.',
+    description: 'Sellado cerámico profesional con Nasiol ZR53 (10H). 3 años de protección de fábrica, extensible a 5 con mantenciones. Tres paquetes: Platino, Gold y Elite.',
     offers: [
       { '@type': 'Offer', name: 'Cerámico Platino', priceSpecification: { '@type': 'PriceSpecification', minPrice: 300000, priceCurrency: 'CLP' } },
       { '@type': 'Offer', name: 'Cerámico Gold', priceSpecification: { '@type': 'PriceSpecification', minPrice: 350000, priceCurrency: 'CLP' } },
@@ -96,9 +97,18 @@ export default async function SelladoCeramicoPage() {
     })),
   }
 
+  const schemaBreadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://www.fullshine.autos' },
+      { '@type': 'ListItem', position: 2, name: 'Sellado Cerámico en Concepción', item: 'https://www.fullshine.autos/sellado-ceramico-concepcion' },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([schemaService, schemaFAQ]) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([schemaService, schemaFAQ, schemaBreadcrumb]) }} />
       <SiteNav />
       <WhatsAppButton />
 
@@ -107,11 +117,11 @@ export default async function SelladoCeramicoPage() {
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-4">Concepción &amp; San Pedro de la Paz</p>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
-            Sellado Cerámico<br />
+            Sellado Cerámico{' '}<br />
             <span className="text-amber-400">en Concepción</span>
           </h1>
           <p className="text-gray-300 text-lg mb-4 max-w-xl mx-auto">
-            Protege tu pintura con <strong className="text-white">Nasiol ZR53</strong> — una de las cerámicas más duras del mercado. 3 a 5 años de protección, brillo espejo y efecto hidrofóbico permanente.
+            Protege tu pintura con <strong className="text-white">Nasiol ZR53</strong> — cerámica certificada 10H, una de las más duras del mercado. 3 años de protección de fábrica (extensible a 5 con mantenciones), brillo espejo y efecto hidrofóbico durante toda la vigencia del tratamiento.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
@@ -129,9 +139,9 @@ export default async function SelladoCeramicoPage() {
       <section className="py-16 px-4 bg-amber-500/5 border-y border-amber-500/10">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { value: '3-5 años', label: 'Duración garantizada' },
-            { value: '9H+', label: 'Dureza de la capa' },
-            { value: '100°', label: 'Resistencia al calor' },
+            { value: '3-5 años', label: 'Protección (3 de fábrica + extensión con mantenciones)' },
+            { value: '10H', label: 'Dureza certificada' },
+            { value: '150°C', label: 'Resistencia térmica' },
             { value: 'Efecto lotus', label: 'Repele agua y suciedad' },
           ].map((s, i) => (
             <div key={i}>
@@ -146,7 +156,7 @@ export default async function SelladoCeramicoPage() {
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-3">Elige tu paquete cerámico</h2>
-          <p className="text-gray-400 text-center mb-12">Todos incluyen Nasiol ZR53 con 3 a 5 años de protección</p>
+          <p className="text-gray-400 text-center mb-12">Todos incluyen Nasiol ZR53 (10H) — 3 años de protección, extensible a 5 con mantenciones</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TIERS.map(tier => (
               <div key={tier.name} className={`rounded-2xl p-6 border flex flex-col ${tier.popular ? 'bg-amber-500/10 border-amber-500/40 relative' : 'bg-gray-900 border-white/5'}`}>

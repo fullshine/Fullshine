@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Reservar Servicio | Fullshine Detailing',
   description: 'Reserva tu servicio de detailing en Concepción & San Pedro de la Paz.',
+  robots: { index: false, follow: true },
 }
 
 export default async function ReservarPage() {

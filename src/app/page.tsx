@@ -203,7 +203,7 @@ export default async function HomePage() {
               Concepción &amp; San Pedro de la Paz
             </p>
             <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4 leading-[1.05]">
-              Detailing Premium<br />
+              Detailing Premium{' '}<br />
               {/* Gradiente metálico plata → blanco → plata */}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-chrome-400 via-white to-chrome-300">
                 en Concepción
@@ -276,7 +276,7 @@ export default async function HomePage() {
       <section className="py-24 px-4 bg-gray-900/50">
         <div className="max-w-6xl mx-auto">
           <FadeUp>
-            <h2 className="text-3xl font-bold text-center mb-3">Por que Fullshine?</h2>
+            <h2 className="text-3xl font-bold text-center mb-3">¿Por qué Fullshine?</h2>
             <p className="text-gray-400 text-center mb-12">Detailing de calidad no es un lujo, es cuidar tu inversión.</p>
           </FadeUp>
           <StaggerList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -324,7 +324,7 @@ export default async function HomePage() {
           <FadeUp>
             <p className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-2 text-center">Tratamientos Cerámicos</p>
             <h2 className="text-3xl font-bold text-white text-center mb-3">¿Cuál es el indicado para ti?</h2>
-            <p className="text-gray-400 text-center mb-12">Todos incluyen Nasiol ZR53 con 3 a 5 años de protección</p>
+            <p className="text-gray-400 text-center mb-12">Todos incluyen Nasiol ZR53 (10H) — 3 años de protección, extensible a 5 con mantenciones</p>
           </FadeUp>
 
           <div className="overflow-x-auto">
@@ -360,7 +360,7 @@ export default async function HomePage() {
                 {[
                   ['Lavado técnico + descontaminación',   true,  true,  true ],
                   ['Pulido avanzado de pintura',          true,  true,  true ],
-                  ['Cerámica Nasiol ZR53 (3-5 años)',     true,  true,  true ],
+                  ['Cerámica Nasiol ZR53 10H (3 años + extensión)',     true,  true,  true ],
                   ['Limpieza interior de cortesía',       true,  true,  true ],
                   ['Sellado cerámico de vidrios',         false, true,  true ],
                   ['Sellado cerámico de plásticos',       false, false, true ],
@@ -505,7 +505,7 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify([
           {
             "@context": "https://schema.org",
-            "@type": "AutoBodyShop",
+            "@type": "AutomotiveBusiness",
             "name": "Fullshine Detailing Premium",
             "url": "https://www.fullshine.autos",
             "telephone": "+56933654943",
@@ -547,12 +547,13 @@ export default async function HomePage() {
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": "5",
-              "reviewCount": "3",
+              "reviewCount": "82",
               "bestRating": "5",
               "worstRating": "1"
             },
             "sameAs": [
-              "https://www.instagram.com/fullshine_detailing/"
+              "https://www.instagram.com/fullshinespp",
+              "https://share.google/CuDgbHdTZu1FF03yi"
             ]
           },
           {

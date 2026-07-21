@@ -27,13 +27,13 @@ export const metadata: Metadata = {
 const PRECIOS = [
   { nivel: 'Básico / entrada', rango: '$150.000 – $220.000', incluye: 'Solo aplicación de cerámica de bajo costo. Sin pulido previo. Duración real: 6-12 meses.' },
   { nivel: 'Intermedio', rango: '$250.000 – $380.000', incluye: 'Lavado técnico + cerámica de calidad media. Duración real: 1-2 años.' },
-  { nivel: 'Premium (Fullshine)', rango: '$300.000 – $500.000+', incluye: 'Descontaminación + pulido + Nasiol ZR53 (9H). Duración real: 3-5 años.' },
+  { nivel: 'Premium (Fullshine)', rango: '$300.000 – $500.000+', incluye: 'Descontaminación + pulido + Nasiol ZR53 (10H). Duración real: 3-5 años.' },
 ]
 
 const FAQ_ITEMS = [
   {
     q: '¿Por qué hay cerámicos desde $80.000 en Instagram?',
-    a: 'El precio muy bajo suele indicar que se aplica una cerámica de baja concentración (spray cerámico), sin preparación de la pintura. El resultado dura semanas o pocos meses, no años. Una cerámica real de 9H como Nasiol ZR53 requiere una preparación seria que toma horas.',
+    a: 'El precio muy bajo suele indicar que se aplica una cerámica de baja concentración (spray cerámico), sin preparación de la pintura. El resultado dura semanas o pocos meses, no años. Una cerámica real de 10H como Nasiol ZR53 requiere una preparación seria que toma horas.',
   },
   {
     q: '¿Puedo poner cerámica sin haber pulido antes?',
@@ -147,7 +147,7 @@ export default function ArticleCeramicoCosto() {
               />
               <Factor
                 n="2" title="La cerámica que se usa"
-                desc='No todas las cerámicas son iguales. Las spray cerámicas cuestan poco y duran poco. Una cerámica de capa como el Nasiol ZR53 (9H de dureza) cuesta más, pero dura 3 a 5 años. Siempre pregunta qué producto específico usan.'
+                desc='No todas las cerámicas son iguales. Las spray cerámicas cuestan poco y duran poco. Una cerámica de capa como el Nasiol ZR53 (10H de dureza) cuesta más, pero dura 3 a 5 años. Siempre pregunta qué producto específico usan.'
               />
               <Factor
                 n="3" title="La preparación de la pintura"
@@ -162,7 +162,7 @@ export default function ArticleCeramicoCosto() {
 
           <Section title="Los paquetes de Fullshine">
             <p className="text-gray-400 leading-relaxed mb-6">
-              En Fullshine trabajamos con <strong className="text-white">Nasiol ZR53</strong>, una cerámica alemana de 9H con 3 a 5 años de garantía de duración. Todos nuestros paquetes incluyen descontaminación y pulido previo — sin eso, no aplicamos cerámica.
+              En Fullshine trabajamos con <strong className="text-white">Nasiol ZR53</strong>, una cerámica turca certificada 10H con 3 años de duración de fábrica, extensible a 5 con nuestro programa de mantenciones. Todos nuestros paquetes incluyen descontaminación y pulido previo — sin eso, no aplicamos cerámica.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
