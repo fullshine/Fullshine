@@ -27,6 +27,11 @@ async function sendMessage(phone: string, message: string): Promise<void> {
   }
 }
 
+/** Envío directo de texto (usado por el agente IA) */
+export async function sendRawMessage(phone: string, message: string): Promise<void> {
+  return sendMessage(phone, message)
+}
+
 function formatDateTime(scheduledAt: string): { date: string; time: string } {
   const d = new Date(scheduledAt)
   const date = d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
