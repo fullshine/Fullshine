@@ -7,6 +7,9 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Fullshine Detailing | Concepción & San Pedro de la Paz',
   description: 'Reserva tu servicio de detailing profesional en Concepción & San Pedro de la Paz, Chile.',
+  verification: {
+    google: 'bmBwZgsCrhDaMSV5wiXED3PXRpxGhkuYGfkd_uqzDCw',
+  },
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
