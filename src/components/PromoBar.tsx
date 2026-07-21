@@ -3,58 +3,44 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-const DURATION = 20 * 60 // 20 minutos en segundos
-const START_KEY = 'promo25_start'
+// Fin de la promo: 31 de julio 2026, 23:59 hora de Chile (UTC-4)
+const PROMO_END = new Date('2026-08-01T03:59:00Z').getTime()
 const DISMISSED_KEY = 'promo25_dismissed'
 const BAR_H = 44 // px (desktop); mobile uses auto height via min-height
 
 export default function PromoBar() {
-  const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
-  const [dismissed, setDismissed] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const [daysLeft, setDaysLeft] = useState(0)
 
   useEffect(() => {
     if (sessionStorage.getItem(DISMISSED_KEY)) {
-      setDismissed(true)
       document.documentElement.style.setProperty('--promo-h', '0px')
       return
     }
 
-    let start = parseInt(sessionStorage.getItem(START_KEY) || '0')
-    if (!start) {
-      start = Date.now()
-      sessionStorage.setItem(START_KEY, start.toString())
+    const msLeft = PROMO_END - Date.now()
+    if (msLeft <= 0) {
+      // Promo terminada: no mostrar nada
+      document.documentElement.style.setProperty('--promo-h', '0px')
+      return
     }
 
-    // Use 56px on mobile (auto-detected later), 44px on desktop
+    setDaysLeft(Math.max(1, Math.ceil(msLeft / (1000 * 60 * 60 * 24))))
+    setVisible(true)
+
     const isMobile = window.innerWidth < 768
     document.documentElement.style.setProperty('--promo-h', isMobile ? '56px' : `${BAR_H}px`)
-
-    const tick = () => {
-      const elapsed = Math.floor((Date.now() - start) / 1000)
-      const left = Math.max(0, DURATION - elapsed)
-      setSecondsLeft(left)
-      if (left === 0) {
-        clearInterval(id)
-        document.documentElement.style.setProperty('--promo-h', '0px')
-      }
-    }
-
-    tick()
-    const id = setInterval(tick, 1000)
-    return () => clearInterval(id)
   }, [])
 
   function dismiss() {
     sessionStorage.setItem(DISMISSED_KEY, '1')
-    setDismissed(true)
+    setVisible(false)
     document.documentElement.style.setProperty('--promo-h', '0px')
   }
 
-  if (dismissed || secondsLeft === null || secondsLeft === 0) return null
+  if (!visible) return null
 
-  const m = Math.floor(secondsLeft / 60)
-  const s = secondsLeft % 60
-  const pad = (n: number) => n.toString().padStart(2, '0')
+  const deadline = daysLeft === 1 ? '¡Último día!' : `Quedan ${daysLeft} días`
 
   return (
     <div
@@ -63,9 +49,9 @@ export default function PromoBar() {
     >
       {/* Mobile layout */}
       <div className="flex md:hidden items-center gap-2 flex-1 justify-center text-sm flex-wrap">
-        <span className="font-black text-xs">🔥 25% OFF cerámico</span>
-        <div className="bg-black text-amber-400 font-black px-2 py-0.5 rounded-full tabular-nums text-xs tracking-wider">
-          {pad(m)}:{pad(s)}
+        <span className="font-black text-xs">🔥 25% OFF cerámico · solo julio</span>
+        <div className="bg-black text-amber-400 font-black px-2 py-0.5 rounded-full text-xs tracking-wide">
+          {deadline}
         </div>
         <Link
           href="/reservar"
@@ -77,10 +63,10 @@ export default function PromoBar() {
 
       {/* Desktop layout */}
       <div className="hidden md:flex items-center gap-4 flex-1 justify-center text-sm">
-        <span className="font-black">🔥 OFERTA ESPECIAL</span>
-        <span className="font-medium">Cerámico <strong>25% OFF</strong> · Otros servicios <strong>10% OFF</strong></span>
-        <div className="bg-black text-amber-400 font-black px-3 py-0.5 rounded-full tabular-nums text-sm tracking-wider">
-          {pad(m)}:{pad(s)}
+        <span className="font-black">🔥 PROMO DE JULIO</span>
+        <span className="font-medium">Cerámico <strong>25% OFF</strong> · Otros servicios <strong>10% OFF</strong> · hasta el 31 de julio</span>
+        <div className="bg-black text-amber-400 font-black px-3 py-0.5 rounded-full text-sm tracking-wide">
+          {deadline}
         </div>
         <Link
           href="/reservar"
@@ -90,7 +76,7 @@ export default function PromoBar() {
         </Link>
       </div>
 
-      <button onClick={dismiss} className="text-black/50 hover:text-black shrink-0 text-lg font-bold leading-none ml-1">
+      <button onClick={dismiss} aria-label="Cerrar promoción" className="text-black/50 hover:text-black shrink-0 text-lg font-bold leading-none ml-1 p-2 -m-1">
         ✕
       </button>
     </div>

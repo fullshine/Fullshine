@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { getServicesByCategory } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
+import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO } from '@/lib/promo'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
 import WhatsAppButton from '@/components/WhatsAppButton'
@@ -24,17 +25,17 @@ export const metadata: Metadata = {
 
 const TIERS = [
   {
-    icon: '🥈', name: 'Platino', price: 'desde $300.000',
+    icon: '🥈', name: 'Platino', price: 'desde $300.000', basePrice: 300000,
     features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 10H (3 años + extensión)', 'Limpieza interior de cortesía'],
     extras: [],
   },
   {
-    icon: '🥇', name: 'Gold', price: 'desde $350.000', popular: true,
+    icon: '🥇', name: 'Gold', price: 'desde $350.000', basePrice: 350000, popular: true,
     features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 10H (3 años + extensión)', 'Limpieza interior de cortesía'],
     extras: ['Sellado cerámico de vidrios'],
   },
   {
-    icon: '👑', name: 'Elite', price: 'desde $500.000',
+    icon: '👑', name: 'Elite', price: 'desde $500.000', basePrice: 500000,
     features: ['Lavado técnico + descontaminación', 'Pulido avanzado de pintura', 'Cerámica Nasiol ZR53 10H (3 años + extensión)', 'Limpieza interior de cortesía'],
     extras: ['Sellado cerámico de vidrios', 'Sellado cerámico de plásticos', 'Sellado cerámico de llantas'],
   },
@@ -59,6 +60,7 @@ const FAQS = [
 export default async function SelladoCeramicoPage() {
   const result = await getServicesByCategory('ceramico')
   const services = result.data ?? []
+  const promo = isPromoActive()
 
   const schemaService = {
     '@context': 'https://schema.org',
@@ -167,7 +169,17 @@ export default async function SelladoCeramicoPage() {
                 )}
                 <div className="text-3xl mb-2">{tier.icon}</div>
                 <h3 className={`text-xl font-black mb-1 ${tier.popular ? 'text-amber-400' : 'text-white'}`}>{tier.name}</h3>
-                <p className={`text-sm mb-5 ${tier.popular ? 'text-amber-300/70' : 'text-gray-500'}`}>{tier.price}</p>
+                {promo ? (
+                  <div className="mb-5">
+                    <p className="text-xs text-gray-500 line-through">desde {formatCLP(tier.basePrice)}</p>
+                    <p className={`text-lg font-black ${tier.popular ? 'text-amber-400' : 'text-white'}`}>
+                      desde {formatCLP(promoPrice(tier.basePrice, PROMO_CERAMICO))}
+                    </p>
+                    <p className="text-[11px] font-bold text-green-400 uppercase tracking-wide">25% OFF hasta el 31 de julio</p>
+                  </div>
+                ) : (
+                  <p className={`text-sm mb-5 ${tier.popular ? 'text-amber-300/70' : 'text-gray-500'}`}>{tier.price}</p>
+                )}
                 <ul className="space-y-2 flex-1">
                   {tier.features.map((f, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
@@ -208,12 +220,74 @@ export default async function SelladoCeramicoPage() {
         </div>
       </section>
 
+      {/* CERTIFICADO DE GARANTÍA */}
+      <section className="py-20 px-4 bg-gradient-to-b from-gray-950 to-gray-900/60 border-t border-amber-500/10">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+
+            {/* Texto */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-3">Respaldo real, no promesas</p>
+              <h2 className="text-3xl font-bold mb-4">Certificado de garantía Fullshine</h2>
+              <p className="text-gray-400 leading-relaxed mb-6">
+                Cada tratamiento cerámico incluye un <strong className="text-white">certificado digital con código único</strong> que
+                acredita el trabajo realizado sobre tu vehículo. Nadie más en Concepción entrega este nivel de respaldo.
+              </p>
+              <ul className="space-y-3">
+                {[
+                  ['🔢', 'Código único verificable online en cualquier momento'],
+                  ['📋', 'Detalle del servicio, producto aplicado y fecha'],
+                  ['🗓️', 'Vigencia de la garantía claramente indicada'],
+                  ['📱', 'Código QR para validarlo desde el celular'],
+                  ['🔧', 'Condiciones y programa de mantenciones incluidos'],
+                ].map(([icon, text], i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+                    <span className="shrink-0">{icon}</span> {text}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-gray-500 text-sm mt-6">
+                El certificado también respalda el valor de reventa: un comprador puede verificar que la protección cerámica es real y está vigente.
+              </p>
+            </div>
+
+            {/* Mockup visual del certificado */}
+            <div className="relative bg-gray-900 border border-amber-500/30 rounded-3xl overflow-hidden shadow-2xl shadow-amber-500/10">
+              <div className="h-1.5 bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600" />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03]">
+                <p className="text-white font-black text-6xl rotate-[-30deg] tracking-widest">FULLSHINE</p>
+              </div>
+              <div className="relative px-7 py-7 space-y-4">
+                <div className="text-center">
+                  <p className="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Certificado de Garantía</p>
+                  <p className="text-amber-400 font-black text-xl tracking-widest">FS-XXXX-XXXX</p>
+                </div>
+                <div className="h-px bg-white/5" />
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-gray-500">Servicio</span><span className="text-white font-semibold">Cerámico Gold</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">Producto</span><span className="text-white font-semibold">Nasiol ZR53 (10H)</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">Garantía</span><span className="text-white font-semibold">3 años + extensión</span></div>
+                </div>
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 text-center">
+                  <p className="text-gray-400 text-[10px] uppercase tracking-widest">Verificable en</p>
+                  <p className="text-amber-400 font-bold text-sm">fullshine.autos/certificado</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* PRECIOS POR TIPO DE VEHÍCULO */}
       {services.length > 0 && (
         <section className="py-20 px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-3">Precios por tipo de vehículo</h2>
-            <p className="text-gray-400 text-center mb-10">Seleccionas tu vehículo al reservar y ves el precio exacto</p>
+            <p className="text-gray-400 text-center mb-10">
+              Seleccionas tu vehículo al reservar y ves el precio exacto
+              {promo && <span className="block mt-1 text-green-400 font-bold text-sm">Precios con 25% OFF aplicado — válido hasta el 31 de julio</span>}
+            </p>
             <div className="space-y-4">
               {services.map(service => {
                 const prices = (service.prices ?? []) as { vehicle_type: string; price_clp: number }[]
@@ -227,7 +301,14 @@ export default async function SelladoCeramicoPage() {
                         byType[type] ? (
                           <div key={type} className="text-center bg-gray-800/50 rounded-xl p-3">
                             <p className="text-xs text-gray-400 mb-1">{label}</p>
-                            <p className="font-black text-amber-400">{formatCurrency(byType[type])}</p>
+                            {promo ? (
+                              <>
+                                <p className="text-xs text-gray-500 line-through">{formatCurrency(byType[type])}</p>
+                                <p className="font-black text-amber-400">{formatCLP(promoPrice(byType[type], PROMO_CERAMICO))}</p>
+                              </>
+                            ) : (
+                              <p className="font-black text-amber-400">{formatCurrency(byType[type])}</p>
+                            )}
                           </div>
                         ) : null
                       ))}

@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Metadata } from 'next'
 import { getServices } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
+import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO } from '@/lib/promo'
 import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
 // ServiceDescription moved to ServicesTabs
 import FaqSection from '@/components/FaqSection'
@@ -140,6 +141,7 @@ function GoogleIcon({ className }: { className?: string }) {
 export default async function HomePage() {
   const servicesResult = await getServices()
   const services = servicesResult.data ?? []
+  const promo = isPromoActive()
 
   const grouped = services.reduce<Record<string, typeof services>>((acc, s) => {
     const cat = s.category ?? 'adicional'
@@ -336,7 +338,14 @@ export default async function HomePage() {
                     <div className="bg-gray-800 rounded-xl p-3 border border-white/10">
                       <p className="text-lg mb-0.5">🥈</p>
                       <p className="font-bold text-white text-sm">Platino</p>
-                      <p className="text-gray-500 text-xs">desde $300.000</p>
+                      {promo ? (
+                        <>
+                          <p className="text-gray-600 text-[10px] line-through">desde $300.000</p>
+                          <p className="text-green-400 text-xs font-bold">desde {formatCLP(promoPrice(300000, PROMO_CERAMICO))}</p>
+                        </>
+                      ) : (
+                        <p className="text-gray-500 text-xs">desde $300.000</p>
+                      )}
                     </div>
                   </th>
                   <th className="text-center pb-4 px-2">
@@ -344,14 +353,28 @@ export default async function HomePage() {
                       <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black text-xs font-black px-3 py-0.5 rounded-full">Popular</span>
                       <p className="text-lg mb-0.5">🥇</p>
                       <p className="font-bold text-amber-400 text-sm">Gold</p>
-                      <p className="text-gray-400 text-xs">desde $350.000</p>
+                      {promo ? (
+                        <>
+                          <p className="text-gray-600 text-[10px] line-through">desde $350.000</p>
+                          <p className="text-green-400 text-xs font-bold">desde {formatCLP(promoPrice(350000, PROMO_CERAMICO))}</p>
+                        </>
+                      ) : (
+                        <p className="text-gray-400 text-xs">desde $350.000</p>
+                      )}
                     </div>
                   </th>
                   <th className="text-center pb-4 px-2">
                     <div className="bg-gray-800 rounded-xl p-3 border border-white/10">
                       <p className="text-lg mb-0.5">👑</p>
                       <p className="font-bold text-white text-sm">Elite</p>
-                      <p className="text-gray-500 text-xs">desde $500.000</p>
+                      {promo ? (
+                        <>
+                          <p className="text-gray-600 text-[10px] line-through">desde $500.000</p>
+                          <p className="text-green-400 text-xs font-bold">desde {formatCLP(promoPrice(500000, PROMO_CERAMICO))}</p>
+                        </>
+                      ) : (
+                        <p className="text-gray-500 text-xs">desde $500.000</p>
+                      )}
                     </div>
                   </th>
                 </tr>
