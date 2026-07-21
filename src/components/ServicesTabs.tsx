@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
 import ServiceDescription from '@/components/ServiceDescription'
+import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
 
 const CATEGORY_LABELS: Record<string, string> = {
   lavado_detallado: 'Lavado',
@@ -61,6 +62,9 @@ export default function ServicesTabs({
   const [active, setActive] = useState(orderedCategories[0])
 
   const services = grouped[active] ?? []
+  const promo = isPromoActive()
+  const discount = active === 'ceramico' ? PROMO_CERAMICO : PROMO_OTROS
+  const discountLabel = active === 'ceramico' ? '25% OFF' : '10% OFF'
 
   return (
     <div>
@@ -110,13 +114,27 @@ export default function ServicesTabs({
                 </div>
               </div>
               {shownPrices.length > 0 ? (
-                <div className="border-t border-white/5 pt-3 grid grid-cols-3 gap-2">
-                  {shownPrices.map(type => (
-                    <div key={type} className="text-center">
-                      <p className="text-white text-xs mb-1 font-medium">{VEHICLE_LABELS[type]}</p>
-                      <p className="font-bold text-amber-400 text-sm">{formatCurrency(priceByType[type])}</p>
-                    </div>
-                  ))}
+                <div className="border-t border-white/5 pt-3">
+                  {promo && (
+                    <p className="text-center text-green-400 text-[11px] font-bold uppercase tracking-wide mb-2">
+                      {discountLabel} hasta el 31 de julio
+                    </p>
+                  )}
+                  <div className="grid grid-cols-3 gap-2">
+                    {shownPrices.map(type => (
+                      <div key={type} className="text-center">
+                        <p className="text-white text-xs mb-1 font-medium">{VEHICLE_LABELS[type]}</p>
+                        {promo ? (
+                          <>
+                            <p className="text-gray-600 text-[11px] line-through">{formatCurrency(priceByType[type])}</p>
+                            <p className="font-bold text-amber-400 text-sm">{formatCLP(promoPrice(priceByType[type], discount))}</p>
+                          </>
+                        ) : (
+                          <p className="font-bold text-amber-400 text-sm">{formatCurrency(priceByType[type])}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm border-t border-white/5 pt-3">Consultar precio</p>

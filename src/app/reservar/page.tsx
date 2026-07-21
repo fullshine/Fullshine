@@ -12,7 +12,7 @@ export const metadata = {
   robots: { index: false, follow: true },
 }
 
-export default async function ReservarPage() {
+export default async function ReservarPage({ searchParams }: { searchParams?: { servicio?: string } }) {
   const servicesResult = await getServices()
   const services = servicesResult.data ?? []
 
@@ -40,7 +40,7 @@ export default async function ReservarPage() {
         </div>
 
         <Suspense fallback={<div className="text-white text-center">Cargando...</div>}>
-          <BookingForm services={services} />
+          <BookingForm services={services} preselect={searchParams?.servicio} />
         </Suspense>
       </div>
     </main>

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { getServicesByCategory } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
+import { isPromoActive, promoPrice, formatCLP, PROMO_OTROS } from '@/lib/promo'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
 import WhatsAppButton from '@/components/WhatsAppButton'
@@ -62,6 +63,7 @@ const FAQS = [
 export default async function LavadoDetalladoPage() {
   const result = await getServicesByCategory('lavado_detallado')
   const services = result.data ?? []
+  const promo = isPromoActive()
 
   const schemaService = {
     '@context': 'https://schema.org',
@@ -121,7 +123,8 @@ export default async function LavadoDetalladoPage() {
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-3">Elige tu paquete</h2>
-          <p className="text-gray-400 text-center mb-12">Precios según tipo de vehículo. Sin cobros ocultos.</p>
+          <p className="text-gray-400 text-center mb-12">Precios según tipo de vehículo. Sin cobros ocultos.{' '}
+            {promo && <span className="block mt-1 text-green-400 font-bold text-sm">10% OFF aplicado — válido hasta el 31 de julio</span>}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {DIFERENCIAS.map(pkg => (
               <div key={pkg.name} className={`rounded-2xl p-6 border flex flex-col ${pkg.recommended ? 'bg-amber-500/10 border-amber-500/40 relative' : 'bg-gray-900 border-white/5'}`}>
@@ -147,11 +150,18 @@ export default async function LavadoDetalladoPage() {
                       <p className="text-xs text-gray-500 mb-0.5">
                         {type === 'hatch_sedan' ? 'Hatch/Sedan' : type === 'suv_camioneta' ? 'SUV' : 'Pickup XL'}
                       </p>
-                      <p className={`font-black text-sm ${pkg.recommended ? 'text-amber-400' : 'text-white'}`}>{formatCurrency(price)}</p>
+                      {promo ? (
+                        <>
+                          <p className="text-[11px] text-gray-600 line-through">{formatCurrency(price)}</p>
+                          <p className={`font-black text-sm ${pkg.recommended ? 'text-amber-400' : 'text-white'}`}>{formatCLP(promoPrice(price, PROMO_OTROS))}</p>
+                        </>
+                      ) : (
+                        <p className={`font-black text-sm ${pkg.recommended ? 'text-amber-400' : 'text-white'}`}>{formatCurrency(price)}</p>
+                      )}
                     </div>
                   ))}
                 </div>
-                <Link href="/reservar" className={`block text-center font-bold py-3 rounded-full text-sm transition-colors ${pkg.recommended ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}>
+                <Link href={`/reservar?servicio=${pkg.name.replace(/[^a-zA-Z ]/g, "").trim().toLowerCase().replace(/ +/g, "-")}`} className={`block text-center font-bold py-3 rounded-full text-sm transition-colors ${pkg.recommended ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}>
                   Reservar {pkg.name.replace(/[⭐🌟]\s/, '')}
                 </Link>
               </div>

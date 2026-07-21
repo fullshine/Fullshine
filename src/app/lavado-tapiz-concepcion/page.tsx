@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { getServicesByCategory } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
+import { isPromoActive, promoPrice, formatCLP, PROMO_OTROS } from '@/lib/promo'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
 import WhatsAppButton from '@/components/WhatsAppButton'
@@ -41,6 +42,7 @@ const FAQS = [
 export default async function LavadoTapizPage() {
   const result = await getServicesByCategory('tapiz')
   const services = result.data ?? []
+  const promo = isPromoActive()
 
   const schemaService = {
     '@context': 'https://schema.org',
@@ -117,6 +119,7 @@ export default async function LavadoTapizPage() {
         <section className="py-20 px-4 bg-gray-900/50 border-t border-white/5">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-10">Precios por tipo de vehículo</h2>
+            {promo && <p className="text-center text-green-400 font-bold text-sm mb-8 -mt-6">10% OFF aplicado — válido hasta el 31 de julio</p>}
             <div className="space-y-4">
               {services.map(service => {
                 const prices = (service.prices ?? []) as { vehicle_type: string; price_clp: number }[]
@@ -130,7 +133,14 @@ export default async function LavadoTapizPage() {
                         byType[type] ? (
                           <div key={type} className="text-center bg-gray-800/50 rounded-xl p-3">
                             <p className="text-xs text-gray-400 mb-1">{label}</p>
-                            <p className="font-black text-amber-400">{formatCurrency(byType[type])}</p>
+                            {promo ? (
+                              <>
+                                <p className="text-xs text-gray-500 line-through">{formatCurrency(byType[type])}</p>
+                                <p className="font-black text-amber-400">{formatCLP(promoPrice(byType[type], PROMO_OTROS))}</p>
+                              </>
+                            ) : (
+                              <p className="font-black text-amber-400">{formatCurrency(byType[type])}</p>
+                            )}
                           </div>
                         ) : null
                       ))}

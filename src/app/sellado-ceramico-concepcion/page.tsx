@@ -192,7 +192,7 @@ export default async function SelladoCeramicoPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/reservar" className={`mt-6 block text-center font-bold py-3 rounded-full text-sm transition-colors ${tier.popular ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}>
+                <Link href={`/reservar?servicio=ceramico-${tier.name.toLowerCase()}`} className={`mt-6 block text-center font-bold py-3 rounded-full text-sm transition-colors ${tier.popular ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}>
                   Reservar {tier.name}
                 </Link>
               </div>

@@ -5,9 +5,11 @@ import { createBooking, getAvailableSlots } from '@/actions/bookings'
 import type { BookingFormData, VehicleType, TimeSlot } from '@/types'
 import { cn, formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
 import ServiceDescription from '@/components/ServiceDescription'
+import { isPromoActive, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
 
 const VEHICLE_TYPES: VehicleType[] = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
-const STEPS = ['Tus datos', 'Servicio', 'Fecha y Hora', 'Confirmar']
+// Orden optimizado: primero el servicio y su precio, los datos personales al final
+const STEPS = ['Servicio', 'Fecha y Hora', 'Tus datos', 'Confirmar']
 
 interface Service {
   id: string
@@ -20,6 +22,8 @@ interface Service {
 
 interface Props {
   services: Service[]
+  /** Slug para preseleccionar servicio, ej: "ceramico-gold", "full-deluxe" */
+  preselect?: string
 }
 
 const INITIAL_FORM: BookingFormData = {
@@ -38,9 +42,28 @@ const INITIAL_FORM: BookingFormData = {
   notes: '',
 }
 
-export default function BookingForm({ services }: Props) {
+function slugify(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+function findPreselected(services: Service[], key?: string): Service | undefined {
+  if (!key) return undefined
+  const k = slugify(key)
+  if (!k) return undefined
+  return (
+    services.find(s => slugify(s.name) === k) ??
+    services.find(s => slugify(s.name).includes(k)) ??
+    services.find(s => k.split('-').every(t => slugify(s.name).includes(t))) ??
+    services.find(s => s.category === k.replace(/-/g, '_'))
+  )
+}
+
+export default function BookingForm({ services, preselect }: Props) {
+  const preselected = findPreselected(services, preselect)
   const [step, setStep] = useState(0)
-  const [form, setForm] = useState<BookingFormData>(INITIAL_FORM)
+  const [form, setForm] = useState<BookingFormData>(
+    preselected ? { ...INITIAL_FORM, service_id: preselected.id } : INITIAL_FORM
+  )
   const [slots, setSlots] = useState<TimeSlot[]>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -48,12 +71,18 @@ export default function BookingForm({ services }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [showErrors, setShowErrors] = useState(false)
 
+  const promoActive = isPromoActive()
   const selectedService = services.find(s => s.id === form.service_id)
   const servicePrice = selectedService?.prices?.find(p => p.vehicle_type === form.vehicle_type)?.price_clp
 
   function getDiscount(price: number, category: string) {
-    const pct = category === 'ceramico' ? 0.25 : 0.10
-    return { discounted: Math.round(price * (1 - pct)), pct, label: category === 'ceramico' ? '25% OFF' : '10% OFF' }
+    if (!promoActive) return null
+    const pct = category === 'ceramico' ? PROMO_CERAMICO : PROMO_OTROS
+    return {
+      discounted: Math.round(price * (1 - pct)),
+      pct,
+      label: category === 'ceramico' ? '25% OFF' : '10% OFF',
+    }
   }
 
   const selectedDiscounted = selectedService && servicePrice
@@ -74,15 +103,14 @@ export default function BookingForm({ services }: Props) {
   }
 
   function canGoNext(): boolean {
-    if (step === 0) return !!(
+    if (step === 0) return !!(form.service_id && form.vehicle_type)
+    if (step === 1) return !!(form.scheduled_date && form.scheduled_time)
+    if (step === 2) return !!(
       form.customer_name.trim() &&
       form.customer_phone.trim() &&
       form.vehicle_make.trim() &&
-      form.vehicle_model.trim() &&
-      form.vehicle_type
+      form.vehicle_model.trim()
     )
-    if (step === 1) return !!form.service_id
-    if (step === 2) return !!(form.scheduled_date && form.scheduled_time)
     return true
   }
 
@@ -163,86 +191,29 @@ export default function BookingForm({ services }: Props) {
 
       <div className="p-6 space-y-4">
 
-        {/* Step 0: Cliente + Vehículo */}
+        {/* Step 0: Servicio (con tipo de vehículo para ver precio exacto) */}
         {step === 0 && (
           <>
-            <h3 className="font-semibold text-gray-900">Tus datos de contacto</h3>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
-              <input
-                className={cn('input-field', showErrors && !form.customer_name.trim() && 'border-red-400 focus:ring-red-300')}
-                placeholder="Juan Pérez" value={form.customer_name}
-                onChange={e => set('customer_name', e.target.value)} />
-              {showErrors && !form.customer_name.trim() && (
-                <p className="text-xs text-red-500 mt-1">Ingresa tu nombre completo</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp *</label>
-              <input
-                className={cn('input-field', showErrors && !form.customer_phone.trim() && 'border-red-400 focus:ring-red-300')}
-                placeholder="+56 9 1234 5678" value={form.customer_phone}
-                onChange={e => set('customer_phone', e.target.value)} type="tel" />
-              {showErrors && !form.customer_phone.trim() && (
-                <p className="text-xs text-red-500 mt-1">Ingresa tu número de WhatsApp</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-gray-400 font-normal">(opcional — para recibir link de pago)</span></label>
-              <input className="input-field" placeholder="juan@email.com" value={form.customer_email}
-                onChange={e => set('customer_email', e.target.value)} type="email" />
-            </div>
-
-            <div className="border-t border-gray-100 pt-4 mt-2">
-              <h3 className="font-semibold text-gray-900 mb-3">Tu vehículo</h3>
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
-                  <input
-                    className={cn('input-field', showErrors && !form.vehicle_make.trim() && 'border-red-400 focus:ring-red-300')}
-                    placeholder="Toyota" value={form.vehicle_make}
-                    onChange={e => set('vehicle_make', e.target.value)} />
-                  {showErrors && !form.vehicle_make.trim() && (
-                    <p className="text-xs text-red-500 mt-1">Ingresa la marca</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
-                  <input
-                    className={cn('input-field', showErrors && !form.vehicle_model.trim() && 'border-red-400 focus:ring-red-300')}
-                    placeholder="Corolla" value={form.vehicle_model}
-                    onChange={e => set('vehicle_model', e.target.value)} />
-                  {showErrors && !form.vehicle_model.trim() && (
-                    <p className="text-xs text-red-500 mt-1">Ingresa el modelo</p>
-                  )}
-                </div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
+              <div className="grid grid-cols-3 gap-2">
+                {VEHICLE_TYPES.map(type => (
+                  <button key={type} type="button"
+                    onClick={() => set('vehicle_type', type)}
+                    className={cn(
+                      'py-2 px-3 rounded-lg border text-sm font-medium transition-colors',
+                      form.vehicle_type === type
+                        ? 'bg-brand-500 border-brand-500 text-white'
+                        : 'bg-white border-gray-300 text-gray-700 hover:border-brand-400'
+                    )}>
+                    {getVehicleTypeLabel(type)}
+                  </button>
+                ))}
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {VEHICLE_TYPES.map(type => (
-                    <button key={type} type="button"
-                      onClick={() => set('vehicle_type', type)}
-                      className={cn(
-                        'py-2 px-3 rounded-lg border text-sm font-medium transition-colors',
-                        form.vehicle_type === type
-                          ? 'bg-brand-500 border-brand-500 text-white'
-                          : 'bg-white border-gray-300 text-gray-700 hover:border-brand-400'
-                      )}>
-                      {getVehicleTypeLabel(type)}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <p className="text-xs text-gray-400 mt-1">Los precios se ajustan según tu vehículo</p>
             </div>
-          </>
-        )}
 
-        {/* Step 1: Servicio */}
-        {step === 1 && (
-          <>
-            <h3 className="font-semibold text-gray-900">Elige tu servicio</h3>
+            <h3 className="font-semibold text-gray-900 pt-2">Elige tu servicio</h3>
             {showErrors && !form.service_id && (
               <p className="text-xs text-red-500 -mt-1">Selecciona un servicio para continuar</p>
             )}
@@ -301,14 +272,18 @@ export default function BookingForm({ services }: Props) {
                                 </p>
                               </div>
                               <div className="text-right ml-4 shrink-0">
-                                {disc ? (
-                                  <div>
-                                    <p className="text-xs text-gray-400 line-through">{formatCurrency(price!)}</p>
-                                    <p className="font-bold text-green-600">{formatCurrency(disc.discounted)}</p>
-                                    <span className="text-xs bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded">
-                                      {disc.label}
-                                    </span>
-                                  </div>
+                                {price ? (
+                                  disc ? (
+                                    <div>
+                                      <p className="text-xs text-gray-400 line-through">{formatCurrency(price)}</p>
+                                      <p className="font-bold text-green-600">{formatCurrency(disc.discounted)}</p>
+                                      <span className="text-xs bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded">
+                                        {disc.label}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <p className="font-bold text-gray-900">{formatCurrency(price)}</p>
+                                  )
                                 ) : (
                                   <span className="text-sm text-gray-400">Consultar</span>
                                 )}
@@ -325,8 +300,8 @@ export default function BookingForm({ services }: Props) {
           </>
         )}
 
-        {/* Step 2: Fecha y Hora */}
-        {step === 2 && (
+        {/* Step 1: Fecha y Hora */}
+        {step === 1 && (
           <>
             <h3 className="font-semibold text-gray-900">Elige fecha y hora</h3>
             <div>
@@ -396,6 +371,64 @@ export default function BookingForm({ services }: Props) {
           </>
         )}
 
+        {/* Step 2: Datos de contacto + vehículo */}
+        {step === 2 && (
+          <>
+            <h3 className="font-semibold text-gray-900">Tus datos de contacto</h3>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+              <input
+                className={cn('input-field', showErrors && !form.customer_name.trim() && 'border-red-400 focus:ring-red-300')}
+                placeholder="Juan Pérez" value={form.customer_name}
+                onChange={e => set('customer_name', e.target.value)} />
+              {showErrors && !form.customer_name.trim() && (
+                <p className="text-xs text-red-500 mt-1">Ingresa tu nombre completo</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp *</label>
+              <input
+                className={cn('input-field', showErrors && !form.customer_phone.trim() && 'border-red-400 focus:ring-red-300')}
+                placeholder="+56 9 1234 5678" value={form.customer_phone}
+                onChange={e => set('customer_phone', e.target.value)} type="tel" />
+              {showErrors && !form.customer_phone.trim() && (
+                <p className="text-xs text-red-500 mt-1">Ingresa tu número de WhatsApp</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-gray-400 font-normal">(opcional — para recibir link de pago)</span></label>
+              <input className="input-field" placeholder="juan@email.com" value={form.customer_email}
+                onChange={e => set('customer_email', e.target.value)} type="email" />
+            </div>
+
+            <div className="border-t border-gray-100 pt-4 mt-2">
+              <h3 className="font-semibold text-gray-900 mb-3">Tu vehículo</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
+                  <input
+                    className={cn('input-field', showErrors && !form.vehicle_make.trim() && 'border-red-400 focus:ring-red-300')}
+                    placeholder="Toyota" value={form.vehicle_make}
+                    onChange={e => set('vehicle_make', e.target.value)} />
+                  {showErrors && !form.vehicle_make.trim() && (
+                    <p className="text-xs text-red-500 mt-1">Ingresa la marca</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
+                  <input
+                    className={cn('input-field', showErrors && !form.vehicle_model.trim() && 'border-red-400 focus:ring-red-300')}
+                    placeholder="Corolla" value={form.vehicle_model}
+                    onChange={e => set('vehicle_model', e.target.value)} />
+                  {showErrors && !form.vehicle_model.trim() && (
+                    <p className="text-xs text-red-500 mt-1">Ingresa el modelo</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
         {/* Step 3: Confirmar */}
         {step === 3 && (
           <>
@@ -408,21 +441,30 @@ export default function BookingForm({ services }: Props) {
               <Row label="Servicio" value={selectedService?.name ?? ''} />
               <Row label="Fecha" value={form.scheduled_date} />
               <Row label="Hora" value={form.scheduled_time} />
-              {servicePrice && selectedDiscounted && (
-                <div className="border-t pt-2 mt-2 space-y-1">
-                  <div className="flex justify-between text-sm text-gray-400">
-                    <span>Precio normal</span>
-                    <span className="line-through">{formatCurrency(servicePrice)}</span>
+              {servicePrice && (
+                selectedDiscounted ? (
+                  <div className="border-t pt-2 mt-2 space-y-1">
+                    <div className="flex justify-between text-sm text-gray-400">
+                      <span>Precio normal</span>
+                      <span className="line-through">{formatCurrency(servicePrice)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-green-600 font-medium">
+                      <span>Descuento ({selectedDiscounted.label} — julio)</span>
+                      <span>-{formatCurrency(servicePrice - selectedDiscounted.discounted)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-base">
+                      <span>Total</span>
+                      <span className="text-brand-600">{formatCurrency(selectedDiscounted.discounted)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm text-green-600 font-medium">
-                    <span>Descuento ({selectedDiscounted.label})</span>
-                    <span>-{formatCurrency(servicePrice - selectedDiscounted.discounted)}</span>
+                ) : (
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between font-bold text-base">
+                      <span>Total</span>
+                      <span className="text-brand-600">{formatCurrency(servicePrice)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between font-bold text-base">
-                    <span>Total</span>
-                    <span className="text-brand-600">{formatCurrency(selectedDiscounted.discounted)}</span>
-                  </div>
-                </div>
+                )
               )}
             </div>
             {error && (
