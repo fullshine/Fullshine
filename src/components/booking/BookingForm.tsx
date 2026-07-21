@@ -24,6 +24,8 @@ interface Props {
   services: Service[]
   /** Slug para preseleccionar servicio, ej: "ceramico-gold", "full-deluxe" */
   preselect?: string
+  /** Si viene, el formulario solo muestra servicios de esa categoría (ej: "ceramico") */
+  category?: string
 }
 
 const INITIAL_FORM: BookingFormData = {
@@ -58,7 +60,11 @@ function findPreselected(services: Service[], key?: string): Service | undefined
   )
 }
 
-export default function BookingForm({ services, preselect }: Props) {
+export default function BookingForm({ services: allServices, preselect, category }: Props) {
+  // Filtro por categoría (para landings de campaña): solo si existe al menos
+  // un servicio de esa categoría; si no, se muestran todos como fallback.
+  const filtered = category ? allServices.filter(s => s.category === category) : allServices
+  const services = filtered.length > 0 ? filtered : allServices
   const preselected = findPreselected(services, preselect)
   const [step, setStep] = useState(0)
   const [form, setForm] = useState<BookingFormData>(

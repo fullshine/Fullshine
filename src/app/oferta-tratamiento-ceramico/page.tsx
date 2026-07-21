@@ -77,7 +77,7 @@ export default function OfertaCeramicoLanding() {
               <p className="text-[10px] text-gray-400 tracking-widest uppercase">Detailing Premium</p>
             </div>
           </Link>
-          <Link href="/reservar?servicio=ceramico"
+          <Link href="/reservar?categoria=ceramico"
             className="bg-amber-500 hover:bg-amber-400 text-black font-black text-sm px-5 py-2 rounded-full transition-all">
             Reservar
           </Link>
@@ -106,7 +106,7 @@ export default function OfertaCeramicoLanding() {
           </p>
           <p className="text-gray-500 text-sm mb-8">Concepción & San Pedro de la Paz · 82 reseñas ⭐ 5.0 en Google</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/reservar?servicio=ceramico"
+            <Link href="/reservar?categoria=ceramico"
               className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-10 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/25">
               Reservar con 25% OFF
             </Link>
@@ -174,7 +174,7 @@ export default function OfertaCeramicoLanding() {
                     </li>
                   ))}
                 </ul>
-                <Link href={`/reservar?servicio=${tier.slug}`}
+                <Link href={`/reservar?categoria=ceramico&servicio=${tier.slug}`}
                   className={`block text-center font-black py-3.5 rounded-full text-sm transition-all hover:scale-105 ${tier.popular ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}>
                   Reservar {tier.name}
                 </Link>
@@ -235,7 +235,7 @@ export default function OfertaCeramicoLanding() {
           )}
           <h2 className="text-3xl md:text-4xl font-black mb-4">Tu auto merece esta protección</h2>
           <p className="text-gray-400 mb-8">Reserva en 2 minutos. Solo pagas el 20% de anticipo.</p>
-          <Link href="/reservar?servicio=ceramico"
+          <Link href="/reservar?categoria=ceramico"
             className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/25">
             {promo ? 'Reservar con 25% OFF' : 'Reservar tratamiento cerámico'}
           </Link>
