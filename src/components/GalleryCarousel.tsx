@@ -55,19 +55,29 @@ export default function GalleryCarousel() {
       onTouchEnd={onTouchEnd}
     >
       {/* Viewport */}
-      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 bg-gray-900">
+      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 bg-black">
         {SLIDES.map((slide, i) => (
           <div
             key={slide.src}
             className={`absolute inset-0 transition-opacity duration-700 ${i === index ? 'opacity-100' : 'opacity-0'}`}
             aria-hidden={i !== index}
           >
+            {/* Fondo difuminado de la misma foto — rellena los lados sin barras negras feas */}
+            <Image
+              src={slide.src}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="object-cover blur-2xl scale-110 opacity-40"
+              aria-hidden
+            />
+            {/* Foto completa, sin recorte */}
             <Image
               src={slide.src}
               alt={slide.alt}
               fill
               sizes="(max-width: 768px) 100vw, 768px"
-              className="object-cover"
+              className="object-contain relative"
               priority={i === 0}
             />
           </div>
