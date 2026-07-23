@@ -13,6 +13,7 @@ import ExitIntentPopup from '@/components/ExitIntentPopup'
 import WhatsAppButton from '@/components/WhatsAppButton'
 import StatsBar from '@/components/StatsBar'
 import ServicesTabs from '@/components/ServicesTabs'
+import GalleryCarousel from '@/components/GalleryCarousel'
 // ServiceDescription is used inside ServicesTabs
 
 export const revalidate = 3600 // ISR: revalida cada hora
@@ -317,6 +318,18 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* GALERÍA DE TRABAJOS */}
+      <section className="py-24 px-4 border-t border-white/5">
+        <div className="max-w-5xl mx-auto">
+          <FadeUp>
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-2 text-center">Galería</p>
+            <h2 className="text-3xl font-bold text-white text-center mb-3">Nuestros trabajos</h2>
+            <p className="text-gray-400 text-center mb-12">Autos reales que pasaron por Fullshine — el brillo habla por sí solo</p>
+          </FadeUp>
+          <GalleryCarousel />
         </div>
       </section>
 
