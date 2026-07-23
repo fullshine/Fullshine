@@ -8,13 +8,14 @@ interface Slide {
   alt: string
 }
 
-// Para agregar/cambiar fotos: deja los archivos en /public/galeria/ con estos nombres
+// Para agregar/cambiar fotos: deja los archivos en /public/galeria/ como trabajo-N.jpg
 const SLIDES: Slide[] = [
-  { src: '/galeria/ferrari.jpg',     alt: 'Ferrari con sellado cerámico en Fullshine Concepción' },
-  { src: '/galeria/mazda-rojo.jpg',  alt: 'Mazda CX rojo con cerámica Nasiol ZR53 en Fullshine' },
-  { src: '/galeria/porsche.jpg',     alt: 'Porsche Cayenne con tratamiento cerámico en Fullshine' },
-  { src: '/galeria/mazda-negro.jpg', alt: 'Mazda negro con sellado cerámico y pulido en Fullshine' },
-  { src: '/galeria/ds-gris.jpg',     alt: 'SUV gris con protección cerámica en Fullshine Concepción' },
+  { src: '/galeria/trabajo-1.jpg', alt: 'Auto con sellado cerámico Nasiol ZR53 en Fullshine Concepción' },
+  { src: '/galeria/trabajo-2.jpg', alt: 'Detailing premium con cerámica en Fullshine Concepción' },
+  { src: '/galeria/trabajo-3.jpg', alt: 'Auto con tratamiento cerámico y pulido en Fullshine' },
+  { src: '/galeria/trabajo-4.jpg', alt: 'Vehículo con protección cerámica en Fullshine Concepción' },
+  { src: '/galeria/trabajo-5.jpg', alt: 'Sellado cerámico profesional en Fullshine Concepción' },
+  { src: '/galeria/trabajo-6.jpg', alt: 'Auto premium detallado en Fullshine Concepción' },
 ]
 
 const INTERVAL = 4000 // ms entre fotos
