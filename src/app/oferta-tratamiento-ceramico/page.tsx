@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Metadata } from 'next'
 import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO } from '@/lib/promo'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import GalleryCarousel from '@/components/GalleryCarousel'
 
 export const revalidate = 3600
 
@@ -133,8 +134,17 @@ export default function OfertaCeramicoLanding() {
         </div>
       </section>
 
-      {/* PRECIOS ANTES / DESPUÉS */}
+      {/* GALERÍA DE TRABAJOS */}
       <section className="py-20 px-4">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-black text-center mb-3">Nuestros trabajos</h2>
+          <p className="text-gray-400 text-center mb-10">Autos reales sellados en Fullshine — el brillo habla por sí solo</p>
+          <GalleryCarousel />
+        </div>
+      </section>
+
+      {/* PRECIOS ANTES / DESPUÉS */}
+      <section className="py-20 px-4 bg-gray-900/40 border-y border-white/5">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-black text-center mb-3">Elige tu paquete</h2>
           <p className="text-gray-400 text-center mb-12">
