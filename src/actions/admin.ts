@@ -413,3 +413,60 @@ export async function sendReviewRequest(bookingId: string): Promise<ActionResult
     return { success: false, error: 'Error inesperado' }
   }
 }
+
+// Reenvía la confirmación de una reserva (WhatsApp al cliente + push al negocio).
+// Útil cuando el envío automático falló al crear la reserva.
+export async function resendConfirmation(bookingId: string): Promise<ActionResult> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
+  try {
+    const supabase = createAdminClient()
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .select('*, customer:customers(*), vehicle:vehicles(*), service:services(*)')
+      .eq('id', bookingId)
+      .single()
+
+    if (error || !booking) return { success: false, error: 'Reserva no encontrada' }
+    if (!booking.customer?.phone) return { success: false, error: 'La reserva no tiene teléfono de cliente' }
+
+    const scheduledAt = booking.booking_date && booking.slot_start
+      ? `${booking.booking_date}T${booking.slot_start}`
+      : booking.slot_start ?? ''
+    const total = booking.total_price_clp ?? 0
+    const isCeramico = booking.service?.category === 'ceramico'
+
+    const { sendBookingConfirmationToClient, sendNewBookingToAdmin } = await import('@/lib/whatsapp')
+    const { sendPushToAdmin } = await import('@/lib/push')
+
+    await Promise.all([
+      sendBookingConfirmationToClient({
+        phone: booking.customer.phone,
+        customerName: booking.customer.full_name,
+        serviceName: booking.service?.name ?? '',
+        scheduledAt,
+        vehicleMake: booking.vehicle?.brand ?? '',
+        vehicleModel: booking.vehicle?.model ?? '',
+        totalPrice: total > 0 ? total : undefined,
+        basePrice: total > 0 ? Math.round(total / (isCeramico ? 0.75 : 0.9)) : undefined,
+        discountPct: total > 0 ? (isCeramico ? 0.25 : 0.10) : undefined,
+      }).catch(e => console.error('[Reenvío WhatsApp cliente]', e?.message)),
+      sendNewBookingToAdmin({
+        customerName: booking.customer.full_name,
+        customerPhone: booking.customer.phone,
+        serviceName: booking.service?.name ?? '',
+        scheduledAt,
+        vehicleMake: booking.vehicle?.brand ?? '',
+        vehicleModel: booking.vehicle?.model ?? '',
+      }).catch(e => console.error('[Reenvío WhatsApp admin]', e?.message)),
+      sendPushToAdmin(
+        '🔔 Reserva (reenvío)',
+        `${booking.customer.full_name} · ${booking.service?.name ?? ''}`.trim()
+      ).catch(e => console.error('[Reenvío push]', e?.message)),
+    ])
+
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Error inesperado' }
+  }
+}

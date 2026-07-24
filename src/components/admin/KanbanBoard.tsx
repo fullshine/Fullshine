@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { moveBookingStage, sendReviewRequest } from '@/actions/admin'
+import { moveBookingStage, sendReviewRequest, resendConfirmation } from '@/actions/admin'
 import { generateCertificate } from '@/actions/certificates'
 import { getStatusLabelFull, getStatusColorFull, formatCurrency } from '@/lib/utils'
 import type { BookingWithRelations } from '@/types'
@@ -95,6 +95,14 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
     })
   }
 
+  function handleResend() {
+    startTransition(async () => {
+      setMsg('Reenviando confirmación...')
+      const res = await resendConfirmation(booking.id)
+      setMsg(res.success ? '✅ Confirmación reenviada por WhatsApp' : `Error: ${res.error}`)
+    })
+  }
+
   return (
     <div className={`bg-white rounded-lg border border-gray-200 p-3 shadow-sm text-sm ${pending ? 'opacity-60' : ''}`}>
       <div className="flex items-start justify-between mb-1 gap-1">
@@ -138,6 +146,11 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
             🏅 Certificado
           </button>
         )}
+        <button onClick={handleResend} disabled={pending}
+          className="text-xs px-2 py-1 rounded bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 disabled:opacity-50"
+          title="Reenviar la confirmación por WhatsApp al cliente y push al negocio">
+          🔁 Reenviar
+        </button>
         <button onClick={() => move('cancelled')} disabled={pending}
           className="text-xs px-2 py-1 rounded bg-red-50 hover:bg-red-100 text-red-600 disabled:opacity-50 ml-auto">
           X
