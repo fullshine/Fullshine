@@ -280,6 +280,11 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         vehicleMake: input.vehicle.make ?? '',
         vehicleModel: input.vehicle.model,
       }).catch(e => console.error('[WhatsApp admin]', e?.message)),
+      // Notificación push a la app del celular del negocio
+      sendPushToAdmin(
+        '🔔 Nueva reserva Fullshine',
+        `${input.customer.full_name} · ${service.name} · ${input.vehicle.make ?? ''} ${input.vehicle.model}`.trim()
+      ).catch(e => console.error('[Push admin]', e?.message)),
     ])
 
     return { success: true, data: { bookingId } }
