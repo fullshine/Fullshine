@@ -257,8 +257,10 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
 
     // Link de pago: se envía manualmente desde el kanban
 
-    // WhatsApp: fallar silenciosamente si Green API no está disponible
-    Promise.all([
+    // WhatsApp: se AWAITEA para que los mensajes se envíen antes de que el
+    // runtime serverless de Vercel congele la función. Cada envío falla
+    // silenciosamente (.catch) para no romper la reserva si Green API cae.
+    await Promise.all([
       sendBookingConfirmationToClient({
         phone: input.customer.phone,
         customerName: input.customer.full_name,
