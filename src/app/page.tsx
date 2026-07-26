@@ -184,9 +184,15 @@ export default async function HomePage() {
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
             <a href="#empresas" className="hover:text-white transition-colors">Empresas</a>
           </div>
-          <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-5 py-2 rounded-full transition-colors shrink-0">
-            Reservar
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href="/revision-gratis-concepcion"
+              className="hidden sm:inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-sm px-4 py-2 rounded-full transition-colors whitespace-nowrap">
+              🔍 Revisión GRATIS
+            </Link>
+            <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-5 py-2 rounded-full transition-colors">
+              Reservar
+            </Link>
+          </div>
         </div>
       </nav>
 
