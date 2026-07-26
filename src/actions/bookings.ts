@@ -18,6 +18,12 @@ const FIXED_SLOTS = [
 const MAX_CONCURRENT = 1
 const FULL_DAY_THRESHOLD_MINUTES = 6 * 60
 
+// Servicios cortos (revisión/diagnóstico): horarios cada 1 hora desde las 09:00.
+// No bloquean la bahía como un detailing, así que admiten mayor concurrencia.
+const SHORT_SERVICE_MAX_MINUTES = 60
+const SHORT_SLOT_START_HOUR = 9
+const MAX_CONCURRENT_SHORT = 3
+
 // --- SERVICES ---
 
 export async function getServices(): Promise<ActionResult<Service[]>> {
@@ -70,9 +76,17 @@ export async function getAvailableSlots(date: string, serviceId: string): Promis
 
     const { data: bookings } = await supabase
       .from('bookings')
-      .select('slot_start, slot_end')
+      .select('slot_start, slot_end, service:services(duration_hours)')
       .eq('booking_date', date)
       .not('status', 'eq', 'cancelled')
+
+    // Las revisiones (servicios cortos) corren en una agenda PARALELA:
+    // no ocupan cupo de detailing, y el detailing no les quita cupo a ellas.
+    const isShortBooking = (b: any) =>
+      Math.round(((b.service?.duration_hours ?? 1) as number) * 60) <= SHORT_SERVICE_MAX_MINUTES
+
+    const shortBookings = (bookings ?? []).filter(isShortBooking)
+    const longBookings = (bookings ?? []).filter(b => !isShortBooking(b))
 
     const dayOfWeek = new Date(`${date}T12:00:00`).getDay()
     if (dayOfWeek === 0) return { success: true, data: { date, slots: [] } }
@@ -80,6 +94,34 @@ export async function getAvailableSlots(date: string, serviceId: string): Promis
     const hours = dayOfWeek === 6 ? BUSINESS_HOURS.saturday : BUSINESS_HOURS.weekday
     const slots: TimeSlot[] = []
     const isFullDay = durationMinutes > FULL_DAY_THRESHOLD_MINUTES
+
+    // --- Servicios cortos: un turno cada hora, de 09:00 hasta la hora de cierre ---
+    if (durationMinutes <= SHORT_SERVICE_MAX_MINUTES) {
+      for (let h = SHORT_SLOT_START_HOUR; h < hours.close; h++) {
+        const startMinutes = h * 60
+        const endMinutes = startMinutes + durationMinutes
+
+        const slotStartTime = `${h.toString().padStart(2, '0')}:00:00`
+        const eh = Math.floor(endMinutes / 60).toString().padStart(2, '0')
+        const emin = (endMinutes % 60).toString().padStart(2, '0')
+        const slotEndTime = `${eh}:${emin}:00`
+
+        // Solo cuenta otras revisiones, nunca los trabajos de detailing
+        const overlappingCount = shortBookings.filter((b: any) =>
+          b.slot_start < slotEndTime && b.slot_end > slotStartTime
+        ).length
+
+        const spotsLeft = MAX_CONCURRENT_SHORT - overlappingCount
+
+        slots.push({
+          start: `${date}T${slotStartTime}`,
+          end: `${date}T${slotEndTime}`,
+          available: spotsLeft > 0,
+          spots_left: Math.max(0, spotsLeft),
+        })
+      }
+      return { success: true, data: { date, slots } }
+    }
 
     for (const fixed of FIXED_SLOTS) {
       if (isFullDay && fixed.hour >= 12) continue
@@ -97,7 +139,8 @@ export async function getAvailableSlots(date: string, serviceId: string): Promis
       const slotStartTime = `${sh}:${sm}:00`
       const slotEndTime = `${eh}:${emin}:00`
 
-      const overlappingCount = (bookings ?? []).filter((b: any) =>
+      // Solo cuenta trabajos de detailing; las revisiones no bloquean la bahía
+      const overlappingCount = longBookings.filter((b: any) =>
         b.slot_start < slotEndTime && b.slot_end > slotStartTime
       ).length
 
@@ -223,13 +266,24 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
 
     const { data: overlapping } = await supabase
       .from('bookings')
-      .select('id')
+      .select('id, service:services(duration_hours)')
       .eq('booking_date', bookingDate)
       .neq('status', 'cancelled')
       .lt('slot_start', slotEndTime)
       .gt('slot_end', slotStartTime)
 
-    if (overlapping && overlapping.length >= MAX_CONCURRENT) {
+    // Agendas paralelas: una revisión solo compite con otras revisiones,
+    // y un trabajo de detailing solo compite con otros trabajos.
+    const isShortService = durationMinutes <= SHORT_SERVICE_MAX_MINUTES
+    const relevantOverlaps = (overlapping ?? []).filter((b: any) => {
+      const mins = Math.round(((b.service?.duration_hours ?? 1) as number) * 60)
+      return isShortService
+        ? mins <= SHORT_SERVICE_MAX_MINUTES
+        : mins > SHORT_SERVICE_MAX_MINUTES
+    })
+    const concurrencyCap = isShortService ? MAX_CONCURRENT_SHORT : MAX_CONCURRENT
+
+    if (relevantOverlaps.length >= concurrencyCap) {
       return { success: false, error: 'El horario seleccionado ya no está disponible.' }
     }
 

@@ -226,6 +226,7 @@ export default function BookingForm({ services: allServices, preselect, category
             <div className="space-y-4 max-h-[28rem] overflow-y-auto pr-1">
               {(() => {
                 const CATEGORY_LABELS: Record<string, string> = {
+                  revision:         'Revisión y Diagnóstico GRATIS',
                   lavado_detallado: 'Lavado Detallado',
                   tapiz:            'Tapiz',
                   pulido:           'Pulidos',
@@ -233,7 +234,7 @@ export default function BookingForm({ services: allServices, preselect, category
                   adicional:        'Adicionales',
                   precompra:        'Servicio Precompra',
                 }
-                const CATEGORY_ORDER = ['lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'adicional', 'precompra']
+                const CATEGORY_ORDER = ['revision', 'lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'adicional', 'precompra']
                 const grouped = services.reduce<Record<string, typeof services>>((acc, s) => {
                   const cat = s.category ?? 'add_on'
                   if (!acc[cat]) acc[cat] = []
@@ -278,7 +279,9 @@ export default function BookingForm({ services: allServices, preselect, category
                                 </p>
                               </div>
                               <div className="text-right ml-4 shrink-0">
-                                {price ? (
+                                {price === 0 ? (
+                                  <span className="text-sm font-black text-green-600 bg-green-50 px-2 py-1 rounded">GRATIS</span>
+                                ) : price ? (
                                   disc ? (
                                     <div>
                                       <p className="text-xs text-gray-400 line-through">{formatCurrency(price)}</p>

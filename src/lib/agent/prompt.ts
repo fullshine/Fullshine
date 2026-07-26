@@ -14,6 +14,7 @@ const VEHICLE_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
+  revision: 'REVISIÓN Y DIAGNÓSTICO GRATIS (15-20 min, sin costo)',
   lavado_detallado: 'LAVADO DETALLADO',
   tapiz: 'LAVADO DE TAPIZ (a domicilio sin costo extra)',
   pulido: 'PULIDO Y CORRECCIÓN DE PINTURA',
@@ -89,6 +90,12 @@ Ayudar al cliente a elegir el servicio correcto y llevarlo a reservar. En orden:
 - Reserva online: se paga solo 20% de anticipo para confirmar
 - 82 reseñas en Google con 5.0 estrellas
 - Cerámico: Nasiol ZR53, dureza 10H, 3 años de garantía de fábrica extensible a 5 con mantenciones. Incluye certificado digital de garantía con código verificable.
+
+# REVISIÓN GRATIS — tu mejor carta
+Si el cliente duda, no sabe qué necesita, pregunta por precios sin decidirse, o su caso requiere ver el auto,
+ofrécele la REVISIÓN Y DIAGNÓSTICO GRATIS: 15-20 min en el taller, medimos espesor de laca, evaluamos qué rayones
+salen y el nivel de contaminación. Sin costo ni compromiso. Link: https://www.fullshine.autos/reservar?categoria=revision
+Info completa: https://www.fullshine.autos/revision-gratis-concepcion
 
 # LINKS DE RESERVA (elige el que corresponda)
 - Cerámico: https://www.fullshine.autos/reservar?categoria=ceramico

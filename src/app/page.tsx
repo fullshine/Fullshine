@@ -177,6 +177,9 @@ export default async function HomePage() {
           {/* Anclas de navegación */}
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-400">
             <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
+            <Link href="/revision-gratis-concepcion" className="text-green-400 hover:text-green-300 font-semibold transition-colors">
+              Revisión gratis
+            </Link>
             <a href="#resenas" className="hover:text-white transition-colors">Reseñas</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
             <a href="#empresas" className="hover:text-white transition-colors">Empresas</a>
@@ -229,10 +232,10 @@ export default async function HomePage() {
                 className="bg-brand-500 hover:bg-brand-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-brand-500/25">
                 Reservar ahora
               </Link>
-              <a href="#servicios"
-                className="border border-chrome-700 hover:border-chrome-500 text-chrome-300 hover:text-white font-semibold text-lg px-8 py-4 rounded-full transition-colors">
-                Ver servicios
-              </a>
+              <Link href="/revision-gratis-concepcion"
+                className="border-2 border-green-500/60 hover:border-green-400 bg-green-500/10 hover:bg-green-500/20 text-green-300 hover:text-white font-bold text-lg px-8 py-4 rounded-full transition-all">
+                🔍 Revisión GRATIS
+              </Link>
             </div>
             <p className="mt-6 text-chrome-700 text-sm tracking-wide">
               Concepción y San Pedro de la Paz · Lun–Vie 09:00–18:00 · Sáb 09:00–14:00
@@ -318,6 +321,29 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* REVISIÓN GRATIS — lead magnet */}
+      <section className="py-20 px-4 bg-gradient-to-b from-green-950/20 to-gray-950 border-y border-green-500/15">
+        <div className="max-w-3xl mx-auto text-center">
+          <FadeUp>
+            <span className="inline-block bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-5">
+              Sin costo · Sin compromiso
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
+              ¿No sabes qué necesita tu auto?
+            </h2>
+            <p className="text-gray-400 mb-3 max-w-xl mx-auto leading-relaxed">
+              Te hacemos una <strong className="text-white">revisión gratis</strong>: medimos el espesor de la laca,
+              evaluamos qué rayones se pueden corregir y detectamos la contaminación de la pintura.
+            </p>
+            <p className="text-gray-600 text-sm mb-8">15-20 minutos · Diagnóstico honesto · Sin presión de venta</p>
+            <Link href="/revision-gratis-concepcion"
+              className="inline-block bg-green-500 hover:bg-green-400 text-black font-black text-lg px-10 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-green-500/25">
+              🔍 Agendar revisión gratis
+            </Link>
+          </FadeUp>
         </div>
       </section>
 
