@@ -7,8 +7,14 @@ export const revalidate = 3600
 
 const CTA_URL = '/reservar?categoria=revision'
 
-/** Loop de 8s de la medición real (Ferrari Portofino, medidor marcando 123 μm). */
-const VIDEO_MEDICION: string | null = '/video/medicion.mp4'
+/**
+ * Loop corto (8s) de la medición real.
+ * Requiere buena calidad: grabar en horizontal o vertical directo desde el celular
+ * (NO reenviado por WhatsApp, que recomprime a 560px).
+ * Guardarlo en  public/video/medicion.mp4  y cambiar esta constante a esa ruta.
+ * Mientras sea null se muestra el instrumento gráfico.
+ */
+const VIDEO_MEDICION: string | null = null
 const WA_URL =
   'https://wa.me/56933654943?text=' +
   encodeURIComponent('Hola, quiero agendar mi diagnóstico gratuito de pintura 🚗')
