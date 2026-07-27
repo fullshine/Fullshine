@@ -7,12 +7,8 @@ export const revalidate = 3600
 
 const CTA_URL = '/reservar?categoria=revision'
 
-/**
- * Video corto (8s) de la medición real.
- * Cuando grabes el clip, guárdalo en  public/video/medicion.mp4
- * y cambia esta constante a  '/video/medicion.mp4'
- */
-const VIDEO_MEDICION: string | null = null
+/** Loop de 8s de la medición real (Ferrari Portofino, medidor marcando 123 μm). */
+const VIDEO_MEDICION: string | null = '/video/medicion.mp4'
 const WA_URL =
   'https://wa.me/56933654943?text=' +
   encodeURIComponent('Hola, quiero agendar mi diagnóstico gratuito de pintura 🚗')
@@ -153,9 +149,9 @@ export default function DiagnosticoLanding() {
       <header className="relative flex min-h-[100svh] items-center justify-center px-5 py-24">
         <Image
           src="/galeria/hero-diagnostico.jpg"
-          alt="Vehículo bajo las luces LED de inspección del taller Fullshine en Concepción"
+          alt="Ferrari bajo las luces LED de inspección del taller Fullshine en Concepción"
           fill priority sizes="100vw"
-          className="scale-105 object-cover object-[58%_42%]"
+          className="scale-105 object-cover object-[50%_62%]"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-[#05070A]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,.8)_100%)]" />
@@ -179,17 +175,17 @@ export default function DiagnosticoLanding() {
           </Reveal>
 
           <Reveal delay={330}>
-            <p className="mx-auto mt-6 max-w-2xl text-xl font-bold leading-snug text-[#FFC107] sm:text-3xl">
-              No todos los autos deberían pulirse.
+            <p className="mx-auto mt-7 max-w-2xl text-xl font-bold leading-snug text-white/80 sm:text-3xl">
+              Hay una forma de saberlo.
             </p>
           </Reveal>
 
           <Reveal delay={430}>
-            <p className="mt-4 text-2xl font-black leading-tight tracking-tight sm:text-4xl">
+            <p className="mt-3 text-3xl font-black leading-[1.05] tracking-tight sm:text-5xl">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E37A] via-[#8affc9] to-[#00E37A]">
-                Descúbrelo GRATIS
+                GRATIS.
               </span>
-              <span className="block text-white/90 sm:inline"> en 15 minutos</span>
+              <span className="block text-white/90 sm:ml-3 sm:inline">En 15 minutos.</span>
             </p>
           </Reveal>
 
@@ -204,7 +200,7 @@ export default function DiagnosticoLanding() {
 
           <Reveal delay={660}>
             <div className="mt-11">
-              <CTA size="xl">QUIERO MI DIAGNÓSTICO GRATUITO</CTA>
+              <CTA size="xl">QUIERO SABER SI MI AUTO NECESITA UN PULIDO</CTA>
             </div>
             <p className="mt-6 text-xs tracking-wide text-white/35 sm:text-sm">
               Sin costo · Sin compromiso · Camilo Henríquez 381, Concepción
@@ -290,11 +286,32 @@ export default function DiagnosticoLanding() {
               <div className="pointer-events-none absolute -inset-10 rounded-[48px] bg-[#00E37A]/[0.08] blur-3xl" />
 
               {VIDEO_MEDICION ? (
-                <video
-                  src={VIDEO_MEDICION}
-                  autoPlay muted loop playsInline
-                  className="relative w-full rounded-[32px] border border-white/10 shadow-[0_40px_120px_-40px_rgba(0,227,122,.45)]"
-                />
+                <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#080B10] shadow-[0_40px_120px_-40px_rgba(0,227,122,.45)]">
+                  <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-3.5">
+                    <span className="flex items-center gap-2.5">
+                      <span className="h-2 w-2 animate-pulse rounded-full bg-[#00E37A]" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/45">
+                        Midiendo en vivo
+                      </span>
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/25">
+                      Ferrari Portofino
+                    </span>
+                  </div>
+                  <video
+                    src={VIDEO_MEDICION}
+                    poster="/video/medicion-poster.jpg"
+                    autoPlay muted loop playsInline preload="metadata"
+                    aria-label="Medición del espesor de laca con medidor profesional sobre un Ferrari en el taller Fullshine"
+                    className="block w-full"
+                  />
+                  <p className="border-t border-white/[0.07] px-5 py-4 text-center text-sm text-white/45">
+                    Medición real en nuestro taller, panel por panel.
+                    <span className="block text-white/70">
+                      Cada zona da un número distinto. Por eso se mide todo.
+                    </span>
+                  </p>
+                </div>
               ) : (
                 <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-b from-[#12171F] to-[#080B10] p-7 shadow-[0_40px_120px_-40px_rgba(0,227,122,.45)] sm:p-10">
                   {/* barra superior del aparato */}
@@ -317,7 +334,7 @@ export default function DiagnosticoLanding() {
                       Espesor de laca
                     </p>
                     <p className="relative mt-4 font-black tabular-nums leading-none text-[#00E37A] drop-shadow-[0_0_35px_rgba(0,227,122,.65)]">
-                      <CountUp to={128} className="text-[5.5rem] sm:text-[9rem]" />
+                      <CountUp to={143} className="text-[5.5rem] sm:text-[9rem]" />
                       <span className="ml-2 align-top text-2xl font-bold text-[#00E37A]/60 sm:text-4xl">μm</span>
                     </p>
 
@@ -341,7 +358,7 @@ export default function DiagnosticoLanding() {
                   <p className="mt-7 text-center text-sm leading-relaxed text-white/45">
                     Lectura real de un vehículo evaluado en el taller.
                     <span className="block text-white/70">
-                      Con 128 μm hay margen suficiente para una corrección segura.
+                      Con 143 μm hay margen suficiente para una corrección segura.
                     </span>
                   </p>
                 </div>
@@ -355,6 +372,27 @@ export default function DiagnosticoLanding() {
               Eso nos permite saber si tu auto fue repintado, cuánto margen real hay para corregir
               y hasta dónde es seguro llegar. <span className="text-white">Sin adivinar.</span>
             </p>
+          </Reveal>
+
+          {/* ── ¿Sabías que...? ── */}
+          <Reveal delay={340}>
+            <div className="relative mx-auto mt-16 max-w-3xl overflow-hidden rounded-[26px] border border-[#FFC107]/30 bg-gradient-to-br from-[#FFC107]/[0.09] to-transparent p-9 sm:p-12">
+              <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#FFC107]/10 blur-3xl" />
+              <div className="relative">
+                <p className="mb-6 text-[10px] font-bold uppercase tracking-[0.35em] text-[#FFC107]">
+                  ¿Sabías que…?
+                </p>
+                <p className="text-2xl font-black leading-[1.25] tracking-tight sm:text-[2rem]">
+                  Cada pulido elimina una pequeña parte del barniz de tu vehículo.
+                </p>
+                <p className="mt-5 text-xl font-bold leading-snug text-[#FFC107] sm:text-2xl">
+                  Ese espesor nunca vuelve.
+                </p>
+                <p className="mt-7 text-base leading-relaxed text-white/55 sm:text-lg">
+                  Por eso primero medimos. Después recomendamos.
+                </p>
+              </div>
+            </div>
           </Reveal>
 
           <Reveal delay={360}>
@@ -591,6 +629,42 @@ export default function DiagnosticoLanding() {
         </div>
       </section>
 
+      {/* ══════ QUIÉN TE ATIENDE ══════ */}
+      <section className="border-y border-white/[0.07] bg-white/[0.02] px-5 py-24 sm:py-32">
+        <div className="mx-auto max-w-3xl">
+          <Reveal>
+            <div className="flex flex-col items-center gap-9 text-center sm:flex-row sm:items-center sm:gap-11 sm:text-left">
+              <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-2xl border border-[#00E37A]/25 sm:h-40 sm:w-40">
+                <Image
+                  src="/juan-medidor.jpg"
+                  alt="Juan Sáez midiendo el espesor de laca de un Ferrari en el taller Fullshine"
+                  fill loading="lazy" sizes="160px"
+                  className="object-cover"
+                />
+              </div>
+
+              <div>
+                <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.35em] text-[#00E37A]">
+                  Quién te atiende
+                </p>
+                <p className="text-2xl font-black tracking-tight sm:text-3xl">Juan Sáez</p>
+                <p className="mt-1.5 text-sm font-semibold text-white/60">
+                  Especialista en corrección de pintura
+                </p>
+                <p className="mt-1 text-sm text-white/40">
+                  Más de 300 vehículos tratados en Concepción
+                </p>
+                <p className="mt-6 text-base leading-relaxed text-white/55">
+                  El diagnóstico lo hago yo, contigo al lado. Vas a ver las mediciones
+                  en la pantalla del instrumento al mismo tiempo que yo, y te voy a decir
+                  exactamente lo que veo — aunque la conclusión sea que tu auto no necesita nada.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ══════ CTA FINAL ══════ */}
       <section className="relative overflow-hidden px-5 py-32 sm:py-44">
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#00E37A]/10 blur-[120px]" />
@@ -609,7 +683,7 @@ export default function DiagnosticoLanding() {
 
           <Reveal delay={200}>
             <div className="mt-12">
-              <CTA size="xl">QUIERO MI DIAGNÓSTICO GRATUITO</CTA>
+              <CTA size="xl">QUIERO SABER SI MI AUTO NECESITA UN PULIDO</CTA>
             </div>
           </Reveal>
 
