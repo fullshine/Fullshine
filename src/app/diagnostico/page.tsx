@@ -6,6 +6,13 @@ import Reveal, { CountUp } from '@/components/Reveal'
 export const revalidate = 3600
 
 const CTA_URL = '/reservar?categoria=revision'
+
+/**
+ * Video corto (8s) de la medición real.
+ * Cuando grabes el clip, guárdalo en  public/video/medicion.mp4
+ * y cambia esta constante a  '/video/medicion.mp4'
+ */
+const VIDEO_MEDICION: string | null = null
 const WA_URL =
   'https://wa.me/56933654943?text=' +
   encodeURIComponent('Hola, quiero agendar mi diagnóstico gratuito de pintura 🚗')
@@ -71,10 +78,10 @@ const DESCUBRIRAS = [
 ]
 
 const PASOS = [
-  { n: 1, t: 'Reservas online', d: 'Eliges día y hora en menos de un minuto. Confirmación inmediata por WhatsApp.' },
-  { n: 2, t: 'Analizamos tu pintura', d: 'Medidor de espesor y luz de inspección, panel por panel. Toma 15 a 20 minutos.' },
-  { n: 3, t: 'Vemos juntos los resultados', d: 'Te mostramos las mediciones en el momento. Los números están a la vista, no hay caja negra.' },
-  { n: 4, t: 'Recibes tu recomendación', d: 'Qué corresponde hacer, qué riesgos existen y cuánto costaría. Decides tú, sin presión.' },
+  { n: 1, t: 'Reservas tu hora', d: 'Eliges día y horario en menos de un minuto. Confirmación inmediata por WhatsApp.' },
+  { n: 2, t: 'Evaluamos tu pintura', d: 'Medidor de espesor y luz de inspección, panel por panel. La evaluación toma 15 a 20 minutos.' },
+  { n: 3, t: 'Revisamos juntos los datos', d: 'Te mostramos las mediciones en el momento. Los números están a la vista, no hay caja negra.' },
+  { n: 4, t: 'Prescribimos el tratamiento', d: 'Qué corresponde hacer, qué riesgos existen y cuánto costaría. Decides tú, sin presión.' },
 ]
 
 const INFORME = [
@@ -83,7 +90,7 @@ const INFORME = [
   'Zonas repintadas detectadas',
   'Nivel de corrección recomendado',
   'Riesgos identificados',
-  'Tratamiento sugerido y alternativas',
+  'Tratamiento prescrito y alternativas',
 ]
 
 const RESENAS = [
@@ -171,8 +178,14 @@ export default function DiagnosticoLanding() {
             </h1>
           </Reveal>
 
-          <Reveal delay={340}>
-            <p className="mt-7 text-2xl font-black leading-tight tracking-tight sm:text-4xl">
+          <Reveal delay={330}>
+            <p className="mx-auto mt-6 max-w-2xl text-xl font-bold leading-snug text-[#FFC107] sm:text-3xl">
+              No todos los autos deberían pulirse.
+            </p>
+          </Reveal>
+
+          <Reveal delay={430}>
+            <p className="mt-4 text-2xl font-black leading-tight tracking-tight sm:text-4xl">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E37A] via-[#8affc9] to-[#00E37A]">
                 Descúbrelo GRATIS
               </span>
@@ -180,15 +193,16 @@ export default function DiagnosticoLanding() {
             </p>
           </Reveal>
 
-          <Reveal delay={460}>
+          <Reveal delay={540}>
             <p className="mx-auto mt-8 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">
-              Antes de recomendar cualquier tratamiento, medimos el espesor real de tu laca,
-              detectamos rayones corregibles e identificamos contaminación invisible.
-              Te mostramos exactamente qué necesita tu auto — y qué no.
+              Antes de recomendar cualquier tratamiento diagnosticamos tu pintura con instrumentos:
+              medimos el espesor real de la laca, evaluamos qué rayones son corregibles
+              e identificamos contaminación invisible.
+              <span className="text-white"> Después prescribimos — no antes.</span>
             </p>
           </Reveal>
 
-          <Reveal delay={580}>
+          <Reveal delay={660}>
             <div className="mt-11">
               <CTA size="xl">QUIERO MI DIAGNÓSTICO GRATUITO</CTA>
             </div>
@@ -251,74 +265,144 @@ export default function DiagnosticoLanding() {
       </section>
 
       {/* ══════ EL INSTRUMENTO ══════ */}
-      <section className="relative overflow-hidden border-y border-white/[0.07] bg-gradient-to-b from-white/[0.035] to-transparent px-5 py-28 sm:py-36">
-        <div className="pointer-events-none absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-[#00E37A]/[0.07] blur-[100px]" />
+      <section className="relative overflow-hidden border-y border-white/[0.07] bg-gradient-to-b from-white/[0.04] via-transparent to-transparent px-5 py-28 sm:py-36">
+        <div className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#00E37A]/[0.09] blur-[130px]" />
+
         <div className="relative mx-auto max-w-5xl">
-          <div className="grid items-center gap-14 lg:grid-cols-2">
-            <Reveal>
-              <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.35em] text-[#FFC107]">
-                El instrumento
-              </p>
-              <h2 className="text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl">
-                Medimos en micras.<br />
-                <span className="text-white/45">No a ojo.</span>
-              </h2>
-              <p className="mt-7 leading-relaxed text-white/55">
-                La capa transparente que protege tu pintura tiene un espesor medible — y finito.
-                Cada pulido consume parte de ella <span className="text-white">para siempre</span>.
-              </p>
-              <p className="mt-5 leading-relaxed text-white/55">
-                Con un medidor de espesor profesional obtenemos la lectura exacta de cada panel.
-                Eso nos permite saber si tu auto fue repintado, cuánto margen real hay para corregir
-                y hasta dónde es seguro llegar. Sin adivinar.
-              </p>
+          <Reveal className="text-center">
+            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.35em] text-[#FFC107]">
+              El instrumento
+            </p>
+            <h2 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
+              Medimos en micras.<br />
+              <span className="text-white/40">No a ojo.</span>
+            </h2>
+            <p className="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-white/55 sm:text-lg">
+              La capa transparente que protege tu pintura tiene un espesor medible — y finito.
+              Cada pulido consume parte de ella <span className="text-white">para siempre</span>.
+            </p>
+          </Reveal>
 
-              <div className="mt-9 grid grid-cols-3 gap-4">
-                {[
-                  { v: '±1', l: 'micra de precisión' },
-                  { v: '100%', l: 'de los paneles' },
-                  { v: '15′', l: 'y lo sabes' },
-                ].map(x => (
-                  <div key={x.l} className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 text-center">
-                    <p className="text-xl font-black text-[#00E37A]">{x.v}</p>
-                    <p className="mt-1 text-[10px] uppercase tracking-wider text-white/40">{x.l}</p>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
+          {/* ── El medidor, en grande ── */}
+          <Reveal delay={180}>
+            <div className="relative mx-auto mt-16 max-w-2xl">
+              {/* halo */}
+              <div className="pointer-events-none absolute -inset-10 rounded-[48px] bg-[#00E37A]/[0.08] blur-3xl" />
 
-            {/* Informe */}
-            <Reveal delay={200}>
-              <div className="relative overflow-hidden rounded-[26px] border border-[#00E37A]/25 bg-[#080C11]/90 p-8 backdrop-blur sm:p-10">
-                <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#00E37A]/10 blur-3xl" />
-                <div className="relative">
-                  <div className="mb-7 flex items-center gap-3 border-b border-white/[0.08] pb-5">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00E37A]/15 text-[#00E37A]">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
-                        <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
-                        <path d="M9 8h6M9 12h6M9 16h3" strokeLinecap="round" />
-                      </svg>
+              {VIDEO_MEDICION ? (
+                <video
+                  src={VIDEO_MEDICION}
+                  autoPlay muted loop playsInline
+                  className="relative w-full rounded-[32px] border border-white/10 shadow-[0_40px_120px_-40px_rgba(0,227,122,.45)]"
+                />
+              ) : (
+                <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-b from-[#12171F] to-[#080B10] p-7 shadow-[0_40px_120px_-40px_rgba(0,227,122,.45)] sm:p-10">
+                  {/* barra superior del aparato */}
+                  <div className="mb-7 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="h-2 w-2 animate-pulse rounded-full bg-[#00E37A]" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/45">
+                        Midiendo
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/25">
+                      Capó · Panel 01
                     </span>
-                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-white/70">
-                      Tu informe incluye
-                    </p>
                   </div>
-                  <ul className="space-y-4">
-                    {INFORME.map(item => (
-                      <li key={item} className="flex items-start gap-3.5">
-                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#00E37A]/15 text-[10px] font-black text-[#00E37A]">✓</span>
-                        <span className="text-sm text-white/75">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-8 border-t border-white/[0.06] pt-5 text-xs leading-relaxed text-white/35">
-                    Explicado en simple, con los números a la vista. Sin tecnicismos innecesarios
-                    y sin venderte algo que tu auto no necesita.
+
+                  {/* pantalla LCD */}
+                  <div className="relative rounded-2xl border border-[#00E37A]/20 bg-[#03070A] px-6 py-10 text-center shadow-[inset_0_0_60px_-20px_rgba(0,227,122,.5)] sm:py-14">
+                    <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_center,rgba(0,227,122,.12),transparent_65%)]" />
+                    <p className="relative text-[11px] font-bold uppercase tracking-[0.3em] text-[#00E37A]/60">
+                      Espesor de laca
+                    </p>
+                    <p className="relative mt-4 font-black tabular-nums leading-none text-[#00E37A] drop-shadow-[0_0_35px_rgba(0,227,122,.65)]">
+                      <CountUp to={128} className="text-[5.5rem] sm:text-[9rem]" />
+                      <span className="ml-2 align-top text-2xl font-bold text-[#00E37A]/60 sm:text-4xl">μm</span>
+                    </p>
+
+                    {/* escala */}
+                    <div className="relative mx-auto mt-9 max-w-sm">
+                      <div className="flex h-2.5 overflow-hidden rounded-full">
+                        <div className="w-[28%] bg-red-500/70" />
+                        <div className="w-[22%] bg-[#FFC107]/70" />
+                        <div className="w-[50%] bg-[#00E37A]/70" />
+                      </div>
+                      {/* aguja */}
+                      <div className="absolute -top-1.5 left-[62%] h-5 w-0.5 -translate-x-1/2 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,.9)]" />
+                      <div className="mt-3 flex justify-between text-[9px] font-bold uppercase tracking-wider">
+                        <span className="text-red-400/70">Crítico</span>
+                        <span className="text-[#FFC107]/70">Límite</span>
+                        <span className="text-[#00E37A]/70">Seguro</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="mt-7 text-center text-sm leading-relaxed text-white/45">
+                    Lectura real de un vehículo evaluado en el taller.
+                    <span className="block text-white/70">
+                      Con 128 μm hay margen suficiente para una corrección segura.
+                    </span>
                   </p>
                 </div>
+              )}
+            </div>
+          </Reveal>
+
+          <Reveal delay={280}>
+            <p className="mx-auto mt-14 max-w-2xl text-center leading-relaxed text-white/55">
+              Con un medidor de espesor profesional obtenemos la lectura exacta de cada panel.
+              Eso nos permite saber si tu auto fue repintado, cuánto margen real hay para corregir
+              y hasta dónde es seguro llegar. <span className="text-white">Sin adivinar.</span>
+            </p>
+          </Reveal>
+
+          <Reveal delay={360}>
+            <div className="mx-auto mt-11 grid max-w-2xl grid-cols-3 gap-4">
+              {[
+                { v: '±1', l: 'micra de precisión' },
+                { v: '100%', l: 'de los paneles' },
+                { v: '15′', l: 'y lo sabes' },
+              ].map(x => (
+                <div key={x.l} className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 text-center">
+                  <p className="text-xl font-black text-[#00E37A]">{x.v}</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-white/40">{x.l}</p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+
+          {/* ── Informe ── */}
+          <Reveal delay={200}>
+            <div className="relative mx-auto mt-20 max-w-2xl overflow-hidden rounded-[26px] border border-[#00E37A]/25 bg-[#080C11]/90 p-8 backdrop-blur sm:p-10">
+              <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#00E37A]/10 blur-3xl" />
+              <div className="relative">
+                <div className="mb-7 flex items-center gap-3 border-b border-white/[0.08] pb-5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00E37A]/15 text-[#00E37A]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
+                      <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+                      <path d="M9 8h6M9 12h6M9 16h3" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                  <p className="text-sm font-bold uppercase tracking-[0.15em] text-white/70">
+                    Tu informe incluye
+                  </p>
+                </div>
+                <ul className="grid gap-4 sm:grid-cols-2">
+                  {INFORME.map(item => (
+                    <li key={item} className="flex items-start gap-3.5">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#00E37A]/15 text-[10px] font-black text-[#00E37A]">✓</span>
+                      <span className="text-sm text-white/75">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-8 border-t border-white/[0.06] pt-5 text-xs leading-relaxed text-white/35">
+                  Explicado en simple, con los números a la vista. Sin tecnicismos innecesarios
+                  y sin venderte algo que tu auto no necesita.
+                </p>
               </div>
-            </Reveal>
-          </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -326,7 +410,7 @@ export default function DiagnosticoLanding() {
       <section className="px-5 py-28 sm:py-36">
         <div className="mx-auto max-w-6xl">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.35em] text-[#00E37A]">Resultados</p>
+            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.35em] text-[#00E37A]">Lo que descubrirás</p>
             <h2 className="text-3xl font-black leading-[1.1] tracking-tight sm:text-5xl">
               ¿Qué descubrirás<br className="hidden sm:block" /> en tu diagnóstico?
             </h2>
@@ -355,12 +439,88 @@ export default function DiagnosticoLanding() {
         </div>
       </section>
 
+      {/* ══════ POR QUÉ IMPORTA ══════ */}
+      <section className="relative overflow-hidden px-5 pb-28 sm:pb-36">
+        <div className="mx-auto max-w-4xl">
+          <Reveal>
+            <div className="relative overflow-hidden rounded-[28px] border border-[#FFC107]/25 bg-gradient-to-b from-[#FFC107]/[0.07] to-transparent p-9 sm:p-14">
+              <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#FFC107]/[0.09] blur-3xl" />
+
+              <div className="relative">
+                <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.35em] text-[#FFC107]">
+                  Por qué importa
+                </p>
+                <h2 className="text-3xl font-black leading-[1.1] tracking-tight sm:text-[2.75rem]">
+                  ¿Qué pasa si no<br className="hidden sm:block" /> diagnosticas antes?
+                </h2>
+
+                <p className="mt-8 max-w-2xl text-base leading-relaxed text-white/60 sm:text-lg">
+                  Un pulido realizado sobre una pintura demasiado delgada puede reducir aún más
+                  el espesor del barniz. Y el barniz <span className="text-white">no se regenera</span>:
+                  lo que se retira, no vuelve.
+                </p>
+                <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/60 sm:text-lg">
+                  Por eso primero medimos y después recomendamos el tratamiento adecuado.
+                  No es una precaución excesiva — es el orden correcto de las cosas.
+                </p>
+
+                <div className="mt-11 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/[0.07] bg-black/25 p-6">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+                      Sin diagnóstico
+                    </p>
+                    <ul className="space-y-3 text-sm text-white/55">
+                      {[
+                        'Se pule "por si acaso", sin saber cuánta laca queda',
+                        'Un panel repintado pasa desapercibido',
+                        'Se paga por una corrección que quizá no era necesaria',
+                        'El daño solo aparece meses después',
+                      ].map(t => (
+                        <li key={t} className="flex gap-3">
+                          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-white/25" />
+                          <span>{t}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="rounded-2xl border border-[#00E37A]/25 bg-[#00E37A]/[0.05] p-6">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#00E37A]">
+                      Con diagnóstico
+                    </p>
+                    <ul className="space-y-3 text-sm text-white/70">
+                      {[
+                        'Sabes exactamente cuántas micras tiene cada panel',
+                        'Se detecta cualquier zona repintada antes de intervenir',
+                        'Se prescribe solo el tratamiento que corresponde',
+                        'Decides con datos, no con una corazonada',
+                      ].map(t => (
+                        <li key={t} className="flex gap-3">
+                          <span className="mt-0.5 text-[#00E37A]">✓</span>
+                          <span>{t}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <p className="mt-9 text-sm italic leading-relaxed text-white/40">
+                  A veces el diagnóstico concluye que tu auto no necesita un pulido.
+                  También te lo vamos a decir.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ══════ CÓMO FUNCIONA ══════ */}
       <section className="border-y border-white/[0.07] bg-white/[0.02] px-5 py-28 sm:py-36">
         <div className="mx-auto max-w-3xl">
           <Reveal className="text-center">
-            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.35em] text-[#FFC107]">Proceso</p>
+            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.35em] text-[#FFC107]">El protocolo</p>
             <h2 className="text-3xl font-black tracking-tight sm:text-5xl">¿Cómo funciona?</h2>
+            <p className="mt-5 text-white/45">Cuatro pasos. Siempre en este orden.</p>
           </Reveal>
 
           <ol className="mt-16">
@@ -439,7 +599,10 @@ export default function DiagnosticoLanding() {
             <h2 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
               ¿Vale la pena<br />pulir tu auto?
             </h2>
-            <p className="mt-6 text-2xl font-black text-[#00E37A] sm:text-3xl">
+            <p className="mt-5 text-xl font-bold text-[#FFC107] sm:text-2xl">
+              Deja de suponerlo.
+            </p>
+            <p className="mt-4 text-2xl font-black text-[#00E37A] sm:text-3xl">
               Descúbrelo gratis en 15 minutos.
             </p>
           </Reveal>

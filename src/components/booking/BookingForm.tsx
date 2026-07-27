@@ -8,8 +8,21 @@ import ServiceDescription from '@/components/ServiceDescription'
 import { isPromoActive, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
 
 const VEHICLE_TYPES: VehicleType[] = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
-// Orden optimizado: primero el servicio y su precio, los datos personales al final
-const STEPS = ['Servicio', 'Fecha y Hora', 'Tus datos', 'Confirmar']
+
+type StepKey = 'servicio' | 'fecha' | 'datos' | 'confirmar'
+
+const STEP_LABELS: Record<StepKey, string> = {
+  servicio: 'Servicio',
+  fecha: 'Fecha y Hora',
+  datos: 'Tus datos',
+  confirmar: 'Confirmar',
+}
+
+// Flujo completo (servicios pagados)
+const STEPS_FULL: StepKey[] = ['servicio', 'fecha', 'datos', 'confirmar']
+// Flujo corto para la revisión gratis: sin elegir servicio, sin confirmación,
+// sin email ni notas. Cada campo extra cuesta conversión.
+const STEPS_REVISION: StepKey[] = ['fecha', 'datos']
 
 interface Service {
   id: string
@@ -66,9 +79,15 @@ export default function BookingForm({ services: allServices, preselect, category
   const filtered = category ? allServices.filter(s => s.category === category) : allServices
   const services = filtered.length > 0 ? filtered : allServices
   const preselected = findPreselected(services, preselect)
+
+  // Modo "revisión gratis": flujo corto y sin precios.
+  const isRevision = category === 'revision' && filtered.length > 0
+  const STEPS = isRevision ? STEPS_REVISION : STEPS_FULL
+  const autoService = isRevision ? services[0] : preselected
+
   const [step, setStep] = useState(0)
   const [form, setForm] = useState<BookingFormData>(
-    preselected ? { ...INITIAL_FORM, service_id: preselected.id } : INITIAL_FORM
+    autoService ? { ...INITIAL_FORM, service_id: autoService.id } : INITIAL_FORM
   )
   const [slots, setSlots] = useState<TimeSlot[]>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
@@ -108,10 +127,13 @@ export default function BookingForm({ services: allServices, preselect, category
     setLoadingSlots(false)
   }
 
+  const current: StepKey = STEPS[step]
+  const isLastStep = step === STEPS.length - 1
+
   function canGoNext(): boolean {
-    if (step === 0) return !!(form.service_id && form.vehicle_type)
-    if (step === 1) return !!(form.scheduled_date && form.scheduled_time)
-    if (step === 2) return !!(
+    if (current === 'servicio') return !!(form.service_id && form.vehicle_type)
+    if (current === 'fecha') return !!(form.scheduled_date && form.scheduled_time)
+    if (current === 'datos') return !!(
       form.customer_name.trim() &&
       form.customer_phone.trim() &&
       form.vehicle_make.trim() &&
@@ -160,12 +182,21 @@ export default function BookingForm({ services: allServices, preselect, category
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Reserva confirmada!</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          {isRevision ? '¡Diagnóstico agendado!' : '¡Reserva confirmada!'}
+        </h2>
         <p className="text-gray-600 mb-6">
           Recibirás una confirmación por WhatsApp al número <strong>{form.customer_phone}</strong>.
+          {isRevision && ' Te esperamos en Camilo Henríquez 381, Concepción.'}
         </p>
-        <button onClick={() => { setSuccess(false); setForm(INITIAL_FORM); setStep(0) }} className="btn-primary">
-          Nueva reserva
+        <button
+          onClick={() => {
+            setSuccess(false)
+            setForm(autoService ? { ...INITIAL_FORM, service_id: autoService.id } : INITIAL_FORM)
+            setStep(0)
+          }}
+          className="btn-primary">
+          {isRevision ? 'Agendar otro' : 'Nueva reserva'}
         </button>
       </div>
     )
@@ -176,8 +207,8 @@ export default function BookingForm({ services: allServices, preselect, category
       {/* Progress */}
       <div className="bg-gray-50 px-6 py-4 border-b">
         <div className="flex items-center justify-between mb-2">
-          {STEPS.map((label, i) => (
-            <div key={i} className="flex items-center">
+          {STEPS.map((key, i) => (
+            <div key={key} className="flex items-center">
               <div className={cn(
                 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
                 i < step ? 'bg-green-500 text-white' :
@@ -192,13 +223,13 @@ export default function BookingForm({ services: allServices, preselect, category
             </div>
           ))}
         </div>
-        <p className="text-sm font-medium text-gray-700">Paso {step + 1}: {STEPS[step]}</p>
+        <p className="text-sm font-medium text-gray-700">Paso {step + 1}: {STEP_LABELS[current]}</p>
       </div>
 
       <div className="p-6 space-y-4">
 
-        {/* Step 0: Servicio (con tipo de vehículo para ver precio exacto) */}
-        {step === 0 && (
+        {/* Servicio (con tipo de vehículo para ver precio exacto) */}
+        {current === 'servicio' && (
           <>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
@@ -309,9 +340,17 @@ export default function BookingForm({ services: allServices, preselect, category
           </>
         )}
 
-        {/* Step 1: Fecha y Hora */}
-        {step === 1 && (
+        {/* Fecha y Hora */}
+        {current === 'fecha' && (
           <>
+            {isRevision ? (
+              <div className="rounded-xl bg-green-50 border border-green-200 p-4">
+                <p className="font-bold text-green-800">Diagnóstico profesional de pintura</p>
+                <p className="text-sm text-green-700 mt-1">
+                  Sin costo · 15 a 20 minutos · Camilo Henríquez 381, Concepción
+                </p>
+              </div>
+            ) : null}
             <h3 className="font-semibold text-gray-900">Elige fecha y hora</h3>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
@@ -372,18 +411,22 @@ export default function BookingForm({ services: allServices, preselect, category
                 )}
               </div>
             )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
-              <textarea className="input-field resize-none" rows={2} placeholder="Alguna indicación especial..."
-                value={form.notes} onChange={e => set('notes', e.target.value)} />
-            </div>
+            {!isRevision && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
+                <textarea className="input-field resize-none" rows={2} placeholder="Alguna indicación especial..."
+                  value={form.notes} onChange={e => set('notes', e.target.value)} />
+              </div>
+            )}
           </>
         )}
 
-        {/* Step 2: Datos de contacto + vehículo */}
-        {step === 2 && (
+        {/* Datos de contacto + vehículo */}
+        {current === 'datos' && (
           <>
-            <h3 className="font-semibold text-gray-900">Tus datos de contacto</h3>
+            <h3 className="font-semibold text-gray-900">
+              {isRevision ? 'Solo faltan tus datos' : 'Tus datos de contacto'}
+            </h3>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
               <input
@@ -404,14 +447,32 @@ export default function BookingForm({ services: allServices, preselect, category
                 <p className="text-xs text-red-500 mt-1">Ingresa tu número de WhatsApp</p>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-gray-400 font-normal">(opcional — para recibir link de pago)</span></label>
-              <input className="input-field" placeholder="juan@email.com" value={form.customer_email}
-                onChange={e => set('customer_email', e.target.value)} type="email" />
-            </div>
+            {!isRevision && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-gray-400 font-normal">(opcional — para recibir link de pago)</span></label>
+                <input className="input-field" placeholder="juan@email.com" value={form.customer_email}
+                  onChange={e => set('customer_email', e.target.value)} type="email" />
+              </div>
+            )}
 
             <div className="border-t border-gray-100 pt-4 mt-2">
               <h3 className="font-semibold text-gray-900 mb-3">Tu vehículo</h3>
+              {isRevision && (
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {VEHICLE_TYPES.map(type => (
+                    <button key={type} type="button"
+                      onClick={() => set('vehicle_type', type)}
+                      className={cn(
+                        'py-2 px-2 rounded-lg border text-xs font-medium transition-colors',
+                        form.vehicle_type === type
+                          ? 'bg-brand-500 border-brand-500 text-white'
+                          : 'bg-white border-gray-300 text-gray-700 hover:border-brand-400'
+                      )}>
+                      {getVehicleTypeLabel(type)}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
@@ -438,8 +499,8 @@ export default function BookingForm({ services: allServices, preselect, category
           </>
         )}
 
-        {/* Step 3: Confirmar */}
-        {step === 3 && (
+        {/* Confirmar */}
+        {current === 'confirmar' && (
           <>
             <h3 className="font-semibold text-gray-900">Confirma tu reserva</h3>
             <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
@@ -482,6 +543,10 @@ export default function BookingForm({ services: allServices, preselect, category
           </>
         )}
 
+        {error && current !== 'confirmar' && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">{error}</div>
+        )}
+
       </div>
 
       {/* Navigation */}
@@ -493,7 +558,7 @@ export default function BookingForm({ services: allServices, preselect, category
             Atrás
           </button>
         )}
-        {step < STEPS.length - 1 ? (
+        {!isLastStep ? (
           <button type="button" onClick={() => {
             if (!canGoNext()) { setShowErrors(true); return }
             setShowErrors(false)
@@ -502,9 +567,17 @@ export default function BookingForm({ services: allServices, preselect, category
             Siguiente
           </button>
         ) : (
-          <button type="button" onClick={handleSubmit} disabled={submitting}
+          <button type="button"
+            onClick={() => {
+              if (!canGoNext()) { setShowErrors(true); return }
+              setShowErrors(false)
+              handleSubmit()
+            }}
+            disabled={submitting}
             className="btn-primary flex-1">
-            {submitting ? 'Confirmando...' : 'Confirmar reserva'}
+            {submitting
+              ? 'Confirmando...'
+              : isRevision ? 'AGENDAR MI DIAGNÓSTICO GRATIS' : 'Confirmar reserva'}
           </button>
         )}
       </div>
