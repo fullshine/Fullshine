@@ -4,6 +4,7 @@ import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
 import WhatsAppButton from '@/components/WhatsAppButton'
 import GalleryCarousel from '@/components/GalleryCarousel'
+import PixelEvent from '@/components/PixelEvent'
 
 export const revalidate = 3600
 
@@ -151,6 +152,11 @@ export default function RevisionGratisPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([schemaService, schemaFAQ, schemaBreadcrumb]) }}
+      />
+      <PixelEvent
+        event="ViewContent"
+        contentName="Revisión gratis Concepción (orgánico)"
+        contentCategory="revision"
       />
       <SiteNav />
       <WhatsAppButton />

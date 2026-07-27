@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { track } from '@/lib/fbq'
 
 export default function WhatsAppButton() {
   const [visible, setVisible] = useState(false)
@@ -18,6 +19,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contactar por WhatsApp"
+      onClick={() => track('Contact', { content_name: 'WhatsApp flotante' })}
       className="fixed bottom-6 right-6 z-[80] flex items-center gap-3 group"
     >
       {/* Tooltip hover */}

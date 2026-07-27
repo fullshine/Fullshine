@@ -4,6 +4,7 @@ import { Metadata } from 'next'
 import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO } from '@/lib/promo'
 import WhatsAppButton from '@/components/WhatsAppButton'
 import GalleryCarousel from '@/components/GalleryCarousel'
+import PixelEvent from '@/components/PixelEvent'
 
 export const revalidate = 3600
 
@@ -66,6 +67,11 @@ export default function OfertaCeramicoLanding() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
+      <PixelEvent
+        event="ViewContent"
+        contentName="Landing oferta cerámico 25% OFF"
+        contentCategory="ceramico"
+      />
       <WhatsAppButton />
 
       {/* NAV MINIMAL — sin menú para no fugar tráfico de la campaña */}

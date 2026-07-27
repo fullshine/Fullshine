@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { createBooking, getAvailableSlots } from '@/actions/bookings'
 import type { BookingFormData, VehicleType, TimeSlot } from '@/types'
 import { cn, formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
 import ServiceDescription from '@/components/ServiceDescription'
 import { isPromoActive, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
+import { track } from '@/lib/fbq'
 
 const VEHICLE_TYPES: VehicleType[] = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
 
@@ -95,6 +96,8 @@ export default function BookingForm({ services: allServices, preselect, category
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showErrors, setShowErrors] = useState(false)
+  // Para que InitiateCheckout se dispare una sola vez por sesión de formulario
+  const startedRef = useRef(false)
 
   const promoActive = isPromoActive()
   const selectedService = services.find(s => s.id === form.service_id)
@@ -165,8 +168,30 @@ export default function BookingForm({ services: allServices, preselect, category
         scheduled_at: scheduledAt,
         notes: form.notes || undefined,
       })
-      if (result.success) setSuccess(true)
-      else setError(result.error ?? 'Error al crear la reserva')
+      if (result.success) {
+        // ── Meta Pixel: conversión ─────────────────────────────────────────
+        // La revisión gratis es un LEAD (objetivo de las campañas).
+        // Una reserva pagada es un SCHEDULE, con su valor real en CLP.
+        const finalPrice = selectedDiscounted?.discounted ?? servicePrice ?? 0
+        if (isRevision) {
+          track('Lead', {
+            content_name: 'Diagnóstico gratuito de pintura',
+            content_category: 'revision',
+            currency: 'CLP',
+            value: 0,
+          })
+        } else {
+          track('Schedule', {
+            content_name: selectedService?.name ?? 'Servicio Fullshine',
+            content_category: selectedService?.category ?? 'detailing',
+            currency: 'CLP',
+            value: finalPrice,
+          })
+        }
+        setSuccess(true)
+      } else {
+        setError(result.error ?? 'Error al crear la reserva')
+      }
     } catch {
       setError('Error inesperado. Por favor intenta de nuevo.')
     } finally {
@@ -561,6 +586,18 @@ export default function BookingForm({ services: allServices, preselect, category
         {!isLastStep ? (
           <button type="button" onClick={() => {
             if (!canGoNext()) { setShowErrors(true); return }
+            // Meta Pixel: el usuario avanzó de verdad en el formulario
+            if (!startedRef.current) {
+              startedRef.current = true
+              track('InitiateCheckout', {
+                content_name: isRevision
+                  ? 'Diagnóstico gratuito de pintura'
+                  : selectedService?.name ?? 'Reserva Fullshine',
+                content_category: isRevision ? 'revision' : selectedService?.category ?? 'detailing',
+                currency: 'CLP',
+                value: isRevision ? 0 : selectedDiscounted?.discounted ?? servicePrice ?? 0,
+              })
+            }
             setShowErrors(false)
             setStep(s => s + 1)
           }} className="btn-primary flex-1">

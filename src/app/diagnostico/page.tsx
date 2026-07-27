@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Metadata } from 'next'
 import Reveal, { CountUp } from '@/components/Reveal'
+import PixelEvent, { WhatsAppTrackedLink } from '@/components/PixelEvent'
 
 export const revalidate = 3600
 
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     siteName: 'Fullshine Premium Detailing',
     locale: 'es_CL',
     type: 'website',
-    images: [{ url: 'https://www.fullshine.autos/galeria/hero-diagnostico.jpg', width: 1600, height: 1200 }],
+    images: [{ url: 'https://www.fullshine.autos/galeria/hero-ferrari.jpg', width: 1600, height: 1200 }],
   },
 }
 
@@ -150,11 +151,16 @@ export default function DiagnosticoLanding() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#05070A] text-white antialiased selection:bg-[#00E37A] selection:text-black">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <PixelEvent
+        event="ViewContent"
+        contentName="Landing diagnóstico gratuito"
+        contentCategory="revision"
+      />
 
       {/* ══════ HERO ══════ */}
       <header className="relative flex min-h-[100svh] items-center justify-center px-5 py-24">
         <Image
-          src="/galeria/hero-diagnostico.jpg"
+          src="/galeria/hero-ferrari.jpg"
           alt="Ferrari bajo las luces LED de inspección del taller Fullshine en Concepción"
           fill priority sizes="100vw"
           className="scale-105 object-cover object-[50%_62%]"
@@ -695,14 +701,13 @@ export default function DiagnosticoLanding() {
 
           <Reveal delay={320}>
             <p className="mt-8 text-sm text-white/35">Sin costo · Sin compromiso · Sin presión de venta</p>
-            <a
+            <WhatsAppTrackedLink
               href={WA_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              source="Landing diagnóstico — CTA final"
               className="mt-7 inline-block text-sm font-medium text-white/45 underline decoration-white/20 underline-offset-4 transition-colors hover:text-white"
             >
               ¿Prefieres escribirnos por WhatsApp?
-            </a>
+            </WhatsAppTrackedLink>
           </Reveal>
         </div>
       </section>
