@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     siteName: 'Fullshine Premium Detailing',
     locale: 'es_CL',
     type: 'website',
-    images: [{ url: 'https://www.fullshine.autos/galeria/trabajo-1.jpg', width: 1200, height: 900 }],
+    images: [{ url: 'https://www.fullshine.autos/galeria/hero-diagnostico.jpg', width: 1600, height: 1200 }],
   },
 }
 
@@ -145,12 +145,12 @@ export default function DiagnosticoLanding() {
       {/* ══════ HERO ══════ */}
       <header className="relative flex min-h-[100svh] items-center justify-center px-5 py-24">
         <Image
-          src="/galeria/trabajo-1.jpg"
-          alt="Vehículo premium bajo luces de inspección en Fullshine Concepción"
+          src="/galeria/hero-diagnostico.jpg"
+          alt="Vehículo bajo las luces LED de inspección del taller Fullshine en Concepción"
           fill priority sizes="100vw"
-          className="scale-105 object-cover object-center"
+          className="scale-105 object-cover object-[58%_42%]"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/88 via-black/72 to-[#05070A]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-[#05070A]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,.8)_100%)]" />
 
         <div className="relative z-10 mx-auto max-w-4xl text-center">
