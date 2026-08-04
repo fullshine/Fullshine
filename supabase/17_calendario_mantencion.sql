@@ -43,10 +43,13 @@ CREATE INDEX IF NOT EXISTS idx_maintenance_due     ON maintenance_schedule (due_
 CREATE INDEX IF NOT EXISTS idx_maintenance_status  ON maintenance_schedule (status);
 CREATE INDEX IF NOT EXISTS idx_maintenance_cliente ON maintenance_schedule (customer_id);
 
--- Evita duplicar la misma mantención si el trigger corre dos veces
+-- Evita duplicar la misma mantención si el trigger corre dos veces.
+-- OJO: el índice NO puede ser parcial (con WHERE), porque entonces
+-- Postgres no lo acepta en las cláusulas ON CONFLICT de más abajo.
+-- Un índice único normal ya permite varios NULL, así que no hace falta.
+DROP INDEX IF EXISTS idx_maintenance_origen_unico;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_maintenance_origen_unico
-  ON maintenance_schedule (origin_booking_id)
-  WHERE origin_booking_id IS NOT NULL;
+  ON maintenance_schedule (origin_booking_id);
 
 -- ── RLS: solo el service role (el servidor) toca esta tabla ──────────────
 ALTER TABLE maintenance_schedule ENABLE ROW LEVEL SECURITY;
