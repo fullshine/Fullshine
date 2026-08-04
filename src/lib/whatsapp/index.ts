@@ -111,23 +111,60 @@ export async function sendNewBookingToAdmin({
   return sendMessage(branchPhone, message)
 }
 
-// --- Recordatorio 24h antes ---
+// --- Datos del taller (usados en los recordatorios) ---
+const DIRECCION = 'Camilo Henríquez 381, Concepción'
+const MAPA_QUERY =
+  'https://www.google.com/maps/search/?api=1&query=' +
+  encodeURIComponent('Fullshine Detailing, Camilo Henríquez 381, Concepción')
+
+/**
+ * Recordatorio del día anterior.
+ *
+ * Pide confirmación activa a propósito: quien responde "SÍ" llega mucho más
+ * que quien solo recibe el aviso. Y si alguien avisa que no puede, liberas
+ * el cupo con tiempo en vez de perderlo.
+ */
 export async function sendReminderToClient({
-  phone, customerName, serviceName, scheduledAt,
+  phone, customerName, serviceName, scheduledAt, isFree,
 }: {
   phone: string
   customerName: string
   serviceName: string
   scheduledAt: string
+  isFree?: boolean
 }) {
   const { date, time } = formatDateTime(scheduledAt)
   const message =
     `⏰ *Recordatorio Fullshine*\n\n` +
-    `¡Hola ${customerName}! Mañana tienes tu cita:\n\n` +
-    `🛠️ *Servicio:* ${serviceName}\n` +
-    `📅 *Fecha:* ${date}\n` +
-    `🕐 *Hora:* ${time}\n\n` +
-    `¡Te esperamos! 🚗✨`
+    `¡Hola ${customerName}! Mañana te esperamos:\n\n` +
+    `🛠️ *${serviceName}*\n` +
+    `📅 ${date}\n` +
+    `🕐 ${time}\n` +
+    `📍 ${DIRECCION}\n\n` +
+    `🗺️ Cómo llegar: ${MAPA_QUERY}\n\n` +
+    (isFree
+      ? `El diagnóstico toma entre 15 y 20 minutos y no tiene costo. ` +
+        `Solo trae el auto como esté — no hace falta lavarlo antes.\n\n`
+      : '') +
+    `👉 *¿Confirmas que vienes?* Respóndeme *SÍ* para dejar tu hora asegurada.\n` +
+    `Si te surgió algo, avísame y la movemos sin problema. 🙌`
+  return sendMessage(phone, message)
+}
+
+/** Recordatorio corto, 2 horas antes de la cita. */
+export async function sendSameDayReminderToClient({
+  phone, customerName, scheduledAt,
+}: {
+  phone: string
+  customerName: string
+  scheduledAt: string
+}) {
+  const { time } = formatDateTime(scheduledAt)
+  const message =
+    `🚗 ¡Hola ${customerName}! Te esperamos hoy a las *${time}*.\n\n` +
+    `📍 ${DIRECCION}\n` +
+    `🗺️ ${MAPA_QUERY}\n\n` +
+    `Si vas atrasado no te preocupes, solo avísame por aquí.`
   return sendMessage(phone, message)
 }
 

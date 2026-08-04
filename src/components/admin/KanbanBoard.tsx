@@ -59,11 +59,16 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
         // Generar certificado automáticamente al completar (solo cerámicos)
         if (newStatus === 'completed' && isForward) {
           setMsg('Generando certificado...')
-          const certRes = await generateCertificate(booking.id)
-          if (certRes.success && !certRes.skipped) {
-            setMsg(`✅ Certificado ${certRes.code} generado y enviado por WhatsApp`)
-          } else {
+          const certRes: any = await generateCertificate(booking.id)
+          if (!certRes.success) {
+            // Antes este error se tragaba en silencio y parecía que no pasaba nada.
+            setMsg(`⚠️ Certificado no generado: ${certRes.error}`)
+          } else if (certRes.skipped) {
             setMsg(null)
+          } else if (certRes.already_existed) {
+            setMsg(`ℹ️ Ya existía el certificado ${certRes.code}`)
+          } else {
+            setMsg(`✅ Certificado ${certRes.code} generado y enviado por WhatsApp`)
           }
         } else {
           setMsg(null)
