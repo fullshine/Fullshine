@@ -7,23 +7,24 @@ export async function generateCertificate(bookingId: string) {
   try {
     const supabase = createAdminClient()
 
-    // Obtener datos de la reserva
-    // OJO: la tabla vehicles usa make / license_plate (no brand / plate)
-    // y la fecha de la cita vive en bookings.scheduled_at.
+    // La tabla real usa booking_date (no scheduled_at ni booking_date en el
+    // esquema versionado, que quedó desactualizado). Se piden las filas
+    // completas y se lee el campo que exista.
     const { data: booking, error } = await supabase
       .from('bookings')
       .select(`
-        id, scheduled_at,
+        *,
         customer:customers(full_name, phone),
-        vehicle:vehicles(make, model, license_plate),
+        vehicle:vehicles(*),
         service:services(name, category)
       `)
       .eq('id', bookingId)
       .single<{
         id: string
-        scheduled_at: string
+        booking_date?: string
+        scheduled_at?: string
         customer: { full_name: string; phone: string } | null
-        vehicle: { make: string; model: string; license_plate: string | null } | null
+        vehicle: Record<string, string | null> | null
         service: { name: string; category: string } | null
       }>()
 
@@ -49,8 +50,14 @@ export async function generateCertificate(bookingId: string) {
       return { success: true, code: existing.certificate_code, already_existed: true }
     }
 
+    // Lectura tolerante a los dos nombres de columna posibles
+    const vMarca = booking.vehicle?.make ?? booking.vehicle?.brand ?? ''
+    const vModelo = booking.vehicle?.model ?? ''
+    const vPatente = booking.vehicle?.license_plate ?? booking.vehicle?.plate ?? null
+
     // Fecha de aplicación = fecha de la cita (o hoy, si viniera vacía)
-    const appliedDate = booking.scheduled_at ? new Date(booking.scheduled_at) : new Date()
+    const fechaCita = booking.booking_date ?? booking.scheduled_at
+    const appliedDate = fechaCita ? new Date(`${fechaCita.substring(0, 10)}T12:00:00`) : new Date()
     if (Number.isNaN(appliedDate.getTime())) {
       return { success: false, error: 'La reserva no tiene una fecha válida' }
     }
@@ -81,9 +88,9 @@ export async function generateCertificate(bookingId: string) {
           booking_id:       bookingId,
           certificate_code: code,
           customer_name:    booking.customer?.full_name ?? 'Cliente',
-          vehicle_brand:    booking.vehicle?.make ?? '',
-          vehicle_model:    booking.vehicle?.model ?? '',
-          vehicle_plate:    booking.vehicle?.license_plate ?? null,
+          vehicle_brand:    vMarca,
+          vehicle_model:    vModelo,
+          vehicle_plate:    vPatente,
           service_name:     booking.service?.name ?? '',
           product_name:     'Nasiol ZR53',
           applied_at:       appliedAtStr,

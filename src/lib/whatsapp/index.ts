@@ -247,6 +247,59 @@ export async function sendCertificateToClient({
   return sendMessage(phone, message)
 }
 
+// --- Mantención cerámica: primer aviso (a los 5 meses) ---
+/**
+ * No vende: recuerda un compromiso que el cliente ya adquirió al comprar
+ * el cerámico. Por eso menciona la garantía y ofrece posponer sin costo.
+ */
+export async function sendMaintenanceReminder({
+  phone, customerName, vehicle, dueMonth, certCode,
+}: {
+  phone: string
+  customerName: string
+  vehicle: string
+  dueMonth: string
+  certCode?: string
+}) {
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.fullshine.autos'}/reservar?categoria=mantencion`
+  const message =
+    `💎 *Hola ${customerName}, te escribo desde Fullshine.*\n\n` +
+    `Hace 6 meses aplicamos el tratamiento cerámico a tu *${vehicle}*` +
+    (certCode ? `, certificado *${certCode}*` : '') +
+    `, así que en ${dueMonth} corresponde la mantención semestral.\n\n` +
+    `No es un trámite: el booster es lo que mantiene la hidrofobia y el brillo, ` +
+    `y es la condición para que tu garantía de 3 años siga vigente.\n\n` +
+    `👉 Puedes agendar tu hora acá: ${url}\n\n` +
+    `Si prefieres esperar un poco más no hay problema — solo avísame y lo dejo ` +
+    `anotado para que la garantía no se caiga. 🙌`
+  return sendMessage(phone, message)
+}
+
+// --- Mantención cerámica: seguimiento (15 días después, sin respuesta) ---
+/**
+ * Segundo ángulo: en vez de repetir la oferta, ofrece revisar el estado
+ * del coating sin costo. Baja la barrera y suele reactivar al indeciso.
+ */
+export async function sendMaintenanceFollowUp({
+  phone, customerName, vehicle,
+}: {
+  phone: string
+  customerName: string
+  vehicle: string
+}) {
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.fullshine.autos'}/reservar?categoria=revision`
+  const message =
+    `Hola ${customerName} 👋\n\n` +
+    `Te escribí hace unas semanas por la mantención de tu *${vehicle}*. ` +
+    `No quiero insistir, solo dejarte una alternativa:\n\n` +
+    `Si no estás seguro de que le haga falta, pásate y *revisamos el estado del ` +
+    `coating sin costo*. Medimos la hidrofobia, revisamos el brillo y te digo con ` +
+    `honestidad si conviene hacer la mantención ahora o si puede esperar.\n\n` +
+    `👉 ${url}\n\n` +
+    `A veces la respuesta es que puede esperar. También te lo voy a decir.`
+  return sendMessage(phone, message)
+}
+
 // --- Solicitud de reseña Google ---
 export async function sendReviewRequestToClient({
   phone, customerName, serviceName,

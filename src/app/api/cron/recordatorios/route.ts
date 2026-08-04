@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendReminderToClient, sendSameDayReminderToClient } from '@/lib/whatsapp'
+import { procesarMantenciones, type ReporteMantenciones } from '@/lib/mantenciones'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -8,34 +9,45 @@ export const maxDuration = 60
 /**
  * Recordatorios automáticos por WhatsApp.
  *
- * Dos tandas en cada ejecución:
  *   · 24 h — todas las citas de MAÑANA que aún no fueron recordadas
  *   · 2 h  — citas que empiezan dentro de las próximas 1 a 3 horas
+ *   · Además dispara el calendario de mantención cerámica
  *
- * Es idempotente: cada envío marca la columna correspondiente en `bookings`,
- * así que aunque el cron corra varias veces al día nadie recibe el mismo
- * mensaje dos veces.
+ * Es idempotente: cada envío marca su columna en `bookings`, así que
+ * aunque el cron corra varias veces al día nadie recibe el mismo mensaje
+ * dos veces.
  *
- * Zona horaria: Chile continental (UTC-4 en invierno, UTC-3 en verano).
- * Se resuelve con Intl para no depender de la zona del servidor.
+ * La tabla bookings guarda booking_date (date) + slot_start (time),
+ * ambos en hora local de Chile.
  */
 
 const TZ = 'America/Santiago'
 const ESTADOS_VIGENTES = ['pending', 'confirmed']
 
-/** Devuelve 'YYYY-MM-DD' de una fecha, en hora de Chile. */
-function chileDateKey(d: Date): string {
+/** 'YYYY-MM-DD' de una fecha, en hora de Chile. */
+function claveFechaChile(d: Date): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: TZ,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
+    year: 'numeric', month: '2-digit', day: '2-digit',
   }).format(d)
 }
 
-type BookingRow = {
+/** 'HH:MM' actual en Chile. */
+function horaChile(d: Date): string {
+  return new Intl.DateTimeFormat('es-CL', {
+    timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false,
+  }).format(d)
+}
+
+function aMinutos(hhmm: string): number {
+  const [h, m] = hhmm.split(':').map(Number)
+  return h * 60 + (m || 0)
+}
+
+type FilaReserva = {
   id: string
-  scheduled_at: string
+  booking_date: string
+  slot_start: string
   status: string
   reminder_24h_at: string | null
   reminder_2h_at: string | null
@@ -44,21 +56,25 @@ type BookingRow = {
 }
 
 const SELECT = `
-  id, scheduled_at, status, reminder_24h_at, reminder_2h_at,
+  id, booking_date, slot_start, status, reminder_24h_at, reminder_2h_at,
   customer:customers(full_name, phone),
   service:services(name, category)
 `
 
-function authorized(req: NextRequest): boolean {
+function autorizado(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
-  // Sin secreto configurado, solo se permite el cron interno de Vercel.
   if (!secret) return req.headers.get('x-vercel-cron') !== null
   const auth = req.headers.get('authorization')
   return auth === `Bearer ${secret}` || req.headers.get('x-vercel-cron') !== null
 }
 
+/** Arma un ISO local con la fecha y hora de la reserva, para los mensajes. */
+function momentoCita(f: FilaReserva): string {
+  return `${f.booking_date}T${(f.slot_start ?? '10:00:00').substring(0, 8)}`
+}
+
 async function handler(req: NextRequest) {
-  if (!authorized(req)) {
+  if (!autorizado(req)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
@@ -69,33 +85,27 @@ async function handler(req: NextRequest) {
     ejecutado: ahora.toISOString(),
     recordatorios_24h: [] as string[],
     recordatorios_2h: [] as string[],
+    mantenciones: null as ReporteMantenciones | null,
     errores: [] as string[],
   }
 
+  const hoy = claveFechaChile(ahora)
+  const manana = claveFechaChile(new Date(ahora.getTime() + 24 * 3600 * 1000))
+
   // ── Tanda 1: citas de MAÑANA ────────────────────────────────────────────
   {
-    const desde = new Date(ahora.getTime() + 6 * 60 * 60 * 1000)   // +6 h
-    const hasta = new Date(ahora.getTime() + 48 * 60 * 60 * 1000)  // +48 h
-    const manana = chileDateKey(new Date(ahora.getTime() + 24 * 60 * 60 * 1000))
-
     const { data, error } = await supabase
       .from('bookings')
       .select(SELECT)
       .is('reminder_24h_at', null)
       .in('status', ESTADOS_VIGENTES)
-      .gte('scheduled_at', desde.toISOString())
-      .lte('scheduled_at', hasta.toISOString())
-      .order('scheduled_at')
+      .eq('booking_date', manana)
+      .order('slot_start')
 
     if (error) {
       resultado.errores.push(`consulta 24h: ${error.message}`)
     } else {
-      // Nos quedamos solo con las que caen mañana en hora de Chile
-      const delDia = ((data ?? []) as unknown as BookingRow[]).filter(
-        b => chileDateKey(new Date(b.scheduled_at)) === manana
-      )
-
-      for (const b of delDia) {
+      for (const b of ((data ?? []) as unknown as FilaReserva[])) {
         if (!b.customer?.phone) {
           resultado.errores.push(`${b.id}: cliente sin teléfono`)
           continue
@@ -105,7 +115,7 @@ async function handler(req: NextRequest) {
             phone: b.customer.phone,
             customerName: b.customer.full_name?.split(' ')[0] ?? 'Hola',
             serviceName: b.service?.name ?? 'tu servicio',
-            scheduledAt: b.scheduled_at,
+            scheduledAt: momentoCita(b),
             isFree: b.service?.category === 'revision',
           })
           await supabase
@@ -120,31 +130,35 @@ async function handler(req: NextRequest) {
     }
   }
 
-  // ── Tanda 2: citas dentro de 1 a 3 horas ────────────────────────────────
+  // ── Tanda 2: citas de HOY que empiezan en 1 a 3 horas ───────────────────
   // Solo tiene efecto si el cron corre varias veces al día.
   {
-    const desde = new Date(ahora.getTime() + 60 * 60 * 1000)
-    const hasta = new Date(ahora.getTime() + 3 * 60 * 60 * 1000)
+    const minutosAhora = aMinutos(horaChile(ahora))
 
     const { data, error } = await supabase
       .from('bookings')
       .select(SELECT)
       .is('reminder_2h_at', null)
       .in('status', ESTADOS_VIGENTES)
-      .gte('scheduled_at', desde.toISOString())
-      .lte('scheduled_at', hasta.toISOString())
-      .order('scheduled_at')
+      .eq('booking_date', hoy)
+      .order('slot_start')
 
     if (error) {
       resultado.errores.push(`consulta 2h: ${error.message}`)
     } else {
-      for (const b of ((data ?? []) as unknown as BookingRow[])) {
+      const proximas = ((data ?? []) as unknown as FilaReserva[]).filter(b => {
+        const inicio = aMinutos((b.slot_start ?? '10:00').substring(0, 5))
+        const faltan = inicio - minutosAhora
+        return faltan >= 60 && faltan <= 180
+      })
+
+      for (const b of proximas) {
         if (!b.customer?.phone) continue
         try {
           await sendSameDayReminderToClient({
             phone: b.customer.phone,
             customerName: b.customer.full_name?.split(' ')[0] ?? 'Hola',
-            scheduledAt: b.scheduled_at,
+            scheduledAt: momentoCita(b),
           })
           await supabase
             .from('bookings')
@@ -156,6 +170,14 @@ async function handler(req: NextRequest) {
         }
       }
     }
+  }
+
+  // ── Tanda 3: calendario de mantención cerámica ──────────────────────────
+  // Va en el mismo cron para no gastar el único job diario del plan gratuito.
+  try {
+    resultado.mantenciones = await procesarMantenciones()
+  } catch (e) {
+    resultado.errores.push(`mantenciones: ${(e as Error).message}`)
   }
 
   console.log('[cron recordatorios]', JSON.stringify(resultado))

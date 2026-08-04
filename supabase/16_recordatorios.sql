@@ -13,8 +13,9 @@ COMMENT ON COLUMN bookings.reminder_2h_at  IS 'Cuándo se envió el recordatorio
 
 -- Índice para que el cron encuentre rápido las citas pendientes de recordar.
 CREATE INDEX IF NOT EXISTS idx_bookings_reminder_24h
-  ON bookings (scheduled_at)
+  ON bookings (booking_date)
   WHERE reminder_24h_at IS NULL;
 
 -- Verificación:
--- SELECT id, scheduled_at, reminder_24h_at, reminder_2h_at FROM bookings ORDER BY scheduled_at DESC LIMIT 5;
+-- SELECT id, booking_date, slot_start, reminder_24h_at, reminder_2h_at
+-- FROM bookings ORDER BY booking_date DESC LIMIT 5;

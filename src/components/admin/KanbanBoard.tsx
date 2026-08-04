@@ -6,6 +6,7 @@ import { generateCertificate } from '@/actions/certificates'
 import { getStatusLabelFull, getStatusColorFull, formatCurrency } from '@/lib/utils'
 import type { BookingWithRelations } from '@/types'
 import ManualBookingModal from './ManualBookingModal'
+import HistoricoModal from './HistoricoModal'
 
 const COLUMNS = [
   { id: 'pending',          label: 'Nueva reserva',   color: 'border-yellow-400' },
@@ -168,6 +169,7 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
 export default function KanbanBoard({ initialBookings }: { initialBookings: BookingWithRelations[] }) {
   const [bookings] = useState(initialBookings)
   const [showModal, setShowModal] = useState(false)
+  const [showHistorico, setShowHistorico] = useState(false)
 
   function refresh() {
     window.location.reload()
@@ -182,6 +184,24 @@ export default function KanbanBoard({ initialBookings }: { initialBookings: Book
         onClose={() => setShowModal(false)}
         onSuccess={refresh}
       />
+      <HistoricoModal
+        open={showHistorico}
+        onClose={() => setShowHistorico(false)}
+        onSuccess={() => {}}
+      />
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => setShowHistorico(true)}
+          className="px-4 py-2 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-sm font-semibold hover:bg-purple-100 transition-colors"
+        >
+          📚 Cargar trabajos históricos
+        </button>
+        <span className="text-xs text-gray-500">
+          Clientes atendidos antes de este sistema. No se les envía ningún mensaje.
+        </span>
+      </div>
+
       <div className="flex gap-3 overflow-x-auto pb-4" style={{ minHeight: '70vh' }}>
         {COLUMNS.map(col => (
           <div key={col.id} className="flex-shrink-0 w-60">
