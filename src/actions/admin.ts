@@ -393,24 +393,43 @@ export async function sendReviewRequest(bookingId: string): Promise<ActionResult
 
     if (error || !booking) return { success: false, error: 'Reserva no encontrada' }
 
-    if (booking.customer?.phone) {
+    if (!booking.customer?.phone) {
+      return { success: false, error: 'La reserva no tiene teléfono de cliente' }
+    }
+
+    // El envío se AWAITEA y su error se devuelve: antes reventaba silenciosamente
+    // y el kanban mostraba "Resena solicitada" aunque no hubiera salido nada.
+    try {
       const { sendReviewRequestToClient } = await import('@/lib/whatsapp')
       await sendReviewRequestToClient({
         phone: booking.customer.phone,
         customerName: booking.customer.full_name,
         serviceName: booking.service?.name ?? '',
       })
+    } catch (e) {
+      console.error('[sendReviewRequest] WhatsApp:', e)
+      return { success: false, error: `WhatsApp falló: ${(e as Error).message}` }
     }
 
-    await supabase.from('bookings').update({
-      status: 'review_sent',
-      updated_at: new Date().toISOString(),
-    }).eq('id', bookingId)
+    const { error: errUpdate } = await supabase
+      .from('bookings')
+      .update({ status: 'review_sent' })
+      .eq('id', bookingId)
+
+    if (errUpdate) {
+      console.error('[sendReviewRequest] update:', errUpdate)
+      // El mensaje sí se envió; solo falló guardar el estado.
+      return {
+        success: false,
+        error: `Mensaje enviado, pero no se pudo guardar el estado: ${errUpdate.message}`,
+      }
+    }
 
     revalidatePath('/admin/kanban')
     return { success: true }
-  } catch {
-    return { success: false, error: 'Error inesperado' }
+  } catch (e) {
+    console.error('[sendReviewRequest]', e)
+    return { success: false, error: (e as Error).message ?? 'Error inesperado' }
   }
 }
 
@@ -466,7 +485,8 @@ export async function resendConfirmation(bookingId: string): Promise<ActionResul
     ])
 
     return { success: true }
-  } catch {
-    return { success: false, error: 'Error inesperado' }
+  } catch (e) {
+    console.error('[resendConfirmation]', e)
+    return { success: false, error: (e as Error).message ?? 'Error inesperado' }
   }
 }
