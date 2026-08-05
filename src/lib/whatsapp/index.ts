@@ -27,6 +27,28 @@ async function sendMessage(phone: string, message: string): Promise<void> {
   }
 }
 
+/**
+ * Estado de la conexión con Green API.
+ *
+ * 'authorized' = todo bien. Cualquier otra cosa (notAuthorized, blocked,
+ * suscripción vencida, credenciales malas) significa que NINGÚN mensaje
+ * está saliendo: ni confirmaciones, ni recordatorios, ni certificados.
+ */
+export async function getEstadoWhatsApp(): Promise<{ ok: boolean; estado: string }> {
+  if (!INSTANCE_ID || !TOKEN) {
+    return { ok: false, estado: 'sin credenciales configuradas' }
+  }
+  try {
+    const res = await fetch(`${API_URL}/waInstance${INSTANCE_ID}/getStateInstance/${TOKEN}`)
+    const texto = await res.text()
+    if (!res.ok) return { ok: false, estado: `HTTP ${res.status}: ${texto.substring(0, 160)}` }
+    const estado = (JSON.parse(texto)?.stateInstance ?? 'desconocido') as string
+    return { ok: estado === 'authorized', estado }
+  } catch (e) {
+    return { ok: false, estado: (e as Error).message }
+  }
+}
+
 /** Envío directo de texto (usado por el agente IA) */
 export async function sendRawMessage(phone: string, message: string): Promise<void> {
   return sendMessage(phone, message)

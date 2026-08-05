@@ -34,26 +34,60 @@ export async function generateCertificate(bookingId: string) {
     }
     if (!booking) return { success: false, error: 'Reserva no encontrada' }
 
-    // Solo para tratamientos cerámicos
-    if (booking.service?.category !== 'ceramico') {
+    // Solo para tratamientos cerámicos.
+    // Se acepta también por nombre: hay servicios cargados con otra categoría.
+    const esCeramico =
+      booking.service?.category === 'ceramico' ||
+      /cer[áa]mico/i.test(booking.service?.name ?? '')
+
+    if (!esCeramico) {
       return { success: true, skipped: true }
-    }
-
-    // Verificar si ya tiene certificado
-    const { data: existing } = await supabase
-      .from('certificates')
-      .select('certificate_code')
-      .eq('booking_id', bookingId)
-      .maybeSingle()
-
-    if (existing) {
-      return { success: true, code: existing.certificate_code, already_existed: true }
     }
 
     // Lectura tolerante a los dos nombres de columna posibles
     const vMarca = booking.vehicle?.make ?? booking.vehicle?.brand ?? ''
     const vModelo = booking.vehicle?.model ?? ''
     const vPatente = booking.vehicle?.license_plate ?? booking.vehicle?.plate ?? null
+
+    const SITIO = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.fullshine.autos'
+
+    // ── ¿Ya existe el certificado? ──
+    // OJO: antes se retornaba acá sin enviar nada. Si el certificado se había
+    // creado mientras Green API estaba caído, el cliente NUNCA recibía el
+    // mensaje y volver a apretar el botón tampoco lo mandaba. Ahora se reenvía.
+    const { data: existing } = await supabase
+      .from('certificates')
+      .select('certificate_code, expires_at')
+      .eq('booking_id', bookingId)
+      .maybeSingle()
+
+    if (existing) {
+      const url = `${SITIO}/certificado/${existing.certificate_code}`
+      if (booking.customer?.phone) {
+        try {
+          await sendCertificateToClient({
+            phone:        booking.customer.phone,
+            customerName: booking.customer.full_name,
+            serviceName:  booking.service?.name ?? '',
+            certCode:     existing.certificate_code,
+            certUrl:      url,
+            expiresAt:    existing.expires_at,
+          })
+        } catch (e) {
+          return {
+            success: false,
+            error: `El certificado ${existing.certificate_code} existe, pero WhatsApp falló: ${(e as Error).message}`,
+          }
+        }
+      }
+      return {
+        success: true,
+        code: existing.certificate_code,
+        certUrl: url,
+        already_existed: true,
+        reenviado: true,
+      }
+    }
 
     // Fecha de aplicación = fecha de la cita (o hoy, si viniera vacía)
     const fechaCita = booking.booking_date ?? booking.scheduled_at
@@ -112,17 +146,29 @@ export async function generateCertificate(bookingId: string) {
     // Enviar WhatsApp al cliente.
     // Debe ir AWAIT: en Vercel la función se congela al retornar y una
     // promesa suelta nunca alcanza a ejecutarse.
-    const certUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.fullshine.autos'}/certificado/${code}`
+    const certUrl = `${SITIO}/certificado/${code}`
 
     if (booking.customer?.phone) {
-      await sendCertificateToClient({
-        phone:        booking.customer.phone,
-        customerName: booking.customer.full_name,
-        serviceName:  booking.service?.name ?? '',
-        certCode:     code,
-        certUrl,
-        expiresAt:    expiresAtStr,
-      }).catch(e => console.error('[WhatsApp certificado]', e?.message))
+      try {
+        await sendCertificateToClient({
+          phone:        booking.customer.phone,
+          customerName: booking.customer.full_name,
+          serviceName:  booking.service?.name ?? '',
+          certCode:     code,
+          certUrl,
+          expiresAt:    expiresAtStr,
+        })
+      } catch (e) {
+        console.error('[WhatsApp certificado]', e)
+        // El certificado quedó creado; lo que falló fue el envío.
+        // Se avisa para poder reintentar con el mismo botón.
+        return {
+          success: false,
+          code,
+          certUrl,
+          error: `Certificado ${code} creado, pero WhatsApp falló: ${(e as Error).message}. Aprieta de nuevo para reenviarlo.`,
+        }
+      }
     }
 
     return { success: true, code, certUrl }

@@ -10,12 +10,20 @@ import WhatsAppButton from '@/components/WhatsAppButton'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Sellado Cerámico en Concepción | Nasiol ZR53 — Fullshine',
-  description: 'Sellado cerámico profesional en Concepción y San Pedro de la Paz. Nasiol ZR53 (10H): 3 años de fábrica, extensible a 5 con mantenciones. Reserva online.',
+  title: 'Tratamiento Cerámico en Concepción | Sellado Nasiol ZR53 10H — Fullshine',
+  description: 'Tratamiento cerámico para autos en Concepción y San Pedro de la Paz. Sellado Nasiol ZR53 (10H) desde $300.000: 3 años de protección de fábrica, extensible a 5. Precios claros y reserva online.',
+  keywords: [
+    'tratamiento cerámico Concepción',
+    'sellado cerámico Concepción',
+    'cerámico para autos Concepción',
+    'tratamiento cerámico San Pedro de la Paz',
+    'coating cerámico Concepción',
+    'Nasiol ZR53 Chile',
+  ],
   alternates: { canonical: 'https://www.fullshine.autos/sellado-ceramico-concepcion' },
   openGraph: {
-    title: 'Sellado Cerámico en Concepción | Nasiol ZR53 — Fullshine',
-    description: 'Sellado cerámico profesional con Nasiol ZR53 (10H). Platino desde $300.000, Gold desde $350.000, Elite desde $500.000.',
+    title: 'Tratamiento Cerámico en Concepción | Nasiol ZR53 10H — Fullshine',
+    description: 'Tratamiento cerámico profesional con Nasiol ZR53 (10H). Platino desde $300.000, Gold desde $350.000, Elite desde $500.000.',
     url: 'https://www.fullshine.autos/sellado-ceramico-concepcion',
     siteName: 'Fullshine Detailing Premium',
     locale: 'es_CL',
@@ -50,6 +58,18 @@ const PROCESS = [
 ]
 
 const FAQS = [
+  {
+    q: '¿Cuánto cuesta un tratamiento cerámico en Concepción?',
+    a: 'En Fullshine el tratamiento cerámico parte en $300.000 (paquete Platino), $350.000 el Gold y $500.000 el Elite. El precio varía según el tipo de vehículo y el estado de la pintura. Todos incluyen lavado técnico, descontaminación, pulido de corrección y aplicación de Nasiol ZR53 10H. En el mercado local vas a encontrar desde $80.000 hasta $600.000: la diferencia está en la cerámica que se usa y en si incluye o no la preparación de la pintura.',
+  },
+  {
+    q: '¿Es lo mismo tratamiento cerámico que sellado cerámico?',
+    a: 'Sí, son el mismo servicio. También se le dice coating cerámico, nano cerámico o simplemente cerámica. Todos se refieren a aplicar una capa de sílice (SiO₂) sobre la pintura, que endurece al curar y forma una barrera protectora. Lo que cambia entre talleres no es el nombre, sino la concentración del producto y la preparación previa.',
+  },
+  {
+    q: '¿Dónde hacer un tratamiento cerámico en Concepción?',
+    a: 'Estamos en Camilo Henríquez 381, Concepción centro, con taller propio e iluminación LED de inspección. Atendemos de lunes a viernes de 09:00 a 18:00 y sábados de 09:00 a 14:00. Antes de cotizar te ofrecemos un diagnóstico gratuito de 15 minutos donde medimos el espesor real de tu laca y te decimos si tu auto es candidato al tratamiento.',
+  },
   { q: '¿Cuánto dura el sellado cerámico?', a: 'El Nasiol ZR53 tiene una duración de fábrica de 3 años, extensible hasta 5 con nuestro programa de mantenciones Fullshine. Mientras la protección esté vigente, reduce significativamente la necesidad de aplicar ceras.' },
   { q: '¿El sellado cerámico protege contra rayones?', a: 'La cerámica aporta mayor resistencia frente a micro-rayas y daños leves del lavado cotidiano. No reemplaza el PPF contra impactos fuertes ni rayones profundos.' },
   { q: '¿Cuánto tiempo demora el proceso completo?', a: 'Depende del paquete: Platino toma 1 día, Gold 1-2 días y Elite hasta 2 días. El auto queda listo para retirar cuando el curado esté completo.' },
@@ -65,7 +85,9 @@ export default async function SelladoCeramicoPage() {
   const schemaService = {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: 'Sellado Cerámico Concepción',
+    name: 'Tratamiento Cerámico en Concepción',
+    alternateName: ['Sellado Cerámico Concepción', 'Coating Cerámico Concepción'],
+    serviceType: 'Tratamiento cerámico automotriz',
     provider: {
       '@type': 'AutomotiveBusiness',
       name: 'Fullshine Detailing Premium',
@@ -80,8 +102,14 @@ export default async function SelladoCeramicoPage() {
         addressCountry: 'CL',
       },
     },
-    areaServed: ['Concepción', 'San Pedro de la Paz'],
-    description: 'Sellado cerámico profesional con Nasiol ZR53 (10H). 3 años de protección de fábrica, extensible a 5 con mantenciones. Tres paquetes: Platino, Gold y Elite.',
+    areaServed: [
+      { '@type': 'City', name: 'Concepción' },
+      { '@type': 'City', name: 'San Pedro de la Paz' },
+      { '@type': 'City', name: 'Chiguayante' },
+      { '@type': 'City', name: 'Talcahuano' },
+      { '@type': 'City', name: 'Hualpén' },
+    ],
+    description: 'Tratamiento cerámico profesional en Concepción con Nasiol ZR53 (10H). 3 años de protección de fábrica, extensible a 5 con mantenciones. Tres paquetes: Platino, Gold y Elite.',
     offers: [
       { '@type': 'Offer', name: 'Cerámico Platino', priceSpecification: { '@type': 'PriceSpecification', minPrice: 300000, priceCurrency: 'CLP' } },
       { '@type': 'Offer', name: 'Cerámico Gold', priceSpecification: { '@type': 'PriceSpecification', minPrice: 350000, priceCurrency: 'CLP' } },
@@ -104,7 +132,7 @@ export default async function SelladoCeramicoPage() {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://www.fullshine.autos' },
-      { '@type': 'ListItem', position: 2, name: 'Sellado Cerámico en Concepción', item: 'https://www.fullshine.autos/sellado-ceramico-concepcion' },
+      { '@type': 'ListItem', position: 2, name: 'Tratamiento Cerámico en Concepción', item: 'https://www.fullshine.autos/sellado-ceramico-concepcion' },
     ],
   }
 
@@ -119,11 +147,16 @@ export default async function SelladoCeramicoPage() {
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-4">Concepción &amp; San Pedro de la Paz</p>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
-            Sellado Cerámico{' '}<br />
+            Tratamiento Cerámico{' '}<br />
             <span className="text-amber-400">en Concepción</span>
           </h1>
           <p className="text-gray-300 text-lg mb-4 max-w-xl mx-auto">
             Protege tu pintura con <strong className="text-white">Nasiol ZR53</strong> — cerámica certificada 10H, una de las más duras del mercado. 3 años de protección de fábrica (extensible a 5 con mantenciones), brillo espejo y efecto hidrofóbico durante toda la vigencia del tratamiento.
+          </p>
+          <p className="text-gray-400 text-sm mb-6 max-w-xl mx-auto">
+            También conocido como <strong className="text-gray-300">sellado cerámico</strong> o{' '}
+            <strong className="text-gray-300">coating cerámico</strong>. Atendemos Concepción,
+            San Pedro de la Paz, Chiguayante, Talcahuano y Hualpén.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">

@@ -89,12 +89,12 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
   function handleCertificate() {
     startTransition(async () => {
       setMsg('Generando certificado...')
-      const res = await generateCertificate(booking.id)
-      if (!res.success) { setMsg(`Error: ${res.error}`); return }
-      if (res.already_existed) {
-        setMsg(`✅ Certificado existente: ${res.code}`)
-      } else if (res.skipped) {
+      const res: any = await generateCertificate(booking.id)
+      if (!res.success) { setMsg(`⚠️ ${res.error}`); return }
+      if (res.skipped) {
         setMsg('No aplica (servicio no cerámico)')
+      } else if (res.already_existed) {
+        setMsg(`✅ Certificado ${res.code} reenviado por WhatsApp`)
       } else {
         setMsg(`✅ Certificado ${res.code} enviado por WhatsApp`)
       }

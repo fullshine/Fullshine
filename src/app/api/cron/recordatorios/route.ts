@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { sendReminderToClient, sendSameDayReminderToClient } from '@/lib/whatsapp'
+import { sendReminderToClient, sendSameDayReminderToClient, getEstadoWhatsApp } from '@/lib/whatsapp'
+import { sendPushToAdmin } from '@/lib/push'
 import { procesarMantenciones, type ReporteMantenciones } from '@/lib/mantenciones'
 
 export const dynamic = 'force-dynamic'
@@ -83,10 +84,32 @@ async function handler(req: NextRequest) {
 
   const resultado = {
     ejecutado: ahora.toISOString(),
+    whatsapp: '' as string,
     recordatorios_24h: [] as string[],
     recordatorios_2h: [] as string[],
     mantenciones: null as ReporteMantenciones | null,
     errores: [] as string[],
+  }
+
+  // ── Vigilante de WhatsApp ───────────────────────────────────────────────
+  // Si Green API está caído (suscripción vencida, sesión desconectada), NADA
+  // sale: ni confirmaciones, ni recordatorios, ni certificados. Antes eso se
+  // descubría por casualidad, días después. Ahora avisa al toque.
+  const estadoWa = await getEstadoWhatsApp()
+  resultado.whatsapp = estadoWa.estado
+
+  if (!estadoWa.ok) {
+    resultado.errores.push(`WhatsApp caído: ${estadoWa.estado}`)
+    await sendPushToAdmin(
+      '🚨 WhatsApp desconectado',
+      `Green API responde "${estadoWa.estado}". No se está enviando ningún mensaje.`,
+      '/admin/dashboard'
+    ).catch(e => console.error('[Push WhatsApp caído]', e?.message))
+
+    // Sin canal no tiene sentido intentar enviar: se cortaría a mitad y
+    // marcaría reservas como recordadas sin haberlo hecho.
+    console.error('[cron recordatorios] abortado:', estadoWa.estado)
+    return NextResponse.json(resultado, { status: 200 })
   }
 
   const hoy = claveFechaChile(ahora)
