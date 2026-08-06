@@ -12,10 +12,11 @@ import './globals.css'
 export const metadata: Metadata = {
   // metadataBase permite usar rutas relativas en OG/Twitter en todas las páginas
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: 'Fullshine Detailing Premium | Detailing y Tratamiento Cerámico en Concepción',
-    template: '%s | Fullshine Detailing Premium',
-  },
+  // Sin `template`: todas las páginas ya incluyen la marca en su propio título.
+  // Con plantilla quedaban duplicados del tipo "… — Fullshine | Fullshine
+  // Detailing Premium", que superan los ~60 caracteres que muestra Google y
+  // hacen que el título aparezca cortado en los resultados.
+  title: 'Fullshine Detailing Premium | Detailing y Tratamiento Cerámico en Concepción',
   description: BUSINESS.description,
   applicationName: BUSINESS.name,
   authors: [{ name: BUSINESS.name, url: SITE_URL }],
@@ -50,9 +51,18 @@ export const metadata: Metadata = {
   verification: {
     google: 'bmBwZgsCrhDaMSV5wiXED3PXRpxGhkuYGfkd_uqzDCw',
   },
+  // Google exige un favicon cuadrado, accesible y de al menos 48px para
+  // mostrarlo junto al resultado. Antes se declaraba /favicon.ico pero el
+  // archivo NO existía en public/ — de ahí el ícono de planeta genérico.
   icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-48.png', type: 'image/png', sizes: '48x48' },
+      { url: '/favicon-96.png', type: 'image/png', sizes: '96x96' },
+      { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
   },
   manifest: '/manifest.json',
   appleWebApp: {
@@ -60,7 +70,10 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Fullshine',
   },
-  formatDetection: { telephone: true, address: true },
+  // Sin formatDetection: el valor por defecto del navegador ya detecta
+  // teléfonos y direcciones, y eso habilita el "tocar para llamar" en móvil.
+  // Declararlo explícitamente generaba `telephone=no`, que lo desactivaba —
+  // justo lo contrario de lo que necesita un negocio local.
 }
 
 export const viewport: Viewport = {
