@@ -25,6 +25,7 @@ const ZONAS = [
 ]
 
 const RECURSOS = [
+  { href: '/preguntas-frecuentes', label: 'Preguntas frecuentes' },
   { href: '/blog', label: 'Blog' },
   { href: '/nosotros', label: 'Quiénes somos' },
   { href: '/reservar', label: 'Reservar hora' },

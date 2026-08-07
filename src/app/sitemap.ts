@@ -29,7 +29,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/lavado-tapiz-concepcion',            priority: 0.85, freq: 'monthly' },
     { path: '/revision-gratis-concepcion',         priority: 0.9,  freq: 'monthly' },
 
-    // Confianza
+    // Confianza y contenido citable por motores de IA
+    { path: '/preguntas-frecuentes',               priority: 0.85, freq: 'monthly' },
     { path: '/nosotros',                           priority: 0.7,  freq: 'monthly' },
 
     // Contenido
