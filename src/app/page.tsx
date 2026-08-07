@@ -9,7 +9,6 @@ import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } 
 import FaqSection from '@/components/FaqSection'
 import SocialProofStrip from '@/components/SocialProofStrip'
 import PromoBar from '@/components/PromoBar'
-import ExitIntentPopup from '@/components/ExitIntentPopup'
 import WhatsAppButton from '@/components/WhatsAppButton'
 import StatsBar from '@/components/StatsBar'
 import ServicesTabs from '@/components/ServicesTabs'
@@ -160,7 +159,6 @@ export default async function HomePage() {
     <div className="min-h-screen bg-gray-950 text-white">
 
       <PromoBar />
-      <ExitIntentPopup />
       <WhatsAppButton />
 
       {/* NAV */}
