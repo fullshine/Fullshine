@@ -63,7 +63,7 @@ const FAQS = [
 export default async function LavadoDetalladoPage() {
   const result = await getServicesByCategory('lavado_detallado')
   const services = result.data ?? []
-  const promo = isPromoActive()
+  const promo = isPromoActive() && PROMO_OTROS > 0
 
   const schemaService = {
     '@context': 'https://schema.org',

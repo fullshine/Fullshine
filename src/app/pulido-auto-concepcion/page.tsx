@@ -47,7 +47,7 @@ const FAQS = [
 export default async function PulidoAutoPage() {
   const result = await getServicesByCategory('pulido')
   const services = result.data ?? []
-  const promo = isPromoActive()
+  const promo = isPromoActive() && PROMO_OTROS > 0
 
   const schemaService = {
     '@context': 'https://schema.org',

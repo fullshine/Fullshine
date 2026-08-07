@@ -42,7 +42,7 @@ const FAQS = [
 export default async function LavadoTapizPage() {
   const result = await getServicesByCategory('tapiz')
   const services = result.data ?? []
-  const promo = isPromoActive()
+  const promo = isPromoActive() && PROMO_OTROS > 0
 
   const schemaService = {
     '@context': 'https://schema.org',

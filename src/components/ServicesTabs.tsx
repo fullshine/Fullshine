@@ -62,9 +62,10 @@ export default function ServicesTabs({
   const [active, setActive] = useState(orderedCategories[0])
 
   const services = grouped[active] ?? []
-  const promo = isPromoActive()
   const discount = active === 'ceramico' ? PROMO_CERAMICO : PROMO_OTROS
-  const discountLabel = active === 'ceramico' ? '25% OFF' : '10% OFF'
+  const discountLabel = `${Math.round(discount * 100)}% OFF`
+  // Solo se muestra la promo en las categorías que sí tienen descuento
+  const promo = isPromoActive() && discount > 0
 
   return (
     <div>
@@ -117,7 +118,7 @@ export default function ServicesTabs({
                 <div className="border-t border-white/5 pt-3">
                   {promo && (
                     <p className="text-center text-green-400 text-[11px] font-bold uppercase tracking-wide mb-2">
-                      {discountLabel} hasta el 31 de julio
+                      {discountLabel} · solo por hoy
                     </p>
                   )}
                   <div className="grid grid-cols-3 gap-2">

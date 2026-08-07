@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getServices } from '@/actions/bookings'
 import BookingForm from '@/components/booking/BookingForm'
+import PromoNoticeReserva from '@/components/PromoNoticeReserva'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +39,8 @@ export default async function ReservarPage({ searchParams }: { searchParams?: { 
           <h1 className="text-3xl font-bold text-white mb-2">Reserva tu detailing</h1>
           <p className="text-gray-500">Profesional, rápido y sin complicaciones</p>
         </div>
+
+        <PromoNoticeReserva />
 
         <Suspense fallback={<div className="text-white text-center">Cargando...</div>}>
           <BookingForm services={services} preselect={searchParams?.servicio} category={searchParams?.categoria} />

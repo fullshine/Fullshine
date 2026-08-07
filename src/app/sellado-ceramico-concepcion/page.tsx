@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { getServicesByCategory } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
-import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO } from '@/lib/promo'
+import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO, PROMO_SHORT } from '@/lib/promo'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
 import WhatsAppButton from '@/components/WhatsAppButton'
@@ -208,7 +208,7 @@ export default async function SelladoCeramicoPage() {
                     <p className={`text-lg font-black ${tier.popular ? 'text-amber-400' : 'text-white'}`}>
                       desde {formatCLP(promoPrice(tier.basePrice, PROMO_CERAMICO))}
                     </p>
-                    <p className="text-[11px] font-bold text-green-400 uppercase tracking-wide">25% OFF hasta el 31 de julio</p>
+                    <p className="text-[11px] font-bold text-green-400 uppercase tracking-wide">{PROMO_SHORT} · solo hoy</p>
                   </div>
                 ) : (
                   <p className={`text-sm mb-5 ${tier.popular ? 'text-amber-300/70' : 'text-gray-500'}`}>{tier.price}</p>
@@ -319,7 +319,7 @@ export default async function SelladoCeramicoPage() {
             <h2 className="text-3xl font-bold text-center mb-3">Precios por tipo de vehículo</h2>
             <p className="text-gray-400 text-center mb-10">
               Seleccionas tu vehículo al reservar y ves el precio exacto
-              {promo && <span className="block mt-1 text-green-400 font-bold text-sm">Precios con 25% OFF aplicado — válido hasta el 31 de julio</span>}
+              {promo && <span className="block mt-1 text-green-400 font-bold text-sm">Precios con {PROMO_SHORT} aplicado — solo por hoy</span>}
             </p>
             <div className="space-y-4">
               {services.map(service => {

@@ -9,12 +9,12 @@ import PixelEvent from '@/components/PixelEvent'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: '25% OFF Tratamiento Cerámico — Solo Julio | Fullshine Concepción',
-  description: 'Oferta de julio: 25% de descuento en sellado cerámico Nasiol ZR53 (10H). Incluye pulido de pintura. Concepción y San Pedro de la Paz. Cupos limitados.',
+  title: '20% OFF Tratamiento Cerámico — Solo por hoy | Fullshine Concepción',
+  description: 'Oferta por 12 horas: 20% de descuento en tratamiento cerámico Nasiol ZR53 (10H). Incluye pulido de pintura. Concepción y San Pedro de la Paz. Cupos limitados.',
   // Landing para tráfico pagado — no necesita indexarse en Google
   robots: { index: false, follow: true },
   openGraph: {
-    title: '25% OFF Tratamiento Cerámico — Solo Julio',
+    title: '20% OFF Tratamiento Cerámico — Solo por hoy',
     description: 'Nasiol ZR53 (10H) con pulido incluido. Desde $225.000 en Concepción.',
     url: 'https://www.fullshine.autos/oferta-tratamiento-ceramico',
     siteName: 'Fullshine Detailing Premium',
@@ -56,8 +56,8 @@ const REVIEWS = [
 ]
 
 const FAQS = [
-  { q: '¿El descuento se aplica automáticamente?', a: 'Sí. Al reservar online, el 25% ya está aplicado en el precio que ves. Sin códigos ni trámites.' },
-  { q: '¿Hasta cuándo dura la oferta?', a: 'Hasta el 31 de julio de 2026, o hasta agotar los cupos disponibles del mes.' },
+  { q: '¿El descuento se aplica automáticamente?', a: 'Sí. Al reservar online, el 20% ya está aplicado en el precio que ves. Sin códigos ni trámites.' },
+  { q: '¿Hasta cuándo dura la oferta?', a: 'Solo por 12 horas. El contador en la parte superior muestra el tiempo exacto que queda.' },
   { q: '¿Cuánto se paga para reservar?', a: 'Solo un anticipo del 20%. El resto se paga al retirar el vehículo.' },
   { q: '¿Cuánto demora el tratamiento?', a: 'Entre 1 y 2 días según el paquete. Te confirmamos el tiempo exacto al reservar.' },
 ]
@@ -69,7 +69,7 @@ export default function OfertaCeramicoLanding() {
     <div className="min-h-screen bg-gray-950 text-white">
       <PixelEvent
         event="ViewContent"
-        contentName="Landing oferta cerámico 25% OFF"
+        contentName="Landing oferta cerámico 20% OFF"
         contentCategory="ceramico"
       />
       <WhatsAppButton />
@@ -96,7 +96,7 @@ export default function OfertaCeramicoLanding() {
         <div className="max-w-3xl mx-auto">
           {promo ? (
             <span className="inline-block bg-green-500/15 border border-green-500/30 text-green-400 text-sm font-black uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
-              🔥 Solo julio · 25% OFF
+              🔥 Solo por hoy · 20% OFF
             </span>
           ) : (
             <span className="inline-block bg-amber-500/15 border border-amber-500/30 text-amber-400 text-sm font-black uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
@@ -109,21 +109,21 @@ export default function OfertaCeramicoLanding() {
           </h1>
           <p className="text-gray-300 text-lg mb-3 max-w-xl mx-auto">
             Sellado cerámico <strong className="text-white">Nasiol ZR53 (10H)</strong> con pulido de pintura incluido.
-            {promo && <> Este mes desde <span className="text-green-400 font-black">{formatCLP(promoPrice(300000, PROMO_CERAMICO))}</span> <span className="text-gray-500 line-through text-base">$300.000</span>.</>}
+            {promo && <> Solo hoy desde <span className="text-green-400 font-black">{formatCLP(promoPrice(300000, PROMO_CERAMICO))}</span> <span className="text-gray-500 line-through text-base">$300.000</span>.</>}
           </p>
           <p className="text-gray-500 text-sm mb-8">Concepción & San Pedro de la Paz · 82 reseñas ⭐ 5.0 en Google</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/reservar?categoria=ceramico"
               className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-10 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/25">
-              Reservar con 25% OFF
+              Reservar con 20% OFF
             </Link>
-            <a href="https://wa.me/56933654943?text=Hola%2C%20vi%20la%20oferta%20del%2025%25%20en%20cer%C3%A1mico%20y%20quiero%20m%C3%A1s%20informaci%C3%B3n"
+            <a href="https://wa.me/56933654943?text=Hola%2C%20vi%20la%20oferta%20del%2020%25%20en%20cer%C3%A1mico%20y%20quiero%20m%C3%A1s%20informaci%C3%B3n"
               target="_blank" rel="noopener noreferrer"
               className="border border-white/20 hover:border-white/40 text-white font-semibold text-lg px-10 py-4 rounded-full transition-colors">
               Consultar por WhatsApp
             </a>
           </div>
-          {promo && <p className="text-gray-500 text-xs mt-4">Válido hasta el 31 de julio · Solo anticipo del 20% para confirmar</p>}
+          {promo && <p className="text-gray-500 text-xs mt-4">Válido solo hoy · Solo anticipo del 20% para confirmar</p>}
         </div>
       </section>
 
@@ -247,13 +247,13 @@ export default function OfertaCeramicoLanding() {
       <section className="py-20 px-4 text-center">
         <div className="max-w-xl mx-auto">
           {promo && (
-            <p className="text-green-400 font-bold text-sm uppercase tracking-wider mb-3">La oferta termina el 31 de julio</p>
+            <p className="text-green-400 font-bold text-sm uppercase tracking-wider mb-3">La oferta termina hoy</p>
           )}
           <h2 className="text-3xl md:text-4xl font-black mb-4">Tu auto merece esta protección</h2>
           <p className="text-gray-400 mb-8">Reserva en 2 minutos. Solo pagas el 20% de anticipo.</p>
           <Link href="/reservar?categoria=ceramico"
             className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/25">
-            {promo ? 'Reservar con 25% OFF' : 'Reservar tratamiento cerámico'}
+            {promo ? 'Reservar con 20% OFF' : 'Reservar tratamiento cerámico'}
           </Link>
           <p className="mt-5 text-gray-600 text-sm">
             Camilo Henríquez 381, Concepción · +56 9 3365 4943

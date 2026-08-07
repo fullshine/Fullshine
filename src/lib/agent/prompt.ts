@@ -64,7 +64,7 @@ async function buildCatalog(): Promise<string> {
 
   if (promo) {
     lines.unshift(
-      `⚡ PROMO VIGENTE HASTA EL 31 DE JULIO: 25% OFF en cerámicos, 10% OFF en el resto. ` +
+      `⚡ PROMO POR TIEMPO LIMITADO: ${Math.round(PROMO_CERAMICO * 100)}% OFF en tratamientos cerámicos (solo por hoy). ` +
       `Los precios promocionales de abajo YA tienen el descuento aplicado.`
     )
   }

@@ -106,10 +106,12 @@ export default function BookingForm({ services: allServices, preselect, category
   function getDiscount(price: number, category: string) {
     if (!promoActive) return null
     const pct = category === 'ceramico' ? PROMO_CERAMICO : PROMO_OTROS
+    // Si la promo no aplica a esta categoría, no se muestra nada tachado.
+    if (pct <= 0) return null
     return {
       discounted: Math.round(price * (1 - pct)),
       pct,
-      label: category === 'ceramico' ? '25% OFF' : '10% OFF',
+      label: `${Math.round(pct * 100)}% OFF`,
     }
   }
 
@@ -544,7 +546,7 @@ export default function BookingForm({ services: allServices, preselect, category
                       <span className="line-through">{formatCurrency(servicePrice)}</span>
                     </div>
                     <div className="flex justify-between text-sm text-green-600 font-medium">
-                      <span>Descuento ({selectedDiscounted.label} — julio)</span>
+                      <span>Descuento por promoción ({selectedDiscounted.label})</span>
                       <span>-{formatCurrency(servicePrice - selectedDiscounted.discounted)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-base">

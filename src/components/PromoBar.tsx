@@ -2,37 +2,63 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { PROMO_END, PROMO_SHORT } from '@/lib/promo'
 
-// Fin de la promo: 31 de julio 2026, 23:59 hora de Chile (UTC-4)
-const PROMO_END = new Date('2026-08-01T03:59:00Z').getTime()
-const DISMISSED_KEY = 'promo25_dismissed'
-const BAR_H = 44 // px (desktop); mobile uses auto height via min-height
+/**
+ * Huincha de promoción con cuenta regresiva real.
+ *
+ * El contador se calcula contra PROMO_END, una fecha absoluta: si el usuario
+ * vuelve mañana, el reloj marca menos tiempo o la barra desaparece. No es un
+ * temporizador que se reinicia por sesión.
+ *
+ * La altura se publica en la variable CSS --promo-h para que el resto del
+ * layout se desplace sin saltos (evita CLS).
+ */
+
+const DISMISSED_KEY = `promo_dismissed_${PROMO_END}`
+const BAR_H = 46
+
+function dosDigitos(n: number) {
+  return n.toString().padStart(2, '0')
+}
 
 export default function PromoBar() {
   const [visible, setVisible] = useState(false)
-  const [daysLeft, setDaysLeft] = useState(0)
+  const [msLeft, setMsLeft] = useState(0)
 
   useEffect(() => {
+    // La clave incluye PROMO_END: si lanzas una promo nueva, quien la cerró
+    // antes vuelve a verla, en vez de quedar oculta para siempre.
     if (sessionStorage.getItem(DISMISSED_KEY)) {
       document.documentElement.style.setProperty('--promo-h', '0px')
       return
     }
 
-    const msLeft = PROMO_END - Date.now()
-    if (msLeft <= 0) {
-      // Promo terminada: no mostrar nada
-      document.documentElement.style.setProperty('--promo-h', '0px')
-      return
+    function tick() {
+      const restante = PROMO_END - Date.now()
+      if (restante <= 0) {
+        setVisible(false)
+        document.documentElement.style.setProperty('--promo-h', '0px')
+        return false
+      }
+      setMsLeft(restante)
+      return true
     }
 
-    setDaysLeft(Math.max(1, Math.ceil(msLeft / (1000 * 60 * 60 * 24))))
-    setVisible(true)
+    if (!tick()) return
 
-    const isMobile = window.innerWidth < 768
-    document.documentElement.style.setProperty('--promo-h', isMobile ? '56px' : `${BAR_H}px`)
+    setVisible(true)
+    const alto = window.innerWidth < 768 ? '58px' : `${BAR_H}px`
+    document.documentElement.style.setProperty('--promo-h', alto)
+
+    const id = setInterval(() => {
+      if (!tick()) clearInterval(id)
+    }, 1000)
+
+    return () => clearInterval(id)
   }, [])
 
-  function dismiss() {
+  function cerrar() {
     sessionStorage.setItem(DISMISSED_KEY, '1')
     setVisible(false)
     document.documentElement.style.setProperty('--promo-h', '0px')
@@ -40,43 +66,59 @@ export default function PromoBar() {
 
   if (!visible) return null
 
-  const deadline = daysLeft === 1 ? '¡Último día!' : `Quedan ${daysLeft} días`
+  const totalSeg = Math.floor(msLeft / 1000)
+  const horas = Math.floor(totalSeg / 3600)
+  const min = Math.floor((totalSeg % 3600) / 60)
+  const seg = totalSeg % 60
+  const reloj = `${dosDigitos(horas)}:${dosDigitos(min)}:${dosDigitos(seg)}`
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-[70] bg-amber-500 text-black flex items-center justify-between gap-2 px-3 md:px-4 py-2 md:py-0"
+      role="region"
+      aria-label="Promoción por tiempo limitado"
+      className="fixed top-0 left-0 right-0 z-[70] flex items-center justify-between gap-2 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 px-3 py-2 text-black md:px-4 md:py-0"
       style={{ minHeight: BAR_H }}
     >
-      {/* Mobile layout */}
-      <div className="flex md:hidden items-center gap-2 flex-1 justify-center text-sm flex-wrap">
-        <span className="font-black text-xs">🔥 25% OFF cerámico · solo julio</span>
-        <div className="bg-black text-amber-400 font-black px-2 py-0.5 rounded-full text-xs tracking-wide">
-          {deadline}
-        </div>
-        <Link
-          href="/reservar"
-          className="bg-black text-amber-400 font-bold text-xs px-3 py-1 rounded-full"
+      {/* Móvil */}
+      <div className="flex flex-1 flex-wrap items-center justify-center gap-2 text-xs md:hidden">
+        <span className="font-black">🔥 {PROMO_SHORT} en cerámicos</span>
+        <span
+          className="rounded-full bg-black px-2 py-0.5 font-black tabular-nums text-amber-400"
+          aria-label={`Termina en ${horas} horas y ${min} minutos`}
         >
+          {reloj}
+        </span>
+        <Link href="/reservar?categoria=ceramico"
+          className="rounded-full bg-black px-3 py-1 font-bold text-amber-400">
           Reservar →
         </Link>
       </div>
 
-      {/* Desktop layout */}
-      <div className="hidden md:flex items-center gap-4 flex-1 justify-center text-sm">
-        <span className="font-black">🔥 PROMO DE JULIO</span>
-        <span className="font-medium">Cerámico <strong>25% OFF</strong> · Otros servicios <strong>10% OFF</strong> · hasta el 31 de julio</span>
-        <div className="bg-black text-amber-400 font-black px-3 py-0.5 rounded-full text-sm tracking-wide">
-          {deadline}
-        </div>
-        <Link
-          href="/reservar"
-          className="bg-black text-amber-400 hover:bg-gray-900 font-bold text-xs px-4 py-1.5 rounded-full transition-colors"
+      {/* Escritorio */}
+      <div className="hidden flex-1 items-center justify-center gap-4 text-sm md:flex">
+        <span className="font-black tracking-wide">🔥 SOLO POR HOY</span>
+        <span className="font-medium">
+          <strong>{PROMO_SHORT}</strong> en todos los tratamientos cerámicos
+        </span>
+        <span className="text-black/50" aria-hidden="true">·</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-black/60">Termina en</span>
+        <span
+          className="rounded-full bg-black px-3 py-0.5 font-black tabular-nums tracking-widest text-amber-400"
+          aria-label={`Termina en ${horas} horas y ${min} minutos`}
         >
+          {reloj}
+        </span>
+        <Link href="/reservar?categoria=ceramico"
+          className="rounded-full bg-black px-4 py-1.5 text-xs font-bold text-amber-400 transition-colors hover:bg-gray-900">
           Reservar →
         </Link>
       </div>
 
-      <button onClick={dismiss} aria-label="Cerrar promoción" className="text-black/50 hover:text-black shrink-0 text-lg font-bold leading-none ml-1 p-2 -m-1">
+      <button
+        onClick={cerrar}
+        aria-label="Cerrar aviso de promoción"
+        className="shrink-0 px-2 text-lg font-light leading-none text-black/50 transition-colors hover:text-black"
+      >
         ✕
       </button>
     </div>
