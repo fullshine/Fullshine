@@ -21,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
     '/certificado/',
     '/diagnostico',
     '/oferta-tratamiento-ceramico',
+    '/proteccion-auto-nuevo',
   ]
 
   return {
