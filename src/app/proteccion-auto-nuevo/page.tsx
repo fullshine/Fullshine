@@ -10,7 +10,11 @@ import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO, PROMO_SHORT } fro
 export const revalidate = 3600
 
 const PATH = '/proteccion-auto-nuevo'
+
+/** Camino A — para quien duda: revisión gratuita primero. */
 const CTA = '/reservar?categoria=revision'
+/** Camino B — para quien ya decidió: reserva directa del tratamiento. */
+const CTA_DIRECTO = '/reservar?categoria=ceramico'
 
 /** WhatsApp con instrucción concreta: pedir marca, modelo y año baja la fricción. */
 const WA = `https://wa.me/${BUSINESS.whatsapp}?text=` +
@@ -110,6 +114,30 @@ const TIERS = [
   { n: 'Elite', p: 500000, d: 'Suma plásticos y llantas' },
 ]
 
+/**
+ * Tabla comparativa: qué incluye cada paquete, fila por fila.
+ * Ver lo que NO incluye un paquete es lo que empuja al siguiente — por eso
+ * conviene mostrar las cruces y no solo los ticks.
+ */
+const COMPARATIVA: { f: string; platino: boolean; gold: boolean; elite: boolean }[] = [
+  { f: 'Lavado técnico y descontaminación',       platino: true,  gold: true,  elite: true },
+  { f: 'Pulido de corrección de pintura',          platino: true,  gold: true,  elite: true },
+  { f: 'Cerámica Nasiol ZR53 10H en carrocería',   platino: true,  gold: true,  elite: true },
+  { f: 'Certificado digital de garantía',          platino: true,  gold: true,  elite: true },
+  { f: 'Limpieza interior de cortesía',            platino: true,  gold: true,  elite: true },
+  { f: 'Sellado cerámico de vidrios',              platino: false, gold: true,  elite: true },
+  { f: 'Sellado cerámico de plásticos exteriores', platino: false, gold: false, elite: true },
+  { f: 'Sellado cerámico de llantas',              platino: false, gold: false, elite: true },
+]
+
+function Marca({ ok }: { ok: boolean }) {
+  return ok ? (
+    <span className="text-amber-400" aria-label="Incluido">✓</span>
+  ) : (
+    <span className="text-white/15" aria-label="No incluido">—</span>
+  )
+}
+
 function BotonCTA({ children, grande = false }: { children: React.ReactNode; grande?: boolean }) {
   return (
     <Link href={CTA}
@@ -187,6 +215,11 @@ export default function ProteccionAutoNuevo() {
             <p className="mt-6 text-xs tracking-wide text-white/40 sm:text-sm">
               📍 Concepción · 15 minutos · Sin compromiso
             </p>
+            {/* Atajo para quien ya decidió y no quiere el paso intermedio */}
+            <a href="#planes"
+              className="mt-5 inline-block text-sm font-medium text-white/45 underline decoration-white/20 underline-offset-4 transition-colors hover:text-amber-400">
+              ¿Ya sabes que lo quieres proteger? Ver planes y precios
+            </a>
           </Reveal>
         </div>
       </header>
@@ -375,7 +408,7 @@ export default function ProteccionAutoNuevo() {
       </section>
 
       {/* ══════ PRECIOS — después de la educación ══════ */}
-      <section className="border-y border-white/[0.07] bg-white/[0.02] px-5 py-24">
+      <section id="planes" className="scroll-mt-16 border-y border-white/[0.07] bg-white/[0.02] px-5 py-24">
         <div className="mx-auto max-w-4xl">
           <Reveal className="text-center">
             <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
@@ -421,12 +454,113 @@ export default function ProteccionAutoNuevo() {
             ))}
           </div>
 
-          <Reveal delay={200}>
+          {/* Tabla comparativa — para quien quiere decidir sin hablar con nadie */}
+          <Reveal delay={150}>
+            <div className="mt-14 overflow-x-auto">
+              <table className="w-full min-w-[560px] border-separate border-spacing-0 text-left">
+                <caption className="sr-only">
+                  Comparación de los paquetes de tratamiento cerámico Platino, Gold y Elite
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col" className="pb-4 pr-4 text-xs font-bold uppercase tracking-wider text-white/40">
+                      Qué incluye
+                    </th>
+                    {TIERS.map(t => (
+                      <th key={t.n} scope="col"
+                        className={`pb-4 text-center text-sm font-black ${t.top ? 'text-amber-400' : 'text-white'}`}>
+                        {t.n}
+                        {t.top && (
+                          <span className="mt-1 block text-[9px] font-bold uppercase tracking-widest text-amber-400/70">
+                            Más elegido
+                          </span>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPARATIVA.map((row, i) => (
+                    <tr key={row.f} className={i % 2 === 0 ? 'bg-white/[0.02]' : ''}>
+                      <th scope="row" className="rounded-l-lg py-3.5 pl-4 pr-4 text-sm font-normal text-white/70">
+                        {row.f}
+                      </th>
+                      <td className="py-3.5 text-center text-lg"><Marca ok={row.platino} /></td>
+                      <td className={`py-3.5 text-center text-lg ${TIERS[1].top ? 'bg-amber-500/[0.04]' : ''}`}>
+                        <Marca ok={row.gold} />
+                      </td>
+                      <td className="rounded-r-lg py-3.5 text-center text-lg"><Marca ok={row.elite} /></td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <th scope="row" className="pt-6 pl-4 pr-4 text-sm font-bold text-white">
+                      Precio desde
+                    </th>
+                    {TIERS.map(t => (
+                      <td key={t.n} className="pt-6 text-center">
+                        {promo ? (
+                          <>
+                            <span className="block text-xs text-white/30 line-through">{formatCLP(t.p)}</span>
+                            <span className="block text-lg font-black text-green-400">
+                              {formatCLP(promoPrice(t.p, PROMO_CERAMICO))}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="block text-lg font-black text-amber-400">{formatCLP(t.p)}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </Reveal>
+
+          <Reveal delay={220}>
             <p className="mx-auto mt-10 max-w-xl text-center text-sm leading-relaxed text-white/45">
               El valor final depende del tipo de vehículo y del estado real de la pintura.
               En un auto nuevo, al requerir menos corrección, el trabajo suele quedar en el
               rango base del paquete.
             </p>
+          </Reveal>
+
+          {/* ── Los dos caminos ── */}
+          <Reveal delay={300}>
+            <div className="mt-14 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-amber-500/40 bg-amber-500/[0.06] p-7 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                  Ya sé lo que quiero
+                </p>
+                <p className="mt-3 text-lg font-bold leading-snug">
+                  Reservar mi tratamiento
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-white/50">
+                  Eliges el paquete y agendas. El estado de la pintura lo revisamos igual
+                  al recibir el vehículo.
+                </p>
+                <Link href={CTA_DIRECTO}
+                  className="mt-6 inline-block rounded-full bg-amber-500 px-7 py-3.5 text-sm font-black text-black transition-all hover:scale-[1.03] hover:bg-amber-400">
+                  RESERVAR TRATAMIENTO →
+                </Link>
+              </div>
+
+              <div className="rounded-2xl border border-white/[0.12] bg-white/[0.02] p-7 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                  Prefiero ver primero
+                </p>
+                <p className="mt-3 text-lg font-bold leading-snug">
+                  Revisión gratuita
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-white/50">
+                  15 minutos. Revisamos la pintura, te mostramos lo que encontramos y
+                  recomendamos el paquete que corresponde.
+                </p>
+                <Link href={CTA}
+                  className="mt-6 inline-block rounded-full border border-white/25 px-7 py-3.5 text-sm font-bold text-white transition-colors hover:border-white/50 hover:bg-white/5">
+                  REVISAR GRATIS →
+                </Link>
+              </div>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -470,8 +604,12 @@ export default function ProteccionAutoNuevo() {
           </Reveal>
 
           <Reveal delay={180}>
-            <div className="mt-11">
+            <div className="mt-11 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <BotonCTA grande>QUIERO REVISAR MI AUTO GRATIS</BotonCTA>
+              <Link href={CTA_DIRECTO}
+                className="rounded-full border border-white/25 px-8 py-5 text-base font-bold text-white transition-colors hover:border-white/50 hover:bg-white/5">
+                Reservar tratamiento
+              </Link>
             </div>
           </Reveal>
 
