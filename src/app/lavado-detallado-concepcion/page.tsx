@@ -124,7 +124,7 @@ export default async function LavadoDetalladoPage() {
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-3">Elige tu paquete</h2>
           <p className="text-gray-400 text-center mb-12">Precios según tipo de vehículo. Sin cobros ocultos.{' '}
-            {promo && <span className="block mt-1 text-green-400 font-bold text-sm">10% OFF aplicado — válido hasta el 31 de julio</span>}</p>
+            {promo && <span className="block mt-1 text-green-400 font-bold text-sm">Descuento aplicado por promoción vigente</span>}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {DIFERENCIAS.map(pkg => (
               <div key={pkg.name} className={`rounded-2xl p-6 border flex flex-col ${pkg.recommended ? 'bg-amber-500/10 border-amber-500/40 relative' : 'bg-gray-900 border-white/5'}`}>

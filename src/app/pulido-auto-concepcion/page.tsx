@@ -139,7 +139,7 @@ export default async function PulidoAutoPage() {
         <section className="py-20 px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-10">Precios por tipo de vehículo</h2>
-            {promo && <p className="text-center text-green-400 font-bold text-sm mb-8 -mt-6">10% OFF aplicado — válido hasta el 31 de julio</p>}
+            {promo && <p className="text-center text-green-400 font-bold text-sm mb-8 -mt-6">Descuento aplicado por promoción vigente</p>}
             <div className="space-y-4">
               {services.map(service => {
                 const prices = (service.prices ?? []) as { vehicle_type: string; price_clp: number }[]

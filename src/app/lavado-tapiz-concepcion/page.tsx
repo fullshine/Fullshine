@@ -32,7 +32,32 @@ const INCLUYE = [
   { icon: '✨', title: 'Tratamiento de olores', desc: 'Neutralización de olores a tabaco, mascota o humedad con productos específicos.' },
 ]
 
+/**
+ * Comparativa de los tres niveles.
+ * Mostrar las cruces —y no solo los ticks— es lo que empuja al siguiente nivel:
+ * el cliente ve concretamente qué se está perdiendo.
+ */
+const NIVELES = ['Platino', 'Gold', 'Elite'] as const
+
+const COMPARATIVA: { f: string; p: boolean; g: boolean; e: boolean }[] = [
+  { f: 'Asientos: extracción de manchas y olores', p: true,  g: true,  e: true },
+  { f: 'Techo interior y paneles de puerta',        p: true,  g: true,  e: true },
+  { f: 'Suelo, alfombras y maletero',               p: true,  g: true,  e: true },
+  { f: 'Higienización profunda del habitáculo',     p: true,  g: true,  e: true },
+  { f: 'Desmontaje de asientos',                    p: false, g: true,  e: true },
+  { f: 'Lavado de rieles y bases bajo los asientos',p: false, g: true,  e: true },
+  { f: 'Sellado de plásticos interiores',           p: false, g: false, e: true },
+]
+
 const FAQS = [
+  {
+    q: '¿Cuál es la diferencia entre Platino, Gold y Elite?',
+    a: 'El Platino limpia asientos, techo, suelo y maletero sin desmontar nada. El Gold suma el desmontaje de los asientos, lo que permite llegar a rieles, bases y zonas que de otra forma quedan sin lavar. El Elite agrega sellado de plásticos interiores, que protege tableros y consolas del sol y facilita la limpieza posterior.',
+  },
+  {
+    q: '¿Vale la pena desmontar los asientos?',
+    a: 'Depende del estado del vehículo. En autos con años de uso, mascotas o niños, debajo de los asientos se acumula suciedad que ninguna extractora alcanza con los asientos puestos. Si tu auto está relativamente cuidado, el Platino suele ser suficiente. Cuando lo revisamos te decimos honestamente cuál corresponde.',
+  },
   { q: '¿Cuánto tarda en secar el tapiz?', a: 'El tiempo de secado es de 4 a 8 horas dependiendo de la temperatura y ventilación. Recomendamos entregar el auto en la mañana para retirarlo en la tarde con todo seco.' },
   { q: '¿El servicio a domicilio tiene costo adicional?', a: 'No. El precio es el mismo ya sea en taller o a domicilio dentro de Concepción y San Pedro de la Paz. Solo necesitamos un espacio para trabajar.' },
   { q: '¿Pueden eliminar el olor a tabaco o a mascota?', a: 'Sí. Usamos productos específicos de neutralización de olores que atacan la fuente del olor, no solo lo cubren. En casos muy intensos puede requerir más de una sesión.' },
@@ -114,12 +139,59 @@ export default async function LavadoTapizPage() {
         </div>
       </section>
 
+      {/* COMPARATIVA DE NIVELES */}
+      <section className="py-20 px-4 border-t border-white/5">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-3">Tres niveles de limpieza</h2>
+          <p className="text-center text-gray-400 mb-10">
+            Elige según el estado de tu interior. Si no estás seguro, lo revisamos y te decimos cuál corresponde.
+          </p>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[520px] border-separate border-spacing-0 text-left">
+              <caption className="sr-only">
+                Comparación de los niveles de limpieza de tapiz Platino, Gold y Elite
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="pb-4 pr-4 text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Qué incluye
+                  </th>
+                  {NIVELES.map(n => (
+                    <th key={n} scope="col"
+                      className={`pb-4 text-center text-sm font-black ${n === 'Gold' ? 'text-amber-400' : 'text-white'}`}>
+                      {n}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARATIVA.map((row, i) => (
+                  <tr key={row.f} className={i % 2 === 0 ? 'bg-white/[0.02]' : ''}>
+                    <th scope="row" className="rounded-l-lg py-3.5 pl-4 pr-4 text-sm font-normal text-gray-300">
+                      {row.f}
+                    </th>
+                    {[row.p, row.g, row.e].map((ok, j) => (
+                      <td key={j} className={`py-3.5 text-center text-lg ${j === 2 ? 'rounded-r-lg' : ''}`}>
+                        {ok
+                          ? <span className="text-amber-400" aria-label="Incluido">✓</span>
+                          : <span className="text-gray-700" aria-label="No incluido">—</span>}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* PRECIOS */}
       {services.length > 0 && (
         <section className="py-20 px-4 bg-gray-900/50 border-t border-white/5">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-10">Precios por tipo de vehículo</h2>
-            {promo && <p className="text-center text-green-400 font-bold text-sm mb-8 -mt-6">10% OFF aplicado — válido hasta el 31 de julio</p>}
+            {promo && <p className="text-center text-green-400 font-bold text-sm mb-8 -mt-6">Descuento aplicado por promoción vigente</p>}
             <div className="space-y-4">
               {services.map(service => {
                 const prices = (service.prices ?? []) as { vehicle_type: string; price_clp: number }[]
