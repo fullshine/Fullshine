@@ -1,7 +1,7 @@
 'use client'
 
 import Script from 'next/script'
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { META_PIXEL_ID, track } from '@/lib/fbq'
 
@@ -17,9 +17,16 @@ import { META_PIXEL_ID, track } from '@/lib/fbq'
 function PixelPageViews() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const primeraCarga = useRef(true)
 
   useEffect(() => {
-    // El script base ya dispara el primer PageView; este cubre las navegaciones.
+    // El script base ya dispara el PageView de la carga inicial.
+    // Sin esta guarda se enviaba DOS veces, inflando las métricas y
+    // ensuciando la optimización de las campañas.
+    if (primeraCarga.current) {
+      primeraCarga.current = false
+      return
+    }
     track('PageView')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams])
