@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendBookingConfirmationToClient, sendNewBookingToAdmin } from '@/lib/whatsapp'
 import { sendPushToAdmin } from '@/lib/push'
+import { promoDiscountFor } from '@/lib/promo'
 import type { CreateBookingInput, ActionResult, AvailableSlotsResult, TimeSlot, Service } from '@/types'
 
 const BUSINESS_HOURS = {
@@ -260,9 +261,14 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
       (p: any) => p.vehicle_type === input.vehicle.vehicle_type
     )
     const basePrice = priceRecord?.price_clp ?? 0
-    const isCeramico = service.category === 'ceramico'
-    const discountPct = isCeramico ? 0.25 : 0.10
-    const totalPrice = Math.round(basePrice * (isCeramico ? 0.75 : 0.90))
+    // El descuento sale de la configuración de promo, NO de valores fijos.
+    // Antes estaba escrito a mano (25% cerámico / 10% resto) y se aplicaba
+    // siempre, aunque no hubiera promoción vigente: cada reserva se guardaba
+    // rebajada y el cliente pagaba de menos.
+    const discountPct = promoDiscountFor(service.category)
+    const totalPrice = discountPct > 0
+      ? Math.round(basePrice * (1 - discountPct))
+      : basePrice
 
     const { data: overlapping } = await supabase
       .from('bookings')
@@ -323,8 +329,9 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
         vehicleMake: input.vehicle.make ?? '',
         vehicleModel: input.vehicle.model,
         totalPrice,
-        basePrice: basePrice > 0 ? basePrice : undefined,
-        discountPct: basePrice > 0 ? discountPct : undefined,
+        // El bloque de descuento solo aparece si realmente hubo descuento
+        basePrice: discountPct > 0 && basePrice > 0 ? basePrice : undefined,
+        discountPct: discountPct > 0 ? discountPct : undefined,
       }).catch(e => console.error('[WhatsApp cliente]', e?.message)),
       sendNewBookingToAdmin({
         customerName: input.customer.full_name,

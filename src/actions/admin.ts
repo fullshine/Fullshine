@@ -3,6 +3,7 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { sendCancellationToClient } from '@/lib/whatsapp'
+import { promoDiscountFor } from '@/lib/promo'
 import type { ActionResult, BookingStatus, DashboardStats, BookingWithRelations, Customer, Vehicle } from '@/types'
 import { revalidatePath } from 'next/cache'
 
@@ -324,7 +325,7 @@ export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{
     if (error || !booking) return { success: false, error: 'Reserva no encontrada' }
 
     const storedTotal = booking.total_price_clp ?? 0
-    const isCeramico = booking.service?.category === 'ceramico'
+
     // total_price_clp already has the discount applied from createBooking
     // but if booking was created manually or before the discount logic, recalculate
     const total = storedTotal
@@ -364,7 +365,12 @@ export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{
         customerName: booking.customer.full_name,
         serviceName: booking.service?.name ?? '',
         totalPrice: total,
-        basePrice: isCeramico ? Math.round(total / 0.6) : undefined,
+        // Se reconstruye el precio original solo si hay promo vigente para
+        // esa categoría. Antes dividía por 0.6 —un 40% inventado— siempre.
+        basePrice: (() => {
+          const pct = promoDiscountFor(booking.service?.category)
+          return pct > 0 ? Math.round(total / (1 - pct)) : undefined
+        })(),
         paymentAmount: amount,
         paymentLink: paymentUrl,
         scheduledAt: booking.booking_date && booking.slot_start
@@ -453,7 +459,7 @@ export async function resendConfirmation(bookingId: string): Promise<ActionResul
       ? `${booking.booking_date}T${booking.slot_start}`
       : booking.slot_start ?? ''
     const total = booking.total_price_clp ?? 0
-    const isCeramico = booking.service?.category === 'ceramico'
+    const descuentoVigente = promoDiscountFor(booking.service?.category)
 
     const { sendBookingConfirmationToClient, sendNewBookingToAdmin } = await import('@/lib/whatsapp')
     const { sendPushToAdmin } = await import('@/lib/push')
@@ -467,8 +473,11 @@ export async function resendConfirmation(bookingId: string): Promise<ActionResul
         vehicleMake: booking.vehicle?.brand ?? '',
         vehicleModel: booking.vehicle?.model ?? '',
         totalPrice: total > 0 ? total : undefined,
-        basePrice: total > 0 ? Math.round(total / (isCeramico ? 0.75 : 0.9)) : undefined,
-        discountPct: total > 0 ? (isCeramico ? 0.25 : 0.10) : undefined,
+        // Igual que arriba: el descuento sale de la configuración de promo.
+        basePrice: descuentoVigente > 0 && total > 0
+          ? Math.round(total / (1 - descuentoVigente))
+          : undefined,
+        discountPct: descuentoVigente > 0 ? descuentoVigente : undefined,
       }).catch(e => console.error('[Reenvío WhatsApp cliente]', e?.message)),
       sendNewBookingToAdmin({
         customerName: booking.customer.full_name,
