@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { sendBookingConfirmationToClient, sendNewBookingToAdmin } from '@/lib/whatsapp'
 import { sendPushToAdmin } from '@/lib/push'
 import { promoDiscountFor } from '@/lib/promo'
+import { marcarConvertido } from '@/actions/borradores'
 import type { CreateBookingInput, ActionResult, AvailableSlotsResult, TimeSlot, Service } from '@/types'
 
 const BUSINESS_HOURS = {
@@ -314,6 +315,10 @@ export async function createBooking(input: CreateBookingInput): Promise<ActionRe
     }
 
     const bookingId = bookingResult.id
+
+    // Si esta persona tenía un borrador abandonado, se cierra: ya convirtió
+    // y no debe aparecer en la lista de recuperación.
+    await marcarConvertido(input.customer.phone, bookingId)
 
     // Link de pago: se envía manualmente desde el kanban
 

@@ -7,6 +7,7 @@ import { cn, formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
 import ServiceDescription from '@/components/ServiceDescription'
 import { isPromoActive, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
 import { track } from '@/lib/fbq'
+import { guardarBorrador } from '@/actions/borradores'
 
 const VEHICLE_TYPES: VehicleType[] = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
 
@@ -482,6 +483,18 @@ export default function BookingForm({ services: allServices, preselect, category
               </div>
             )}
 
+            {/* Aviso de consentimiento — es lo que permite escribirle a quien
+                no termina la reserva. Sin esto no guardamos nada. */}
+            <p className="text-xs text-gray-500 leading-relaxed bg-gray-50 border border-gray-200 rounded-lg p-3">
+              Al continuar autorizas a Fullshine a escribirte por WhatsApp para
+              confirmar tu hora o ayudarte a completar la reserva. Puedes pedir que
+              dejemos de escribirte cuando quieras.{' '}
+              <a href="/politica-privacidad" target="_blank" rel="noopener noreferrer"
+                className="text-brand-600 underline underline-offset-2">
+                Política de privacidad
+              </a>
+            </p>
+
             <div className="border-t border-gray-100 pt-4 mt-2">
               <h3 className="font-semibold text-gray-900 mb-3">Tu vehículo</h3>
               {isRevision && (
@@ -588,6 +601,25 @@ export default function BookingForm({ services: allServices, preselect, category
         {!isLastStep ? (
           <button type="button" onClick={() => {
             if (!canGoNext()) { setShowErrors(true); return }
+
+            // Al salir del paso de datos ya tenemos nombre y teléfono:
+            // se guarda el borrador por si no llega a confirmar.
+            // No se espera la respuesta — no debe frenar al usuario.
+            if (current === 'datos' && form.customer_phone.trim()) {
+              guardarBorrador({
+                phone: form.customer_phone,
+                full_name: form.customer_name,
+                vehicle_make: form.vehicle_make,
+                vehicle_model: form.vehicle_model,
+                vehicle_type: form.vehicle_type,
+                service_id: form.service_id || undefined,
+                service_name: selectedService?.name,
+                booking_date: form.scheduled_date || undefined,
+                slot_start: form.scheduled_time || undefined,
+                paso_alcanzado: 'datos completados, sin confirmar',
+              }).catch(() => {})
+            }
+
             // Meta Pixel: el usuario avanzó de verdad en el formulario
             if (!startedRef.current) {
               startedRef.current = true
