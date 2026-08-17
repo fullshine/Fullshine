@@ -39,11 +39,13 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
   const status = booking.status
 
   const b = booking as any
-  const scheduledAt = b.scheduled_at ?? b.booking_date ?? ''
-  const date = scheduledAt.substring(0, 10) || '-'
-  const time = scheduledAt.substring(11, 16) || '-'
-  const vehicle = `${booking.vehicle?.make ?? ''} ${booking.vehicle?.model ?? ''}`.trim()
-  const total = booking.total_price ?? 0
+  // La tabla real usa booking_date (date) + slot_start (time), no scheduled_at.
+  // Antes se leía la hora con substring sobre la fecha y salía siempre "-".
+  const date = (b.booking_date ?? b.scheduled_at ?? '').substring(0, 10) || '-'
+  const time = (b.slot_start ?? b.scheduled_at?.substring(11) ?? '').substring(0, 5) || '-'
+  // vehicles usa brand/plate en la base real; make queda como respaldo.
+  const vehicle = `${b.vehicle?.brand ?? b.vehicle?.make ?? ''} ${b.vehicle?.model ?? ''}`.trim()
+  const total = b.total_price_clp ?? b.total_price ?? 0
   const amount20 = Math.round(total * 0.2)
 
   function move(newStatus: string, isForward = true) {

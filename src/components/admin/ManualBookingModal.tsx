@@ -64,9 +64,15 @@ export default function ManualBookingModal({ open, onClose, onSuccess }: Props) 
   const selectedService = services.find(s => s.id === form.service_id)
   const selectedPrice = selectedService?.prices?.find(p => p.vehicle_type === form.vehicle_type)
 
+  // Un móvil chileno tiene 9 dígitos (empieza con 9). Con o sin el 56 delante
+  // son 9 u 11 dígitos. Si no valida, Green API rechaza el envío con
+  // "invalid phone number" y el cliente nunca recibe nada.
+  const soloDigitos = form.phone.replace(/\D/g, '')
+  const telefonoValido = soloDigitos.length === 9 || soloDigitos.length === 11
+
   const canSubmit =
     form.full_name.trim() &&
-    form.phone.trim() &&
+    telefonoValido &&
     form.vehicle_make.trim() &&
     form.vehicle_model.trim() &&
     form.vehicle_type &&
@@ -154,12 +160,24 @@ export default function ManualBookingModal({ open, onClose, onSuccess }: Props) 
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Teléfono *</label>
                   <input
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+                    type="tel"
+                    className={cn(
+                      'w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2',
+                      form.phone && !telefonoValido
+                        ? 'border-red-400 focus:ring-red-300'
+                        : 'border-gray-300 focus:ring-brand-400'
+                    )}
                     placeholder="9 1234 5678"
                     value={form.phone}
                     onChange={e => set('phone', e.target.value)}
                     required
                   />
+                  {form.phone && !telefonoValido && (
+                    <p className="text-[11px] text-red-500 mt-1 leading-snug">
+                      Debe tener 9 dígitos (ej: 9 1234 5678). Sin ese formato,
+                      WhatsApp no puede entregar los mensajes.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Email <span className="text-gray-400">(opcional)</span></label>
