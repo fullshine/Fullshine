@@ -11,8 +11,25 @@ function normalizePhone(phone: string): string {
   return digits.startsWith('56') ? digits : `56${digits}`
 }
 
+/**
+ * Valida el número ANTES de llamar a Green API.
+ *
+ * Sin esto, un teléfono mal guardado devuelve errores crípticos del proveedor
+ * ("chatId must be one of the next formats...") que no le dicen nada a quien
+ * está usando el panel. Un móvil chileno normalizado son 11 dígitos: 56 + 9 más.
+ */
+function validarTelefono(phone: string): string {
+  const normalizado = normalizePhone(phone ?? '')
+  if (normalizado.length !== 11) {
+    throw new Error(
+      `El teléfono "${phone}" no es válido (quedó en ${normalizado.length} dígitos, deben ser 11: 56 + 9 dígitos). Corrígelo en la ficha del cliente.`
+    )
+  }
+  return normalizado
+}
+
 async function sendMessage(phone: string, message: string): Promise<void> {
-  const chatId = `${normalizePhone(phone)}@c.us`
+  const chatId = `${validarTelefono(phone)}@c.us`
   const url = `${API_URL}/waInstance${INSTANCE_ID}/sendMessage/${TOKEN}`
 
   const res = await fetch(url, {
