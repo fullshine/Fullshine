@@ -28,6 +28,7 @@ const RECURSOS = [
   { href: '/preguntas-frecuentes', label: 'Preguntas frecuentes' },
   { href: '/blog', label: 'Blog' },
   { href: '/nosotros', label: 'Quiénes somos' },
+  { href: '/trabaja-con-nosotros', label: 'Trabaja con nosotros' },
   { href: '/reservar', label: 'Reservar hora' },
   { href: '/politica-privacidad', label: 'Política de privacidad' },
 ]

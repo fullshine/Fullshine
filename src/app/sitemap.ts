@@ -32,6 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Confianza y contenido citable por motores de IA
     { path: '/preguntas-frecuentes',               priority: 0.85, freq: 'monthly' },
     { path: '/nosotros',                           priority: 0.7,  freq: 'monthly' },
+    { path: '/trabaja-con-nosotros',               priority: 0.5,  freq: 'monthly' },
 
     // Contenido
     { path: '/blog',                                priority: 0.8,  freq: 'weekly'  },
