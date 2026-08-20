@@ -48,6 +48,13 @@ interface Props {
    * agenda el vehículo.
    */
   hidePrices?: boolean
+  /**
+   * Con `strict`, si no hay servicios en la categoría pedida NO se muestran
+   * todos como respaldo: se avisa del problema. Imprescindible en accesos
+   * B2B, donde mostrar el catálogo completo con los precios ocultos dejaría
+   * agendar servicios fuera del convenio sin que nadie lo note.
+   */
+  strict?: boolean
 }
 
 const INITIAL_FORM: BookingFormData = {
@@ -82,11 +89,25 @@ function findPreselected(services: Service[], key?: string): Service | undefined
   )
 }
 
-export default function BookingForm({ services: allServices, preselect, category, hidePrices = false }: Props) {
-  // Filtro por categoría (para landings de campaña): solo si existe al menos
-  // un servicio de esa categoría; si no, se muestran todos como fallback.
+export default function BookingForm({
+  services: allServices, preselect, category, hidePrices = false, strict = false,
+}: Props) {
+  // Filtro por categoría. En modo normal, si la categoría no existe se muestran
+  // todos como respaldo; en modo estricto no hay respaldo (ver prop `strict`).
   const filtered = category ? allServices.filter(s => s.category === category) : allServices
-  const services = filtered.length > 0 ? filtered : allServices
+  const services = filtered.length > 0 || strict ? filtered : allServices
+
+  if (strict && services.length === 0) {
+    return (
+      <div className="rounded-2xl border border-amber-300 bg-amber-50 p-6 text-center">
+        <p className="font-bold text-amber-900">Los planes no están disponibles</p>
+        <p className="mt-2 text-sm text-amber-800 leading-relaxed">
+          No pudimos cargar los servicios de este convenio. Escríbenos por
+          WhatsApp y agendamos tu vehículo de inmediato.
+        </p>
+      </div>
+    )
+  }
   const preselected = findPreselected(services, preselect)
 
   // Modo "revisión gratis": flujo corto y sin precios.

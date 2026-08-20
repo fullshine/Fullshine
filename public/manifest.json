@@ -1,12 +1,14 @@
 {
-  "name": "Fullshine Detailing",
+  "name": "Fullshine Detailing Premium",
   "short_name": "Fullshine",
-  "description": "Panel de administración Fullshine Detailing",
-  "start_url": "/admin/dashboard",
+  "description": "Detailing y tratamiento cerámico en Concepción. Reserva tu hora en línea.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#111827",
+  "background_color": "#030712",
   "theme_color": "#111827",
   "orientation": "portrait",
+  "lang": "es-CL",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -19,6 +21,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Reservar hora",
+      "short_name": "Reservar",
+      "url": "/reservar",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Diagnóstico gratuito",
+      "short_name": "Diagnóstico",
+      "url": "/revision-gratis-concepcion",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

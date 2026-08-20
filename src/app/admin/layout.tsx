@@ -1,4 +1,13 @@
+import type { Metadata } from 'next'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+
+export const metadata: Metadata = {
+  title: 'Fullshine Admin',
+  robots: { index: false, follow: false },
+  // Manifiesto propio del panel: así el acceso directo del admin abre el
+  // dashboard, y el del sitio público abre la portada.
+  manifest: '/manifest-admin.json',
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -18,12 +18,17 @@ export const dynamic = 'force-dynamic'
 
 const SOCIO = 'Automotora Fortia'
 
-export const metadata = buildMetadata({
-  title: `Agenda Fullshine — ${SOCIO}`,
-  description: 'Acceso privado para agendar la preparación de vehículos.',
-  path: '/socios/fortia',
-  noindex: true,
-})
+export const metadata = {
+  ...buildMetadata({
+    title: `Agenda Fullshine — ${SOCIO}`,
+    description: 'Acceso privado para agendar la preparación de vehículos.',
+    path: '/socios/fortia',
+    noindex: true,
+  }),
+  // Manifiesto propio: al "agregar a pantalla principal" el acceso directo
+  // abre esta página y no la portada ni el panel de administración.
+  manifest: '/manifest-fortia.json',
+}
 
 const PLANES = [
   {
@@ -102,7 +107,7 @@ export default async function AccesoFortia() {
         </div>
 
         <Suspense fallback={<div className="text-center text-white">Cargando…</div>}>
-          <BookingForm services={services} category="automotora" hidePrices />
+          <BookingForm services={services} category="automotora" hidePrices strict />
         </Suspense>
 
         <footer className="mt-12 border-t border-white/5 pt-8 text-center">
