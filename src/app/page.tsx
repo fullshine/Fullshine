@@ -81,6 +81,13 @@ const SERVICE_ICONS: Record<string, string> = {
 
 const CATEGORY_ORDER = ['lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'mantencion', 'adicional', 'precompra']
 
+/**
+ * Categorías que NO se muestran en la web pública.
+ * Las tarifas de automotora son preferenciales y no deben quedar visibles
+ * para clientes finales. Se reservan solo desde /socios/[empresa].
+ */
+const CATEGORIAS_PRIVADAS = ['automotora']
+
 const WHY_US = [
   { icon: '🏆', title: 'Calidad premium', desc: 'Productos de primera línea y técnicas profesionales en cada servicio.' },
   { icon: '⏱️', title: 'Puntualidad garantizada', desc: 'Respetamos tu tiempo. Turnos fijos de mañana y tarde sin esperas.' },
@@ -154,7 +161,7 @@ export default async function HomePage() {
   const orderedCategories = [
     ...CATEGORY_ORDER.filter(k => grouped[k]),
     ...Object.keys(grouped).filter(k => !CATEGORY_ORDER.includes(k)),
-  ]
+  ].filter(k => !CATEGORIAS_PRIVADAS.includes(k))
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">

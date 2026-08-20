@@ -22,6 +22,8 @@ export default function robots(): MetadataRoute.Robots {
     '/diagnostico',
     '/oferta-tratamiento-ceramico',
     '/proteccion-auto-nuevo',
+    // Accesos privados de socios comerciales: tarifas preferenciales
+    '/socios/',
   ]
 
   return {

@@ -41,6 +41,13 @@ interface Props {
   preselect?: string
   /** Si viene, el formulario solo muestra servicios de esa categoría (ej: "ceramico") */
   category?: string
+  /**
+   * Oculta todo lo relacionado con precios: valores por servicio, descuentos
+   * y total en la confirmación. Se usa en los accesos B2B, donde la tarifa
+   * está acordada por contrato y no corresponde mostrarla al operario que
+   * agenda el vehículo.
+   */
+  hidePrices?: boolean
 }
 
 const INITIAL_FORM: BookingFormData = {
@@ -75,7 +82,7 @@ function findPreselected(services: Service[], key?: string): Service | undefined
   )
 }
 
-export default function BookingForm({ services: allServices, preselect, category }: Props) {
+export default function BookingForm({ services: allServices, preselect, category, hidePrices = false }: Props) {
   // Filtro por categoría (para landings de campaña): solo si existe al menos
   // un servicio de esa categoría; si no, se muestran todos como fallback.
   const filtered = category ? allServices.filter(s => s.category === category) : allServices
@@ -338,7 +345,7 @@ export default function BookingForm({ services: allServices, preselect, category
                                 </p>
                               </div>
                               <div className="text-right ml-4 shrink-0">
-                                {price === 0 ? (
+                                {hidePrices ? null : price === 0 ? (
                                   <span className="text-sm font-black text-green-600 bg-green-50 px-2 py-1 rounded">GRATIS</span>
                                 ) : price ? (
                                   disc ? (
@@ -551,7 +558,7 @@ export default function BookingForm({ services: allServices, preselect, category
               <Row label="Servicio" value={selectedService?.name ?? ''} />
               <Row label="Fecha" value={form.scheduled_date} />
               <Row label="Hora" value={form.scheduled_time} />
-              {servicePrice && (
+              {!hidePrices && servicePrice && (
                 selectedDiscounted ? (
                   <div className="border-t pt-2 mt-2 space-y-1">
                     <div className="flex justify-between text-sm text-gray-400">
