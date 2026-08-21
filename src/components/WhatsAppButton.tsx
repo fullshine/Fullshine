@@ -1,16 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { track } from '@/lib/fbq'
+
+/** Rutas internas donde el botón estorba: ahí el usuario eres tú, no un cliente. */
+const RUTAS_OCULTAS = ['/admin', '/login']
 
 export default function WhatsAppButton() {
   const [visible, setVisible] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 1500)
     return () => clearTimeout(t)
   }, [])
 
+  if (RUTAS_OCULTAS.some(r => pathname?.startsWith(r))) return null
   if (!visible) return null
 
   return (
