@@ -1,8 +1,9 @@
-import { getDashboardStats, getBookings, getRecentBookings } from '@/actions/admin'
+import { getDashboardStats, getBookings, getRecentBookings, getHistorialMensual } from '@/actions/admin'
 import { getExpensesMonth } from '@/actions/expenses'
 import { getTaxPeriod } from '@/actions/tax'
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils'
 import PushSubscribeButton from '@/components/admin/PushSubscribe'
+import HistorialMensual from '@/components/admin/HistorialMensual'
 
 export const metadata = { title: 'Dashboard | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -11,12 +12,13 @@ export default async function DashboardPage() {
   const now = new Date()
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
-  const [statsResult, bookingsResult, recentResult, expensesResult, taxResult] = await Promise.all([
+  const [statsResult, bookingsResult, recentResult, expensesResult, taxResult, historialResult] = await Promise.all([
     getDashboardStats(),
     getBookings({ date: now.toISOString().split('T')[0] }),
     getRecentBookings(),
     getExpensesMonth(),
     getTaxPeriod(currentMonth),
+    getHistorialMensual(12),
   ])
 
   const stats = statsResult.data
@@ -26,6 +28,7 @@ export default async function DashboardPage() {
   const rcvTotal = taxResult.data?.rcv_total ?? 0
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0) + rcvTotal
   const netProfit = (stats?.revenue_month ?? 0) - totalExpenses
+  const historial = historialResult.data ?? []
 
   return (
     <div className="p-4 md:p-6 space-y-5">
@@ -33,6 +36,9 @@ export default async function DashboardPage() {
       <h1 className="text-xl md:text-2xl font-bold text-gray-900">Dashboard</h1>
       <PushSubscribeButton />
     </div>
+
+      {/* Historial de meses anteriores */}
+      {historial.length > 0 && <HistorialMensual meses={historial} />}
 
       {/* Panel ventas del mes */}
       {stats && (

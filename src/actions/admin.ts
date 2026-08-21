@@ -98,6 +98,92 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
   }
 }
 
+// --- HISTORIAL MENSUAL ---
+
+export type MesHistorico = {
+  periodo: string        // '2026-08'
+  etiqueta: string       // 'Agosto 2026'
+  ingresos: number
+  finalizados: number
+  ticket: number
+  variacion: number | null  // % respecto al mes anterior
+}
+
+const MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+]
+
+/**
+ * Ingresos por mes de los últimos N meses.
+ *
+ * Se cuenta como ingreso el trabajo FINALIZADO (completed o review_sent),
+ * no el agendado: una reserva que no se ejecutó no es venta.
+ *
+ * Una sola consulta trae todo el período y se agrupa en memoria; con el
+ * volumen de un taller son cientos de filas, no millones.
+ */
+export async function getHistorialMensual(meses = 12): Promise<ActionResult<MesHistorico[]>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
+
+  try {
+    const supabase = createAdminClient()
+    const hoy = new Date()
+
+    // Primer día del mes más antiguo del rango
+    const desde = new Date(hoy.getFullYear(), hoy.getMonth() - (meses - 1), 1)
+    const desdeStr = `${desde.getFullYear()}-${String(desde.getMonth() + 1).padStart(2, '0')}-01`
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('booking_date, total_price_clp')
+      .in('status', ['completed', 'review_sent'])
+      .gte('booking_date', desdeStr)
+
+    if (error) return { success: false, error: error.message }
+
+    // Acumular por período
+    const acc: Record<string, { total: number; n: number }> = {}
+    for (const b of data ?? []) {
+      const periodo = (b.booking_date ?? '').substring(0, 7)
+      if (!periodo) continue
+      if (!acc[periodo]) acc[periodo] = { total: 0, n: 0 }
+      acc[periodo].total += b.total_price_clp ?? 0
+      acc[periodo].n += 1
+    }
+
+    // Serie completa, incluyendo meses sin ventas (para no romper la lectura)
+    const serie: MesHistorico[] = []
+    for (let i = meses - 1; i >= 0; i--) {
+      const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1)
+      const periodo = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      const v = acc[periodo] ?? { total: 0, n: 0 }
+      serie.push({
+        periodo,
+        etiqueta: `${MESES[d.getMonth()]} ${d.getFullYear()}`,
+        ingresos: v.total,
+        finalizados: v.n,
+        ticket: v.n > 0 ? Math.round(v.total / v.n) : 0,
+        variacion: null,
+      })
+    }
+
+    // Variación mes a mes
+    for (let i = 1; i < serie.length; i++) {
+      const previo = serie[i - 1].ingresos
+      if (previo > 0) {
+        serie[i].variacion = Math.round(((serie[i].ingresos - previo) / previo) * 100)
+      }
+    }
+
+    return { success: true, data: serie }
+  } catch (e) {
+    console.error('[getHistorialMensual]', e)
+    return { success: false, error: 'Error al cargar el historial' }
+  }
+}
+
 // --- RECENT BOOKINGS ---
 
 export async function getRecentBookings(): Promise<ActionResult<BookingWithRelations[]>> {
