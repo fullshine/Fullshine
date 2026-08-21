@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: '/admin/mantenciones', label: 'Mantenciones', icon: '💎' },
   { href: '/admin/incompletas', label: 'Incompletas', icon: '🛒' },
   { href: '/admin/postulaciones', label: 'Postulaciones', icon: '👤' },
+  { href: '/admin/socios', label: 'Socios', icon: '🤝' },
   { href: '/admin/servicios', label: 'Servicios', icon: '✨' },
   { href: '/admin/finanzas', label: 'Finanzas', icon: '💰' },
 ]
