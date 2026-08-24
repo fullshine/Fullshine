@@ -28,7 +28,18 @@ const MAX_CONCURRENT_SHORT = 3
 
 // --- SERVICES ---
 
-export async function getServices(): Promise<ActionResult<Service[]>> {
+/**
+ * Categorías que NUNCA deben aparecer en el sitio público.
+ *
+ * Son convenios B2B con tarifas preferenciales. Se filtran acá, en el origen,
+ * y no en cada página: así una vista nueva no puede exponerlas por olvido.
+ * Para verlas hay que pedirlas explícitamente con `incluirPrivadas`.
+ */
+export const CATEGORIAS_PRIVADAS = ['automotora']
+
+export async function getServices(
+  opciones?: { incluirPrivadas?: boolean }
+): Promise<ActionResult<Service[]>> {
   try {
     const supabase = createAdminClient()
     const { data, error } = await supabase
@@ -38,7 +49,13 @@ export async function getServices(): Promise<ActionResult<Service[]>> {
       .order('category')
       .order('name')
     if (error) return { success: false, error: error.message }
-    return { success: true, data: (data ?? []) as Service[] }
+
+    const todos = (data ?? []) as Service[]
+    const visibles = opciones?.incluirPrivadas
+      ? todos
+      : todos.filter(s => !CATEGORIAS_PRIVADAS.includes(s.category))
+
+    return { success: true, data: visibles }
   } catch {
     return { success: false, error: 'Error inesperado' }
   }

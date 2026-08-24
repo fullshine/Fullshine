@@ -44,7 +44,7 @@ export default function ManualBookingModal({ open, onClose, onSuccess }: Props) 
 
   useEffect(() => {
     if (open) {
-      getServices().then(r => {
+      getServices({ incluirPrivadas: true }).then(r => {
         if (r.success && r.data) setServices(r.data.filter(s => s.is_active))
       })
       setError(null)

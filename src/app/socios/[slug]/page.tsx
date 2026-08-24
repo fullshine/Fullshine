@@ -42,7 +42,8 @@ export default async function PortalSocioPage({ params }: { params: { slug: stri
   }
 
   const [servicios, docs, hist] = await Promise.all([
-    getServices(),
+    // Acceso autorizado: acá sí se cargan las tarifas del convenio
+    getServices({ incluirPrivadas: true }),
     getDocumentos(socio.id),
     getHistorial(socio.service_category),
   ])

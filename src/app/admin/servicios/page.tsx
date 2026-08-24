@@ -4,7 +4,7 @@ import { formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
 export const metadata = { title: 'Servicios | Fullshine Admin' }
 
 export default async function ServiciosPage() {
-  const result = await getServices()
+  const result = await getServices({ incluirPrivadas: true })
   const services = result.data ?? []
 
   const vehicleTypes = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']

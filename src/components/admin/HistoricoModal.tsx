@@ -38,7 +38,7 @@ export default function HistoricoModal({
 
   useEffect(() => {
     if (!open) return
-    getServices().then(r => {
+    getServices({ incluirPrivadas: true }).then(r => {
       if (r.success && r.data) setServices(r.data.filter(s => s.is_active))
     })
     setForm(VACIO); setMsg(null); setError(null); setCargados(0)
