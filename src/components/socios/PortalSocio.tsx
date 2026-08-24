@@ -162,6 +162,30 @@ export default function PortalSocio({
             </div>
           ) : (
             <>
+              {/* Estado de cuenta */}
+              {facturas.length > 0 && (() => {
+                const pendientes = facturas.filter(f => !f.pagada)
+                const monto = pendientes.reduce((s, f) => s + (f.monto_clp ?? 0), 0)
+                if (pendientes.length === 0) {
+                  return (
+                    <div className="rounded-xl border border-green-500/25 bg-green-500/[0.07] p-4 text-center">
+                      <p className="text-sm font-bold text-green-400">
+                        ✓ No hay facturas pendientes
+                      </p>
+                    </div>
+                  )
+                }
+                return (
+                  <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.07] p-4">
+                    <p className="text-xs uppercase tracking-wider text-amber-400/70">Pendiente de pago</p>
+                    <p className="mt-1 text-2xl font-black text-amber-400">{formatCurrency(monto)}</p>
+                    <p className="mt-0.5 text-xs text-white/50">
+                      {pendientes.length} {pendientes.length === 1 ? 'factura' : 'facturas'}
+                    </p>
+                  </div>
+                )
+              })()}
+
               {[
                 { t: 'Facturas', items: facturas },
                 { t: 'Registro fotográfico', items: fotos },
@@ -177,7 +201,18 @@ export default function PortalSocio({
                         className="flex w-full items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-left transition-colors hover:border-amber-500/30 hover:bg-white/[0.04] disabled:opacity-50">
                         <span className="text-2xl" aria-hidden>{ICONO_TIPO[d.tipo] ?? '📎'}</span>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-semibold text-white">{d.titulo}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="truncate font-semibold text-white">{d.titulo}</p>
+                            {d.tipo === 'factura' && (
+                              <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                d.pagada
+                                  ? 'bg-green-500/15 text-green-400'
+                                  : 'bg-amber-500/15 text-amber-400'
+                              }`}>
+                                {d.pagada ? 'PAGADA' : 'PENDIENTE'}
+                              </span>
+                            )}
+                          </div>
                           <p className="mt-0.5 text-xs text-white/40">
                             {d.created_at.substring(0, 10)}
                             {d.periodo && ` · ${d.periodo}`}

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useTransition } from 'react'
 import {
-  subirDocumento, eliminarDocumento, getEnlaceDocumento,
+  subirDocumento, eliminarDocumento, getEnlaceDocumento, marcarPago,
   type Socio, type Documento,
 } from '@/actions/socios'
 import { formatCurrency } from '@/lib/utils'
@@ -147,6 +147,42 @@ export default function SociosPanel({
         {msg && <p className="text-center text-sm text-gray-600">{msg}</p>}
       </form>
 
+      {/* Resumen de cobranza */}
+      {(() => {
+        const facturas = documentos.filter(d => d.tipo === 'factura')
+        if (facturas.length === 0) return null
+        const pendientes = facturas.filter(d => !d.pagada)
+        const montoPendiente = pendientes.reduce((s, d) => s + (d.monto_clp ?? 0), 0)
+        const montoPagado = facturas
+          .filter(d => d.pagada)
+          .reduce((s, d) => s + (d.monto_clp ?? 0), 0)
+
+        return (
+          <div className="grid grid-cols-2 gap-3">
+            <div className={`rounded-xl border p-4 ${
+              montoPendiente > 0 ? 'border-amber-300 bg-amber-50' : 'border-gray-200 bg-white'
+            }`}>
+              <p className="text-xs uppercase tracking-wider text-gray-500">Por cobrar</p>
+              <p className={`mt-1 text-2xl font-black ${
+                montoPendiente > 0 ? 'text-amber-700' : 'text-gray-400'
+              }`}>
+                {formatCurrency(montoPendiente)}
+              </p>
+              <p className="mt-0.5 text-xs text-gray-500">
+                {pendientes.length} {pendientes.length === 1 ? 'factura pendiente' : 'facturas pendientes'}
+              </p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <p className="text-xs uppercase tracking-wider text-gray-500">Pagado</p>
+              <p className="mt-1 text-2xl font-black text-green-600">{formatCurrency(montoPagado)}</p>
+              <p className="mt-0.5 text-xs text-gray-500">
+                {facturas.length - pendientes.length} de {facturas.length} facturas
+              </p>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Listado */}
       <div>
         <h2 className="mb-3 font-bold text-gray-900">
@@ -166,14 +202,42 @@ export default function SociosPanel({
                   {TIPOS.find(t => t.v === d.tipo)?.l.split(' ')[0] ?? '📎'}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-gray-900">{d.titulo}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="truncate font-semibold text-gray-900">{d.titulo}</p>
+                    {d.tipo === 'factura' && (
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                        d.pagada ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {d.pagada ? 'Pagada' : 'Pendiente'}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500">
                     {d.created_at.substring(0, 10)}
                     {d.periodo && ` · ${d.periodo}`}
                     {d.patente && ` · ${d.patente}`}
                     {d.monto_clp ? ` · ${formatCurrency(d.monto_clp)}` : ''}
+                    {d.pagada && d.pagada_at && ` · pagada el ${d.pagada_at.substring(0, 10)}`}
                   </p>
                 </div>
+
+                {d.tipo === 'factura' && (
+                  <button disabled={pending}
+                    onClick={() => startTransition(async () => {
+                      const r = await marcarPago(d.id, !d.pagada)
+                      setMsg(r.success
+                        ? (d.pagada ? 'Marcada como pendiente' : '✅ Marcada como pagada')
+                        : `Error: ${r.error}`)
+                    })}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold border disabled:opacity-50 ${
+                      d.pagada
+                        ? 'bg-white text-gray-500 border-gray-300'
+                        : 'bg-green-600 text-white border-green-600'
+                    }`}>
+                    {d.pagada ? 'Marcar pendiente' : 'Marcar pagada'}
+                  </button>
+                )}
+
                 <button disabled={pending} onClick={() => abrir(d.file_path)}
                   className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 border border-blue-200 disabled:opacity-50">
                   Ver

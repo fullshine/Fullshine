@@ -39,6 +39,8 @@ export type Documento = {
   file_path: string
   file_name: string
   file_size: number | null
+  pagada: boolean
+  pagada_at: string | null
   created_at: string
 }
 
@@ -262,6 +264,29 @@ export async function subirDocumento(formData: FormData): Promise<{ success: boo
     console.error('[subirDocumento]', e)
     return { success: false, error: (e as Error).message }
   }
+}
+
+/**
+ * Marca una factura como pagada o pendiente.
+ *
+ * El socio ve el estado en su portal, en modo lectura. Funciona como
+ * recordatorio silencioso: evita tener que escribir "¿me pagaron la del
+ * viernes?", que es una conversación incómoda con un cliente que uno quiere
+ * conservar.
+ */
+export async function marcarPago(id: string, pagada: boolean) {
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from('partner_documents')
+    .update({
+      pagada,
+      pagada_at: pagada ? new Date().toISOString() : null,
+    })
+    .eq('id', id)
+
+  if (error) return { success: false, error: error.message }
+  revalidatePath('/admin/socios')
+  return { success: true }
 }
 
 export async function eliminarDocumento(id: string) {
