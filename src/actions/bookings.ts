@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { sendBookingConfirmationToClient, sendNewBookingToAdmin } from '@/lib/whatsapp'
 import { sendPushToAdmin } from '@/lib/push'
 import { promoDiscountFor } from '@/lib/promo'
+import { CATEGORIAS_PRIVADAS } from '@/lib/servicios'
 import { marcarConvertido } from '@/actions/borradores'
 import type { CreateBookingInput, ActionResult, AvailableSlotsResult, TimeSlot, Service } from '@/types'
 
@@ -29,14 +30,10 @@ const MAX_CONCURRENT_SHORT = 3
 // --- SERVICES ---
 
 /**
- * Categorías que NUNCA deben aparecer en el sitio público.
- *
- * Son convenios B2B con tarifas preferenciales. Se filtran acá, en el origen,
- * y no en cada página: así una vista nueva no puede exponerlas por olvido.
- * Para verlas hay que pedirlas explícitamente con `incluirPrivadas`.
+ * Se filtran las categorías privadas acá, en el origen, y no en cada página:
+ * así una vista nueva no puede exponerlas por olvido. Para incluirlas hay que
+ * pedirlas explícitamente con `incluirPrivadas`.
  */
-export const CATEGORIAS_PRIVADAS = ['automotora']
-
 export async function getServices(
   opciones?: { incluirPrivadas?: boolean }
 ): Promise<ActionResult<Service[]>> {
