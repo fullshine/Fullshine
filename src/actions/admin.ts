@@ -98,6 +98,190 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
   }
 }
 
+// --- RESERVA MANUAL DEL ADMINISTRADOR ---
+
+/**
+ * Crea una o varias reservas desde el panel, sin validar disponibilidad.
+ *
+ * Es una acción SEPARADA de createBooking a propósito: saltarse el control de
+ * horarios solo puede hacerlo alguien con sesión iniciada. Si fuera un
+ * parámetro de la función pública, cualquiera podría enviarlo desde el
+ * navegador y sobrecargar la agenda.
+ *
+ * Con varios servicios se crea una reserva por cada uno, encadenadas en el
+ * tiempo. Así el kanban, los certificados, el calendario de mantención y los
+ * reportes por servicio siguen funcionando igual — pero el cliente recibe
+ * UN SOLO mensaje de WhatsApp, no uno por servicio.
+ */
+export async function crearReservaAdmin(input: {
+  full_name: string
+  phone: string
+  email?: string
+  vehicle_make: string
+  vehicle_model: string
+  vehicle_plate?: string
+  vehicle_year?: number
+  vehicle_type: string
+  service_ids: string[]
+  fecha: string          // YYYY-MM-DD
+  hora: string           // HH:MM
+  notas?: string
+  avisar?: boolean       // enviar WhatsApp al cliente
+}): Promise<ActionResult<{ creadas: number }>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
+
+  try {
+    if (input.service_ids.length === 0) {
+      return { success: false, error: 'Selecciona al menos un servicio' }
+    }
+
+    const digitos = input.phone.replace(/\D/g, '')
+    if (digitos.length !== 9 && digitos.length !== 11) {
+      return { success: false, error: 'El teléfono debe tener 9 dígitos' }
+    }
+    const telefono = digitos.startsWith('56') ? digitos : `56${digitos}`
+
+    const supabase = createAdminClient()
+
+    // ── Cliente ──
+    let customerId: string
+    const { data: existente } = await supabase
+      .from('customers')
+      .select('id')
+      .or(`phone.eq.${telefono},phone.eq.+${telefono},phone.eq.${digitos}`)
+      .maybeSingle()
+
+    if (existente) {
+      customerId = existente.id
+    } else {
+      const { data: nuevo, error: errC } = await supabase
+        .from('customers')
+        .insert({
+          full_name: input.full_name.trim(),
+          phone: telefono,
+          email: input.email?.trim() || null,
+        })
+        .select('id')
+        .single()
+      if (errC || !nuevo) return { success: false, error: errC?.message ?? 'No se pudo crear el cliente' }
+      customerId = nuevo.id
+    }
+
+    // ── Vehículo ──
+    // La tabla usa brand/plate; se prueba make/license_plate como respaldo.
+    const base = {
+      customer_id: customerId,
+      model: input.vehicle_model.trim(),
+      year: input.vehicle_year ?? new Date().getFullYear(),
+      vehicle_type: input.vehicle_type,
+    }
+    const variantes: Record<string, unknown>[] = [
+      { ...base, brand: input.vehicle_make.trim(), plate: input.vehicle_plate || null },
+      { ...base, make: input.vehicle_make.trim(), license_plate: input.vehicle_plate || null },
+    ]
+
+    let vehicleId: string | null = null
+    let errV: string | null = null
+    for (const v of variantes) {
+      const { data, error } = await supabase.from('vehicles').insert(v).select('id').single()
+      if (!error && data) { vehicleId = data.id; errV = null; break }
+      errV = error?.message ?? null
+      if (error?.code === '23505') {
+        const { data: yaExiste } = await supabase
+          .from('vehicles').select('id').eq('customer_id', customerId).limit(1).maybeSingle()
+        if (yaExiste) { vehicleId = yaExiste.id; errV = null; break }
+      }
+    }
+    if (!vehicleId) return { success: false, error: `No se pudo registrar el vehículo: ${errV}` }
+
+    // ── Servicios ──
+    const { data: servicios, error: errS } = await supabase
+      .from('services')
+      .select('id, name, category, duration_hours, prices:service_prices(vehicle_type, price_clp)')
+      .in('id', input.service_ids)
+
+    if (errS || !servicios?.length) return { success: false, error: 'Servicios no encontrados' }
+
+    // Se respeta el orden en que fueron seleccionados
+    const ordenados = input.service_ids
+      .map(id => servicios.find(s => s.id === id))
+      .filter(Boolean) as typeof servicios
+
+    // ── Reservas encadenadas ──
+    const [hh, mm] = input.hora.split(':').map(Number)
+    let cursor = hh * 60 + (mm || 0)
+    const hhmm = (m: number) =>
+      `${Math.floor((m % 1440) / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}:00`
+
+    const resumen: { nombre: string; precio: number }[] = []
+    let creadas = 0
+
+    for (const s of ordenados) {
+      const minutos = Math.round((s.duration_hours ?? 1) * 60)
+      const precioLista = (s.prices as { vehicle_type: string; price_clp: number }[] | null)
+        ?.find(p => p.vehicle_type === input.vehicle_type)?.price_clp ?? 0
+
+      const descuento = promoDiscountFor(s.category)
+      const total = descuento > 0 ? Math.round(precioLista * (1 - descuento)) : precioLista
+
+      const { error } = await supabase.from('bookings').insert({
+        customer_id: customerId,
+        vehicle_id: vehicleId,
+        service_id: s.id,
+        status: 'pending',
+        booking_date: input.fecha,
+        slot_start: hhmm(cursor),
+        slot_end: hhmm(cursor + minutos),
+        total_price_clp: total,
+        customer_notes: input.notas?.trim() || null,
+      })
+
+      if (error) {
+        console.error('[crearReservaAdmin]', error.message)
+        return { success: false, error: `Error al crear la reserva: ${error.message}` }
+      }
+
+      resumen.push({ nombre: s.name, precio: total })
+      cursor += minutos
+      creadas++
+    }
+
+    // ── Un solo aviso al cliente, con todos los servicios ──
+    if (input.avisar !== false) {
+      const { sendRawMessage } = await import('@/lib/whatsapp')
+      const fecha = new Date(`${input.fecha}T12:00:00`).toLocaleDateString('es-CL', {
+        weekday: 'long', day: 'numeric', month: 'long',
+      })
+      const suma = resumen.reduce((a, b) => a + b.precio, 0)
+      const nombre = input.full_name.trim().split(' ')[0]
+
+      const mensaje =
+        `👋 ¡Hola ${nombre}!\n\n` +
+        `✅ Tu reserva en *Fullshine Detailing* quedó registrada.\n\n` +
+        `🚗 *Vehículo:* ${input.vehicle_make} ${input.vehicle_model}\n` +
+        `📅 *Fecha:* ${fecha}\n` +
+        `🕐 *Hora:* ${input.hora}\n\n` +
+        `🛠️ *Servicios:*\n` +
+        resumen.map(r => `• ${r.nombre}`).join('\n') +
+        (suma > 0 ? `\n\n💰 *Total:* $${suma.toLocaleString('es-CL')}` : '') +
+        `\n\n📍 Camilo Henríquez 381, Concepción\n\n` +
+        `Si tienes alguna duda, responde este mensaje. ¡Te esperamos! 🙌`
+
+      await sendRawMessage(telefono, mensaje).catch(e =>
+        console.error('[crearReservaAdmin] WhatsApp:', e?.message)
+      )
+    }
+
+    revalidatePath('/admin/kanban')
+    revalidatePath('/admin/agenda')
+    return { success: true, data: { creadas } }
+  } catch (e) {
+    console.error('[crearReservaAdmin]', e)
+    return { success: false, error: (e as Error).message ?? 'Error inesperado' }
+  }
+}
+
 // --- HISTORIAL MENSUAL ---
 
 export type MesHistorico = {
