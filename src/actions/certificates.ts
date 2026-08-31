@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendCertificateToClient } from '@/lib/whatsapp'
+import { puedeNotificar } from '@/lib/notificaciones'
 
 export async function generateCertificate(bookingId: string) {
   try {
@@ -61,9 +62,12 @@ export async function generateCertificate(bookingId: string) {
       .eq('booking_id', bookingId)
       .maybeSingle()
 
+    // El certificado se emite igual; lo que se filtra es el WhatsApp.
+    const permiso = await puedeNotificar(bookingId)
+
     if (existing) {
       const url = `${SITIO}/certificado/${existing.certificate_code}`
-      if (booking.customer?.phone) {
+      if (booking.customer?.phone && permiso.permitido) {
         try {
           await sendCertificateToClient({
             phone:        booking.customer.phone,
@@ -148,7 +152,7 @@ export async function generateCertificate(bookingId: string) {
     // promesa suelta nunca alcanza a ejecutarse.
     const certUrl = `${SITIO}/certificado/${code}`
 
-    if (booking.customer?.phone) {
+    if (booking.customer?.phone && permiso.permitido) {
       try {
         await sendCertificateToClient({
           phone:        booking.customer.phone,

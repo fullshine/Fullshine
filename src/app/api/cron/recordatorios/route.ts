@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendReminderToClient, sendSameDayReminderToClient, getEstadoWhatsApp } from '@/lib/whatsapp'
+import { puedeNotificar, modoSilencioso } from '@/lib/notificaciones'
 import { sendPushToAdmin } from '@/lib/push'
 import { procesarMantenciones, type ReporteMantenciones } from '@/lib/mantenciones'
 
@@ -95,6 +96,12 @@ async function handler(req: NextRequest) {
   // Si Green API está caído (suscripción vencida, sesión desconectada), NADA
   // sale: ni confirmaciones, ni recordatorios, ni certificados. Antes eso se
   // descubría por casualidad, días después. Ahora avisa al toque.
+  // Modo silencioso: se corta antes de gastar llamadas a Green API.
+  if (await modoSilencioso()) {
+    resultado.whatsapp = 'modo silencioso activo — no se envió nada'
+    return NextResponse.json(resultado)
+  }
+
   const estadoWa = await getEstadoWhatsApp()
   resultado.whatsapp = estadoWa.estado
 
@@ -133,6 +140,9 @@ async function handler(req: NextRequest) {
           resultado.errores.push(`${b.id}: cliente sin teléfono`)
           continue
         }
+        // Respeta el modo silencioso y el flag por reserva (convenios B2B).
+        const permiso = await puedeNotificar(b.id)
+        if (!permiso.permitido) continue
         try {
           await sendReminderToClient({
             phone: b.customer.phone,
@@ -177,6 +187,8 @@ async function handler(req: NextRequest) {
 
       for (const b of proximas) {
         if (!b.customer?.phone) continue
+        const permiso = await puedeNotificar(b.id)
+        if (!permiso.permitido) continue
         try {
           await sendSameDayReminderToClient({
             phone: b.customer.phone,

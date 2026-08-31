@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendMaintenanceReminder, sendMaintenanceFollowUp } from '@/lib/whatsapp'
+import { puedeNotificar } from '@/lib/notificaciones'
 
 /**
  * Motor del calendario de mantención cerámica.
@@ -24,6 +25,7 @@ type FilaMantencion = {
   status: string
   contact_1_at: string | null
   contact_2_at: string | null
+  origin_booking_id: string | null
   customer: { full_name: string; phone: string } | null
   // Se pide la fila completa porque el proyecto usa brand/plate en unas
   // partes y make/license_plate en otras. Leemos el que exista.
@@ -31,10 +33,21 @@ type FilaMantencion = {
 }
 
 const SELECT = `
-  id, due_at, status, contact_1_at, contact_2_at,
+  id, due_at, status, contact_1_at, contact_2_at, origin_booking_id,
   customer:customers(full_name, phone),
   vehicle:vehicles(*)
 `
+
+/**
+ * Los recordatorios de mantención son los mensajes de mayor riesgo: van a
+ * clientes que no escriben hace meses. Se respeta el flag de la reserva que
+ * los originó, para no molestar a los convenios B2B.
+ */
+async function avisosPermitidos(originBookingId?: string | null): Promise<boolean> {
+  if (!originBookingId) return true
+  const { permitido } = await puedeNotificar(originBookingId)
+  return permitido
+}
 
 function nombrePila(nombre?: string | null): string {
   return nombre?.trim().split(' ')[0] ?? 'Hola'
@@ -96,6 +109,7 @@ export async function procesarMantenciones(): Promise<ReporteMantenciones> {
           reporte.errores.push(`${m.id}: cliente sin teléfono`)
           continue
         }
+        if (!(await avisosPermitidos(m.origin_booking_id))) continue
         try {
           await sendMaintenanceReminder({
             phone: m.customer.phone,
@@ -139,6 +153,7 @@ export async function procesarMantenciones(): Promise<ReporteMantenciones> {
 
       for (const m of listos) {
         if (!m.customer?.phone) continue
+        if (!(await avisosPermitidos(m.origin_booking_id))) continue
         try {
           await sendMaintenanceFollowUp({
             phone: m.customer.phone,

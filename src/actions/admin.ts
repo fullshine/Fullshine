@@ -4,6 +4,8 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { sendCancellationToClient } from '@/lib/whatsapp'
 import { promoDiscountFor } from '@/lib/promo'
+import { puedeNotificar, modoSilencioso, setModoSilencioso } from '@/lib/notificaciones'
+import { esCategoriaPrivada } from '@/lib/servicios'
 import type { ActionResult, BookingStatus, DashboardStats, BookingWithRelations, Customer, Vehicle } from '@/types'
 import { revalidatePath } from 'next/cache'
 
@@ -247,8 +249,19 @@ export async function crearReservaAdmin(input: {
       creadas++
     }
 
+    // Los convenios B2B nacen callados: el titular es la empresa, no el
+    // dueño del vehículo, y no corresponde mandarle certificados ni reseñas.
+    const esConvenio = ordenados.some(s => esCategoriaPrivada(s.category))
+    if (esConvenio) {
+      await supabase
+        .from('bookings')
+        .update({ notificaciones_activas: false })
+        .eq('customer_id', customerId)
+        .eq('booking_date', input.fecha)
+    }
+
     // ── Un solo aviso al cliente, con todos los servicios ──
-    if (input.avisar !== false) {
+    if (input.avisar !== false && !esConvenio && !(await modoSilencioso())) {
       const { sendRawMessage } = await import('@/lib/whatsapp')
       const fecha = new Date(`${input.fecha}T12:00:00`).toLocaleDateString('es-CL', {
         weekday: 'long', day: 'numeric', month: 'long',
@@ -279,6 +292,328 @@ export async function crearReservaAdmin(input: {
   } catch (e) {
     console.error('[crearReservaAdmin]', e)
     return { success: false, error: (e as Error).message ?? 'Error inesperado' }
+  }
+}
+
+// --- EDICIÓN DE RESERVAS ---
+
+/** Datos que el modal necesita para precargarse. */
+export async function getReservaParaEditar(
+  bookingId: string
+): Promise<ActionResult<{
+  id: string
+  service_id: string
+  booking_date: string
+  slot_start: string
+  total_price_clp: number
+  precio_manual: boolean
+  notificaciones_activas: boolean
+  customer_notes: string | null
+  status: string
+  vehicle_type: string
+  customer_name: string
+  customer_phone: string
+  vehiculo: string
+  tiene_certificado: boolean
+  cambios: { campo: string; valor_antes: string | null; valor_luego: string | null; created_at: string }[]
+}>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
+
+  try {
+    const supabase = createAdminClient()
+
+    const { data: b, error } = await supabase
+      .from('bookings')
+      .select('*, customer:customers(full_name, phone), vehicle:vehicles(*), service:services(name)')
+      .eq('id', bookingId)
+      .single()
+
+    if (error || !b) return { success: false, error: 'Reserva no encontrada' }
+
+    const { data: cert } = await supabase
+      .from('certificates')
+      .select('id')
+      .eq('booking_id', bookingId)
+      .maybeSingle()
+
+    // Si la migración 24 aún no corre, la tabla no existe y esto queda vacío.
+    const { data: cambios } = await supabase
+      .from('booking_changes')
+      .select('campo, valor_antes, valor_luego, created_at')
+      .eq('booking_id', bookingId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    const v = b.vehicle as Record<string, unknown> | null
+    const marca = (v?.brand ?? v?.make ?? '') as string
+    const modelo = (v?.model ?? '') as string
+    const patente = (v?.plate ?? v?.license_plate ?? '') as string
+
+    return {
+      success: true,
+      data: {
+        id: b.id,
+        service_id: b.service_id,
+        booking_date: b.booking_date ?? '',
+        slot_start: (b.slot_start ?? '09:00:00').slice(0, 5),
+        total_price_clp: b.total_price_clp ?? 0,
+        precio_manual: b.precio_manual ?? false,
+        notificaciones_activas: b.notificaciones_activas ?? true,
+        customer_notes: b.customer_notes ?? null,
+        status: b.status,
+        vehicle_type: (v?.vehicle_type ?? 'hatch_sedan') as string,
+        customer_name: b.customer?.full_name ?? 'Cliente',
+        customer_phone: b.customer?.phone ?? '',
+        vehiculo: [marca, modelo, patente && `(${patente})`].filter(Boolean).join(' '),
+        tiene_certificado: !!cert,
+        cambios: cambios ?? [],
+      },
+    }
+  } catch (e) {
+    return { success: false, error: (e as Error).message ?? 'Error inesperado' }
+  }
+}
+
+/**
+ * Edita una reserva existente.
+ *
+ * Reglas de precio:
+ *  - Si el administrador escribe un monto distinto al calculado, la reserva
+ *    queda marcada como `precio_manual` y ningún cambio posterior de servicio
+ *    lo pisa. Es para no perder un valor negociado con el cliente.
+ *  - Si no lo toca, el precio se recalcula desde la tabla de tarifas.
+ *
+ * Cada campo modificado se registra en `booking_changes`.
+ */
+export async function actualizarReservaAdmin(
+  bookingId: string,
+  cambios: {
+    service_id?: string
+    booking_date?: string
+    slot_start?: string          // HH:MM
+    total_price_clp?: number
+    customer_notes?: string | null
+    status?: string
+    notificaciones_activas?: boolean
+  },
+  avisarCliente = false
+): Promise<ActionResult<{ aviso: string | null }>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
+
+  try {
+    const supabase = createAdminClient()
+
+    const { data: antes, error: errB } = await supabase
+      .from('bookings')
+      .select('*, customer:customers(full_name, phone), vehicle:vehicles(*), service:services(name, category, duration_hours)')
+      .eq('id', bookingId)
+      .single()
+
+    if (errB || !antes) return { success: false, error: 'Reserva no encontrada' }
+
+    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+    const registro: { campo: string; antes: string; luego: string }[] = []
+
+    // ── Servicio ──
+    let servicioNuevo: { name: string; category: string; duration_hours: number } | null = null
+    if (cambios.service_id && cambios.service_id !== antes.service_id) {
+      const { data: s } = await supabase
+        .from('services')
+        .select('name, category, duration_hours')
+        .eq('id', cambios.service_id)
+        .single()
+      if (!s) return { success: false, error: 'El servicio seleccionado no existe' }
+
+      servicioNuevo = s
+      patch.service_id = cambios.service_id
+      registro.push({ campo: 'servicio', antes: antes.service?.name ?? '—', luego: s.name })
+    }
+
+    // ── Fecha ──
+    if (cambios.booking_date && cambios.booking_date !== antes.booking_date) {
+      patch.booking_date = cambios.booking_date
+      registro.push({ campo: 'fecha', antes: antes.booking_date ?? '—', luego: cambios.booking_date })
+    }
+
+    // ── Hora (recalcula el término según la duración del servicio) ──
+    const horaActual = (antes.slot_start ?? '').slice(0, 5)
+    if (cambios.slot_start && cambios.slot_start !== horaActual) {
+      const horas = servicioNuevo?.duration_hours ?? antes.service?.duration_hours ?? 1
+      const [hh, mm] = cambios.slot_start.split(':').map(Number)
+      const inicio = hh * 60 + (mm || 0)
+      const fin = inicio + Math.round(horas * 60)
+      const fmt = (m: number) =>
+        `${Math.floor((m % 1440) / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}:00`
+
+      patch.slot_start = fmt(inicio)
+      patch.slot_end = fmt(fin)
+      registro.push({ campo: 'hora', antes: horaActual || '—', luego: cambios.slot_start })
+    } else if (servicioNuevo) {
+      // Cambió el servicio pero no la hora: el término igual se corre.
+      const [hh, mm] = horaActual.split(':').map(Number)
+      const inicio = (hh || 9) * 60 + (mm || 0)
+      const fin = inicio + Math.round(servicioNuevo.duration_hours * 60)
+      patch.slot_end =
+        `${Math.floor((fin % 1440) / 60).toString().padStart(2, '0')}:${(fin % 60).toString().padStart(2, '0')}:00`
+    }
+
+    // ── Precio ──
+    if (cambios.total_price_clp !== undefined && cambios.total_price_clp !== antes.total_price_clp) {
+      patch.total_price_clp = cambios.total_price_clp
+      patch.precio_manual = true
+      registro.push({
+        campo: 'precio',
+        antes: `$${(antes.total_price_clp ?? 0).toLocaleString('es-CL')}`,
+        luego: `$${cambios.total_price_clp.toLocaleString('es-CL')}`,
+      })
+    } else if (servicioNuevo && !antes.precio_manual) {
+      // Servicio distinto y precio nunca tocado a mano: se recalcula.
+      const v = antes.vehicle as Record<string, unknown> | null
+      const tipo = (v?.vehicle_type ?? 'hatch_sedan') as string
+
+      const { data: tarifa } = await supabase
+        .from('service_prices')
+        .select('price_clp')
+        .eq('service_id', cambios.service_id!)
+        .eq('vehicle_type', tipo)
+        .maybeSingle()
+
+      if (tarifa) {
+        const pct = promoDiscountFor(servicioNuevo.category)
+        const nuevo = pct > 0 ? Math.round(tarifa.price_clp * (1 - pct)) : tarifa.price_clp
+        if (nuevo !== antes.total_price_clp) {
+          patch.total_price_clp = nuevo
+          registro.push({
+            campo: 'precio',
+            antes: `$${(antes.total_price_clp ?? 0).toLocaleString('es-CL')}`,
+            luego: `$${nuevo.toLocaleString('es-CL')} (recalculado)`,
+          })
+        }
+      }
+    }
+
+    // ── Notas y estado ──
+    if (cambios.customer_notes !== undefined && cambios.customer_notes !== antes.customer_notes) {
+      patch.customer_notes = cambios.customer_notes
+      registro.push({ campo: 'notas', antes: antes.customer_notes ?? '—', luego: cambios.customer_notes ?? '—' })
+    }
+
+    if (cambios.status && cambios.status !== antes.status) {
+      patch.status = cambios.status
+      registro.push({ campo: 'estado', antes: antes.status, luego: cambios.status })
+    }
+
+    if (
+      cambios.notificaciones_activas !== undefined &&
+      cambios.notificaciones_activas !== (antes.notificaciones_activas ?? true)
+    ) {
+      patch.notificaciones_activas = cambios.notificaciones_activas
+      registro.push({
+        campo: 'avisos al cliente',
+        antes: (antes.notificaciones_activas ?? true) ? 'activados' : 'desactivados',
+        luego: cambios.notificaciones_activas ? 'activados' : 'desactivados',
+      })
+    }
+
+    if (registro.length === 0) return { success: true, data: { aviso: null } }
+
+    const { error: errU } = await supabase.from('bookings').update(patch).eq('id', bookingId)
+    if (errU) {
+      console.error('[actualizarReservaAdmin]', errU.message)
+      return { success: false, error: `No se pudo guardar: ${errU.message}` }
+    }
+
+    // ── Auditoría (silenciosa si la migración 24 no está aplicada) ──
+    await supabase.from('booking_changes').insert(
+      registro.map(r => ({
+        booking_id: bookingId,
+        campo: r.campo,
+        valor_antes: r.antes,
+        valor_luego: r.luego,
+        autor: 'admin',
+      }))
+    )
+
+    // ── Aviso al cliente ──
+    let aviso: string | null = null
+
+    if (avisarCliente) {
+      const permiso = await puedeNotificar(bookingId)
+      if (!permiso.permitido) {
+        aviso = `Los cambios se guardaron, pero no se avisó al cliente: ${permiso.motivo}.`
+      } else if (!antes.customer?.phone) {
+        aviso = 'Los cambios se guardaron, pero el cliente no tiene teléfono registrado.'
+      } else {
+        const { sendRawMessage } = await import('@/lib/whatsapp')
+        const fechaFinal = (patch.booking_date as string) ?? antes.booking_date
+        const horaFinal = ((patch.slot_start as string) ?? antes.slot_start ?? '').slice(0, 5)
+        const servicioFinal = servicioNuevo?.name ?? antes.service?.name ?? 'tu servicio'
+        const nombre = (antes.customer.full_name ?? 'Hola').split(' ')[0]
+
+        const fechaTexto = fechaFinal
+          ? new Date(`${fechaFinal}T12:00:00`).toLocaleDateString('es-CL', {
+              weekday: 'long', day: 'numeric', month: 'long',
+            })
+          : ''
+
+        const mensaje =
+          `👋 Hola ${nombre}, te escribimos de *Fullshine Detailing*.\n\n` +
+          `Actualizamos los datos de tu reserva:\n\n` +
+          `🛠️ *Servicio:* ${servicioFinal}\n` +
+          (fechaTexto ? `📅 *Fecha:* ${fechaTexto}\n` : '') +
+          (horaFinal ? `🕐 *Hora:* ${horaFinal}\n` : '') +
+          `\n📍 Camilo Henríquez 381, Concepción\n\n` +
+          `Si algo no calza, respóndenos este mensaje y lo corregimos. ¡Gracias! 🙌`
+
+        try {
+          await sendRawMessage(antes.customer.phone, mensaje)
+        } catch (e) {
+          aviso = `Los cambios se guardaron, pero el WhatsApp falló: ${(e as Error).message}`
+        }
+      }
+    }
+
+    // El certificado ya emitido queda desactualizado si cambió el servicio.
+    if (servicioNuevo) {
+      const { data: cert } = await supabase
+        .from('certificates')
+        .select('certificate_code')
+        .eq('booking_id', bookingId)
+        .maybeSingle()
+      if (cert) {
+        aviso = (aviso ? aviso + ' ' : '') +
+          `Ojo: el certificado ${cert.certificate_code} sigue diciendo "${antes.service?.name}". Vuelve a emitirlo.`
+      }
+    }
+
+    revalidatePath('/admin/kanban')
+    revalidatePath('/admin/dashboard')
+    return { success: true, data: { aviso } }
+  } catch (e) {
+    console.error('[actualizarReservaAdmin]', e)
+    return { success: false, error: (e as Error).message ?? 'Error inesperado' }
+  }
+}
+
+// --- MODO SILENCIOSO GLOBAL ---
+
+export async function getModoSilencioso(): Promise<ActionResult<boolean>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
+  return { success: true, data: await modoSilencioso() }
+}
+
+export async function cambiarModoSilencioso(activo: boolean): Promise<ActionResult> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
+  try {
+    await setModoSilencioso(activo)
+    revalidatePath('/admin/dashboard')
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: (e as Error).message ?? 'No se pudo guardar' }
   }
 }
 
@@ -442,7 +777,8 @@ export async function updateBookingStatus(
         .eq('id', bookingId)
         .single()
 
-      if (booking?.customer?.phone) {
+      const permiso = await puedeNotificar(bookingId)
+      if (booking?.customer?.phone && permiso.permitido) {
         sendCancellationToClient({
           phone: booking.customer.phone,
           customerName: booking.customer.full_name,
@@ -628,6 +964,11 @@ export async function sendPaymentLink(bookingId: string): Promise<ActionResult<{
       return { success: false, error: 'Error al crear link de pago en Flow' }
     }
 
+    const permisoPago = await puedeNotificar(bookingId)
+    if (!permisoPago.permitido) {
+      return { success: false, error: `${permisoPago.motivo}. El link es: ${paymentUrl}` }
+    }
+
     if (booking.customer?.phone) {
       const { sendPaymentLinkToClient } = await import('@/lib/whatsapp')
       sendPaymentLinkToClient({
@@ -672,6 +1013,9 @@ export async function sendReviewRequest(bookingId: string): Promise<ActionResult
     if (!booking.customer?.phone) {
       return { success: false, error: 'La reserva no tiene teléfono de cliente' }
     }
+
+    const permisoResena = await puedeNotificar(bookingId)
+    if (!permisoResena.permitido) return { success: false, error: permisoResena.motivo! }
 
     // El envío se AWAITEA y su error se devuelve: antes reventaba silenciosamente
     // y el kanban mostraba "Resena solicitada" aunque no hubiera salido nada.
@@ -724,6 +1068,9 @@ export async function resendConfirmation(bookingId: string): Promise<ActionResul
 
     if (error || !booking) return { success: false, error: 'Reserva no encontrada' }
     if (!booking.customer?.phone) return { success: false, error: 'La reserva no tiene teléfono de cliente' }
+
+    const permisoReenvio = await puedeNotificar(bookingId)
+    if (!permisoReenvio.permitido) return { success: false, error: permisoReenvio.motivo! }
 
     const scheduledAt = booking.booking_date && booking.slot_start
       ? `${booking.booking_date}T${booking.slot_start}`

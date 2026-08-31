@@ -4,6 +4,7 @@ import { getTaxPeriod } from '@/actions/tax'
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils'
 import PushSubscribeButton from '@/components/admin/PushSubscribe'
 import HistorialMensual from '@/components/admin/HistorialMensual'
+import ModoSilencioso from '@/components/admin/ModoSilencioso'
 
 export const metadata = { title: 'Dashboard | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -36,6 +37,9 @@ export default async function DashboardPage() {
       <h1 className="text-xl md:text-2xl font-bold text-gray-900">Dashboard</h1>
       <PushSubscribeButton />
     </div>
+
+      {/* Interruptor general de avisos por WhatsApp */}
+      <ModoSilencioso />
 
       {/* Historial de meses anteriores */}
       {historial.length > 0 && <HistorialMensual meses={historial} />}

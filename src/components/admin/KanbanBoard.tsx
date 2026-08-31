@@ -6,6 +6,7 @@ import { generateCertificate } from '@/actions/certificates'
 import { getStatusLabelFull, getStatusColorFull, formatCurrency } from '@/lib/utils'
 import type { BookingWithRelations } from '@/types'
 import ManualBookingModal from './ManualBookingModal'
+import EditarReservaModal from './EditarReservaModal'
 import HistoricoModal from './HistoricoModal'
 
 const COLUMNS = [
@@ -33,7 +34,11 @@ const PREV_STAGE: Record<string, string> = {
   review_sent:      'completed',
 }
 
-function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onAction: () => void }) {
+function BookingCard({ booking, onAction, onEdit }: {
+  booking: BookingWithRelations
+  onAction: () => void
+  onEdit: (id: string) => void
+}) {
   const [pending, startTransition] = useTransition()
   const [msg, setMsg] = useState<string | null>(null)
   const status = booking.status
@@ -114,7 +119,12 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
   return (
     <div className={`bg-white rounded-lg border border-gray-200 p-3 shadow-sm text-sm ${pending ? 'opacity-60' : ''}`}>
       <div className="flex items-start justify-between mb-1 gap-1">
-        <p className="font-semibold text-gray-900 leading-tight">{booking.customer?.full_name}</p>
+        <p className="font-semibold text-gray-900 leading-tight">
+          {booking.customer?.full_name}
+          {(booking as { notificaciones_activas?: boolean }).notificaciones_activas === false && (
+            <span className="ml-1.5 text-gray-400 font-normal" title="Avisos automáticos desactivados">🔕</span>
+          )}
+        </p>
         <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0 ${getStatusColorFull(status)}`}>
           {getStatusLabelFull(status)}
         </span>
@@ -159,6 +169,11 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
           title="Reenviar la confirmación por WhatsApp al cliente y push al negocio">
           🔁 Reenviar
         </button>
+        <button onClick={() => onEdit(booking.id)} disabled={pending}
+          className="text-xs px-2 py-1 rounded bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 disabled:opacity-50"
+          title="Editar fecha, hora, servicio o precio">
+          ✏️ Editar
+        </button>
         <button onClick={() => move('cancelled')} disabled={pending}
           className="text-xs px-2 py-1 rounded bg-red-50 hover:bg-red-100 text-red-600 disabled:opacity-50 ml-auto">
           X
@@ -171,6 +186,7 @@ function BookingCard({ booking, onAction }: { booking: BookingWithRelations; onA
 export default function KanbanBoard({ initialBookings }: { initialBookings: BookingWithRelations[] }) {
   const [bookings] = useState(initialBookings)
   const [showModal, setShowModal] = useState(false)
+  const [editando, setEditando] = useState<string | null>(null)
   const [showHistorico, setShowHistorico] = useState(false)
 
   function refresh() {
@@ -184,6 +200,11 @@ export default function KanbanBoard({ initialBookings }: { initialBookings: Book
       <ManualBookingModal
         open={showModal}
         onClose={() => setShowModal(false)}
+        onSuccess={refresh}
+      />
+      <EditarReservaModal
+        bookingId={editando}
+        onClose={() => setEditando(null)}
         onSuccess={refresh}
       />
       <HistoricoModal
@@ -224,7 +245,7 @@ export default function KanbanBoard({ initialBookings }: { initialBookings: Book
               )}
               <div className="space-y-2">
                 {byStatus(col.id).map(b => (
-                  <BookingCard key={b.id} booking={b} onAction={refresh} />
+                  <BookingCard key={b.id} booking={b} onAction={refresh} onEdit={setEditando} />
                 ))}
                 {byStatus(col.id).length === 0 && (
                   <p className="text-gray-400 text-xs text-center py-4">Sin reservas</p>
