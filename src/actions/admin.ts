@@ -6,6 +6,7 @@ import { sendCancellationToClient } from '@/lib/whatsapp'
 import { promoDiscountFor } from '@/lib/promo'
 import { puedeNotificar, modoSilencioso, setModoSilencioso } from '@/lib/notificaciones'
 import { esCategoriaPrivada } from '@/lib/servicios'
+import { hoyEnChile, aFecha, sumarDias, DIAS_CORTOS, capacidadMinutos } from '@/lib/fechas'
 import type { ActionResult, BookingStatus, DashboardStats, BookingWithRelations, Customer, Vehicle } from '@/types'
 import { revalidatePath } from 'next/cache'
 
@@ -642,6 +643,113 @@ const MESES = [
  * Una sola consulta trae todo el período y se agrupa en memoria; con el
  * volumen de un taller son cientos de filas, no millones.
  */
+// --- RESUMEN SEMANAL DE LA AGENDA ---
+
+export type DiaSemana = {
+  fecha: string
+  diaCorto: string
+  numero: number
+  cantidad: number
+  ingresos: number
+  minutosOcupados: number
+  ocupacion: number      // 0–100
+  esHoy: boolean
+  cerrado: boolean
+}
+
+export async function getResumenSemana(fechaRef: string): Promise<ActionResult<{
+  dias: DiaSemana[]
+  semanaAnterior: string
+  semanaSiguiente: string
+  totalReservas: number
+  totalIngresos: number
+  rotulo: string
+}>> {
+  const auth = await requireAuth()
+  if (!auth.authorized) return { success: false, error: auth.error }
+
+  try {
+    const supabase = createAdminClient()
+
+    // Lunes de la semana que contiene la fecha de referencia
+    const ref = aFecha(fechaRef)
+    const desplazamiento = (ref.getUTCDay() + 6) % 7
+    const lunes = sumarDias(fechaRef, -desplazamiento)
+    const domingo = sumarDias(lunes, 6)
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('booking_date, slot_start, slot_end, total_price_clp, status')
+      .gte('booking_date', lunes)
+      .lte('booking_date', domingo)
+      .neq('status', 'cancelled')
+
+    if (error) return { success: false, error: error.message }
+
+    const acc: Record<string, { n: number; ingresos: number; minutos: number }> = {}
+    for (const b of data ?? []) {
+      const f = b.booking_date
+      if (!f) continue
+      if (!acc[f]) acc[f] = { n: 0, ingresos: 0, minutos: 0 }
+      acc[f].n += 1
+      acc[f].ingresos += b.total_price_clp ?? 0
+
+      const min = (h?: string | null) => {
+        if (!h) return null
+        const [hh, mm] = h.split(':').map(Number)
+        return hh * 60 + (mm || 0)
+      }
+      const ini = min(b.slot_start)
+      const fin = min(b.slot_end)
+      if (ini !== null && fin !== null && fin > ini) acc[f].minutos += fin - ini
+    }
+
+    const hoy = hoyEnChile()
+    const dias: DiaSemana[] = []
+
+    for (let i = 0; i < 7; i++) {
+      const fecha = sumarDias(lunes, i)
+      const d = aFecha(fecha)
+      const diaSemana = d.getUTCDay()
+      const v = acc[fecha] ?? { n: 0, ingresos: 0, minutos: 0 }
+      const capacidad = capacidadMinutos(diaSemana)
+
+      dias.push({
+        fecha,
+        diaCorto: DIAS_CORTOS[diaSemana],
+        numero: d.getUTCDate(),
+        cantidad: v.n,
+        ingresos: v.ingresos,
+        minutosOcupados: v.minutos,
+        ocupacion: capacidad > 0 ? Math.min(100, Math.round((v.minutos / capacidad) * 100)) : 0,
+        esHoy: fecha === hoy,
+        cerrado: diaSemana === 0,
+      })
+    }
+
+    const mesInicio = aFecha(lunes).toLocaleDateString('es-CL', { month: 'long', timeZone: 'UTC' })
+    const mesFin = aFecha(domingo).toLocaleDateString('es-CL', { month: 'long', timeZone: 'UTC' })
+    const rotulo = mesInicio === mesFin
+      ? `${aFecha(lunes).getUTCDate()} al ${aFecha(domingo).getUTCDate()} de ${mesInicio}`
+      : `${aFecha(lunes).getUTCDate()} de ${mesInicio} al ${aFecha(domingo).getUTCDate()} de ${mesFin}`
+
+    return {
+      success: true,
+      data: {
+        dias,
+        semanaAnterior: sumarDias(lunes, -7),
+        semanaSiguiente: sumarDias(lunes, 7),
+        totalReservas: dias.reduce((s, d) => s + d.cantidad, 0),
+        totalIngresos: dias.reduce((s, d) => s + d.ingresos, 0),
+        rotulo,
+      },
+    }
+  } catch (e) {
+    console.error('[getResumenSemana]', e)
+    return { success: false, error: 'Error al cargar la semana' }
+  }
+}
+
 /**
  * Mes más antiguo que se muestra en el dashboard, en formato YYYY-MM.
  * Todo lo anterior queda fuera del gráfico y de las tarjetas.

@@ -1,14 +1,22 @@
-import { getBookings } from '@/actions/admin'
+import { getBookings, getResumenSemana } from '@/actions/admin'
 import BookingStatusUpdater from '@/components/admin/BookingStatusUpdater'
 import { formatCurrency, formatDate, formatTime, getStatusColor, getStatusLabel, getVehicleTypeLabel } from '@/lib/utils'
 import AgendaDatePicker from '@/components/admin/AgendaDatePicker'
+import ResumenSemana from '@/components/admin/ResumenSemana'
+import { hoyEnChile } from '@/lib/fechas'
 
 export const metadata = { title: 'Agenda | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
 
 export default async function AgendaPage({ searchParams }: { searchParams: { date?: string; status?: string } }) {
-  const date = searchParams.date ?? new Date().toISOString().split('T')[0]
-  const result = await getBookings({ date, status: searchParams.status as any })
+  // hoyEnChile() en vez de toISOString(): en Vercel el servidor corre en UTC
+  // y después de las 20:00 la agenda saltaba sola al día siguiente.
+  const date = searchParams.date ?? hoyEnChile()
+
+  const [result, semana] = await Promise.all([
+    getBookings({ date, status: searchParams.status as any }),
+    getResumenSemana(date),
+  ])
   const bookings = result.data ?? []
 
   return (
@@ -17,6 +25,18 @@ export default async function AgendaPage({ searchParams }: { searchParams: { dat
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">Agenda</h1>
         <AgendaDatePicker defaultDate={date} />
       </div>
+
+      {semana.success && semana.data && (
+        <ResumenSemana
+          dias={semana.data.dias}
+          seleccionada={date}
+          semanaAnterior={semana.data.semanaAnterior}
+          semanaSiguiente={semana.data.semanaSiguiente}
+          totalReservas={semana.data.totalReservas}
+          totalIngresos={semana.data.totalIngresos}
+          rotulo={semana.data.rotulo}
+        />
+      )}
 
       <p className="text-gray-500 text-sm">{formatDate(date + 'T12:00:00')} — {bookings.length} reservas</p>
 
