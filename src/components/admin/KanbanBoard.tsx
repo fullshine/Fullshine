@@ -13,7 +13,6 @@ const COLUMNS = [
   { id: 'pending',          label: 'Nueva reserva',   color: 'border-yellow-400' },
   { id: 'payment_received', label: 'Pago recibido',   color: 'border-teal-400'   },
   { id: 'confirmed',        label: 'Confirmada',      color: 'border-blue-400'   },
-  { id: 'in_progress',      label: 'En trabajo',      color: 'border-purple-400' },
   { id: 'completed',        label: 'Completada',      color: 'border-green-400'  },
   { id: 'review_sent',      label: 'Resena enviada',  color: 'border-emerald-400'},
 ]
@@ -21,18 +20,23 @@ const COLUMNS = [
 const NEXT_STAGE: Record<string, string> = {
   pending:          'payment_received',
   payment_received: 'confirmed',
-  confirmed:        'in_progress',
-  in_progress:      'completed',
+  confirmed:        'completed',
   completed:        'review_sent',
 }
 
 const PREV_STAGE: Record<string, string> = {
   payment_received: 'pending',
   confirmed:        'payment_received',
-  in_progress:      'confirmed',
-  completed:        'in_progress',
+  completed:        'confirmed',
   review_sent:      'completed',
 }
+
+/**
+ * 'in_progress' ya no tiene columna propia. Las reservas que quedaron en ese
+ * estado se muestran junto a las confirmadas para que ninguna desaparezca del
+ * tablero; al avanzarlas pasan directo a 'completed'.
+ */
+const COLUMNA_DE: Record<string, string> = { in_progress: 'confirmed' }
 
 function BookingCard({ booking, onAction, onEdit }: {
   booking: BookingWithRelations
@@ -86,8 +90,10 @@ function BookingCard({ booking, onAction, onEdit }: {
     })
   }
 
-  const nextStage = NEXT_STAGE[status]
-  const prevStage = PREV_STAGE[status]
+  // Las reservas heredadas en 'in_progress' se comportan como confirmadas.
+  const etapa = COLUMNA_DE[status] ?? status
+  const nextStage = NEXT_STAGE[etapa]
+  const prevStage = PREV_STAGE[etapa]
   const isCeramico = (booking.service as any)?.category === 'ceramico' ||
     booking.service?.name?.toLowerCase().includes('cerámico') ||
     booking.service?.name?.toLowerCase().includes('ceramico')
@@ -193,7 +199,8 @@ export default function KanbanBoard({ initialBookings }: { initialBookings: Book
     window.location.reload()
   }
 
-  const byStatus = (status: string) => bookings.filter(b => b.status === status)
+  const byStatus = (columna: string) =>
+    bookings.filter(b => (COLUMNA_DE[b.status] ?? b.status) === columna)
 
   return (
     <>

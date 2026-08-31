@@ -9,7 +9,9 @@ const TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
   pending:          ['confirmed', 'cancelled'],
   payment_sent:     ['payment_received', 'cancelled'],
   payment_received: ['confirmed', 'cancelled'],
-  confirmed:        ['in_progress', 'cancelled'],
+  // 'in_progress' se retiró del flujo: se pasa de confirmada a completada.
+  // Las reservas heredadas en ese estado conservan su salida a 'completed'.
+  confirmed:        ['completed', 'cancelled'],
   in_progress:      ['completed', 'cancelled'],
   completed:        [],
   review_sent:      [],

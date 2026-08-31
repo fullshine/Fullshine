@@ -8,11 +8,21 @@ import type { Service } from '@/types'
 
 const ESTADOS = [
   { value: 'pending', label: 'Pendiente' },
+  { value: 'payment_received', label: 'Pago recibido' },
   { value: 'confirmed', label: 'Confirmada' },
-  { value: 'in_progress', label: 'En proceso' },
   { value: 'completed', label: 'Completada' },
+  { value: 'review_sent', label: 'Reseña enviada' },
   { value: 'cancelled', label: 'Cancelada' },
 ]
+
+/** 'En trabajo' salió del flujo, pero si una reserva vieja quedó en ese
+ *  estado hay que ofrecerlo igual: si no, el select mostraría otra cosa
+ *  y bastaría con guardar para cambiarle el estado sin querer. */
+function opcionesPara(actual: string) {
+  return ESTADOS.some(e => e.value === actual)
+    ? ESTADOS
+    : [...ESTADOS, { value: actual, label: 'En trabajo (en desuso)' }]
+}
 
 interface Props {
   bookingId: string | null
@@ -189,7 +199,9 @@ export default function EditarReservaModal({ bookingId, onClose, onSuccess }: Pr
               <label className={etiqueta}>Estado</label>
               <select className={campo} value={form.status}
                 onChange={e => set('status', e.target.value)}>
-                {ESTADOS.map(e => <option key={e.value} value={e.value}>{e.label}</option>)}
+                {opcionesPara(datos.status).map(e => (
+                  <option key={e.value} value={e.value}>{e.label}</option>
+                ))}
               </select>
             </div>
 
