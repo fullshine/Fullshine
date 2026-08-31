@@ -642,6 +642,12 @@ const MESES = [
  * Una sola consulta trae todo el período y se agrupa en memoria; con el
  * volumen de un taller son cientos de filas, no millones.
  */
+/**
+ * Mes más antiguo que se muestra en el dashboard, en formato YYYY-MM.
+ * Todo lo anterior queda fuera del gráfico y de las tarjetas.
+ */
+const HISTORIAL_DESDE = '2026-07'
+
 export async function getHistorialMensual(meses = 12): Promise<ActionResult<MesHistorico[]>> {
   const auth = await requireAuth()
   if (!auth.authorized) return { success: false, error: auth.error }
@@ -652,7 +658,12 @@ export async function getHistorialMensual(meses = 12): Promise<ActionResult<MesH
 
     // Primer día del mes más antiguo del rango
     const desde = new Date(hoy.getFullYear(), hoy.getMonth() - (meses - 1), 1)
-    const desdeStr = `${desde.getFullYear()}-${String(desde.getMonth() + 1).padStart(2, '0')}-01`
+    const calculado = `${desde.getFullYear()}-${String(desde.getMonth() + 1).padStart(2, '0')}`
+
+    // Nunca se muestra nada anterior a HISTORIAL_DESDE: los meses previos
+    // corresponden al taller anterior y sus cifras no son comparables.
+    const periodoInicial = calculado < HISTORIAL_DESDE ? HISTORIAL_DESDE : calculado
+    const desdeStr = `${periodoInicial}-01`
 
     const { data, error } = await supabase
       .from('bookings')
@@ -677,6 +688,7 @@ export async function getHistorialMensual(meses = 12): Promise<ActionResult<MesH
     for (let i = meses - 1; i >= 0; i--) {
       const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1)
       const periodo = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      if (periodo < HISTORIAL_DESDE) continue
       const v = acc[periodo] ?? { total: 0, n: 0 }
       serie.push({
         periodo,

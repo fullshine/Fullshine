@@ -35,7 +35,7 @@ export default function HistorialMensual({ meses }: { meses: MesHistorico[] }) {
       <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="font-bold text-gray-900">Historial mensual</h2>
         <p className="text-xs text-gray-500">
-          Últimos {meses.length} meses · trabajos finalizados
+          Desde {meses[0]?.etiqueta ?? '—'} · trabajos finalizados
         </p>
       </div>
 
