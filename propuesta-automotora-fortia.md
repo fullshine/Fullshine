@@ -27,7 +27,7 @@ LED de inspección e instrumentos de medición de espesor de pintura. Contamos c
 
 ## 2. SERVICIO 1 — Pulido abrillantador + acondicionamiento interior
 
-**Tarifa preferencial: $150.000 IVA incluido**
+**Tarifa preferencial: $110.000 IVA incluido**
 *(valor de lista referencial: $200.000)*
 
 Servicio integral de preparación exterior e interior, orientado a mejorar de
@@ -114,7 +114,7 @@ presentación limpia y cuidada en el momento más importante de la venta.
 
 | Servicio | Descripción | Tarifa IVA incluido |
 |---|---|---:|
-| **Pulido + Interior** | Pulido abrillantador y acondicionamiento interior completo | **$150.000** |
+| **Pulido + Interior** | Pulido abrillantador y acondicionamiento interior completo | **$110.000** |
 | **Lavado Detallado** | Terminación Full Supremo a valor Full Deluxe | **$45.000** |
 | **Lavado para Entrega** | Preparación exterior e interior para entrega al cliente | **$20.000** |
 
@@ -128,7 +128,7 @@ requieren un tiempo de trabajo significativamente mayor, se aplica un recargo de
 
 | Servicio | Recargo | Tarifa final |
 |---|---:|---:|
-| Pulido + Interior | + $30.000 | $180.000 |
+| Pulido + Interior | + $30.000 | $140.000 |
 | Lavado Detallado | + $10.000 | $55.000 |
 | Lavado para Entrega | + $5.000 | $25.000 |
 

@@ -40,9 +40,9 @@ ON CONFLICT (id) DO UPDATE
 -- hatch_sedan y suv_camioneta comparten tarifa plana.
 -- pickup_xl lleva el recargo acordado en la propuesta.
 INSERT INTO service_prices (service_id, vehicle_type, price_clp) VALUES
-  ('ab000001-0000-4000-8000-000000000001', 'hatch_sedan',   150000),
-  ('ab000001-0000-4000-8000-000000000001', 'suv_camioneta', 150000),
-  ('ab000001-0000-4000-8000-000000000001', 'pickup_xl',     180000),
+  ('ab000001-0000-4000-8000-000000000001', 'hatch_sedan',   110000),
+  ('ab000001-0000-4000-8000-000000000001', 'suv_camioneta', 110000),
+  ('ab000001-0000-4000-8000-000000000001', 'pickup_xl',     140000),
 
   ('ab000002-0000-4000-8000-000000000002', 'hatch_sedan',    45000),
   ('ab000002-0000-4000-8000-000000000002', 'suv_camioneta',  45000),
