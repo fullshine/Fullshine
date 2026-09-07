@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/admin/kanban', label: 'CRM', icon: '🗂️' },
   { href: '/admin/agenda', label: 'Agenda', icon: '📅' },
   { href: '/admin/clientes', label: 'Clientes', icon: '👥' },
+  { href: '/admin/suscripciones', label: 'Suscripciones', icon: '🔄' },
   { href: '/admin/mantenciones', label: 'Mantenciones', icon: '💎' },
   { href: '/admin/incompletas', label: 'Incompletas', icon: '🛒' },
   { href: '/admin/postulaciones', label: 'Postulaciones', icon: '👤' },

@@ -24,6 +24,8 @@ export default function robots(): MetadataRoute.Robots {
     '/proteccion-auto-nuevo',
     // Accesos privados de socios comerciales: tarifas preferenciales
     '/socios/',
+    // Paneles personales de clientes con suscripción
+    '/suscripcion/',
   ]
 
   return {

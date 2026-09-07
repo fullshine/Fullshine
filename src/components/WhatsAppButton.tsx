@@ -4,8 +4,14 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { track } from '@/lib/fbq'
 
-/** Rutas internas donde el botón estorba: ahí el usuario eres tú, no un cliente. */
-const RUTAS_OCULTAS = ['/admin', '/login']
+/**
+ * Rutas donde el botón estorba.
+ *
+ * En /admin y /login el usuario eres tú. En los portales privados el visitante
+ * ya es cliente: el mensaje genérico de "quiero información sobre sus
+ * servicios" no le sirve, y esas páginas traen su propio enlace de contacto.
+ */
+const RUTAS_OCULTAS = ['/admin', '/login', '/socios', '/suscripcion']
 
 export default function WhatsAppButton() {
   const [visible, setVisible] = useState(false)
