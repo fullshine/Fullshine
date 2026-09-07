@@ -5,7 +5,9 @@ import {
   getSuscripciones, crearSuscripcion, actualizarSuscripcion, eliminarSuscripcion,
   getDetalle, registrarLavado, eliminarLavado,
   registrarExtra, marcarExtraPagado, eliminarExtra,
+  agregarVehiculo, eliminarVehiculo,
 } from '@/actions/suscripciones'
+import type { Vehiculo } from '@/actions/suscripciones'
 import { LAVADOS_POR_FRECUENCIA, ETIQUETA_FRECUENCIA, agruparPorMes } from '@/lib/suscripciones'
 import type { Frecuencia } from '@/lib/suscripciones'
 import { cn, formatCurrency } from '@/lib/utils'
@@ -254,8 +256,9 @@ function Fila({ s, abierta, onToggle, onCambio }: {
             </p>
             <p className="text-xs text-gray-500 truncate">
               {ETIQUETA_FRECUENCIA[s.frecuencia]}
-              {s.vehiculo && ` · ${s.vehiculo}`}
-              {s.patente && ` (${s.patente})`}
+              {s.vehiculos.length > 0 && ' · ' + s.vehiculos
+                .map(v => v.descripcion + (v.patente ? ` (${v.patente})` : ''))
+                .join(' · ')}
             </p>
           </div>
           <div className="text-right shrink-0">
@@ -281,11 +284,16 @@ function Fila({ s, abierta, onToggle, onCambio }: {
 
           {msg && <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">{msg}</p>}
 
+          {/* Vehículos */}
+          <Vehiculos subId={s.id} vehiculos={s.vehiculos}
+            onCambio={() => { cargar(); onCambio() }} />
+
           {/* Contador manual */}
           <ContadorManual s={s} onCambio={onCambio} />
 
           {/* Registrar lavado */}
-          <RegistrarLavado subId={s.id} onListo={() => { cargar(); onCambio() }} onAviso={setMsg} />
+          <RegistrarLavado subId={s.id} vehiculos={s.vehiculos}
+            onListo={() => { cargar(); onCambio() }} onAviso={setMsg} />
 
           {/* Servicio adicional */}
           <RegistrarExtra subId={s.id} onListo={() => { cargar(); onCambio() }} />
@@ -297,8 +305,13 @@ function Fila({ s, abierta, onToggle, onCambio }: {
                 grupos={agruparPorMes(detalle.lavados)}
                 render={(l: any) => (
                   <div key={l.id} className="flex items-center justify-between gap-2 py-1.5 text-sm">
-                    <span className="text-gray-700">
+                    <span className="text-gray-700 min-w-0 truncate">
                       {l.fecha}
+                      {s.vehiculos.length > 1 && l.vehicle_id && (
+                        <span className="text-gray-500 ml-2">
+                          {s.vehiculos.find(v => v.id === l.vehicle_id)?.descripcion ?? ''}
+                        </span>
+                      )}
                       {l.detalle && <span className="text-gray-400 ml-2">{l.detalle}</span>}
                     </span>
                     <button className="text-xs text-red-500 hover:underline"
@@ -360,6 +373,77 @@ function Fila({ s, abierta, onToggle, onCambio }: {
               Eliminar
             </button>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Autos del cliente. El plan es uno solo y los lavados se descuentan del
+ *  mismo cupo, sin importar cuál de los vehículos se haya lavado. */
+function Vehiculos({ subId, vehiculos, onCambio }: {
+  subId: string
+  vehiculos: Vehiculo[]
+  onCambio: () => void
+}) {
+  const [pending, start] = useTransition()
+  const [abierto, setAbierto] = useState(false)
+  const [f, setF] = useState({ descripcion: '', patente: '' })
+
+  return (
+    <div className="rounded-lg border border-gray-200 p-3">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-semibold text-gray-700">
+          Vehículos {vehiculos.length > 0 && <span className="text-gray-400 font-normal">({vehiculos.length})</span>}
+        </p>
+        <button className="text-xs text-brand-600 hover:underline"
+          onClick={() => setAbierto(a => !a)}>
+          {abierto ? 'Cancelar' : '+ Agregar otro'}
+        </button>
+      </div>
+
+      {vehiculos.length === 0 && !abierto && (
+        <p className="text-xs text-gray-400">Sin vehículos registrados.</p>
+      )}
+
+      {vehiculos.length > 0 && (
+        <div className="divide-y divide-gray-100">
+          {vehiculos.map(v => (
+            <div key={v.id} className="flex items-center justify-between gap-2 py-1.5">
+              <span className="text-sm text-gray-700 min-w-0 truncate">
+                🚗 {v.descripcion}
+                {v.patente && <span className="text-gray-400 ml-1.5">{v.patente}</span>}
+              </span>
+              <button className="text-xs text-red-500 hover:underline shrink-0"
+                disabled={pending}
+                onClick={() => start(async () => {
+                  if (!confirm(`¿Quitar ${v.descripcion} del plan? Los lavados ya registrados se mantienen.`)) return
+                  await eliminarVehiculo(v.id)
+                  onCambio()
+                })}>
+                quitar
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {abierto && (
+        <div className="flex gap-2 mt-2">
+          <input className={campo} placeholder="Marca y modelo" value={f.descripcion}
+            onChange={e => setF(p => ({ ...p, descripcion: e.target.value }))} />
+          <input className={`${campo} w-28 uppercase`} placeholder="Patente" value={f.patente}
+            onChange={e => setF(p => ({ ...p, patente: e.target.value.toUpperCase() }))} />
+          <button className="btn-primary text-sm px-4 shrink-0"
+            disabled={pending || !f.descripcion.trim()}
+            onClick={() => start(async () => {
+              await agregarVehiculo({ subscription_id: subId, ...f })
+              setF({ descripcion: '', patente: '' })
+              setAbierto(false)
+              onCambio()
+            })}>
+            {pending ? '…' : 'Agregar'}
+          </button>
         </div>
       )}
     </div>
@@ -436,25 +520,48 @@ function ContadorManual({ s, onCambio }: {
   )
 }
 
-function RegistrarLavado({ subId, onListo, onAviso }: {
-  subId: string; onListo: () => void; onAviso: (m: string | null) => void
+function RegistrarLavado({ subId, vehiculos, onListo, onAviso }: {
+  subId: string
+  vehiculos: Vehiculo[]
+  onListo: () => void
+  onAviso: (m: string | null) => void
 }) {
   const [pending, start] = useTransition()
   const [fecha, setFecha] = useState(hoy())
   const [detalle, setDetalle] = useState('')
+  const [vehiculoId, setVehiculoId] = useState('')
+
+  // Con un solo auto no hay nada que elegir: se asigna solo.
+  const auto = vehiculos.length === 1 ? vehiculos[0].id : vehiculoId
 
   return (
     <div className="rounded-lg border border-gray-200 p-3">
       <p className="text-xs font-semibold text-gray-700 mb-2">Registrar lavado del plan</p>
+
+      {vehiculos.length > 1 && (
+        <select className={`${campo} mb-2`} value={vehiculoId}
+          onChange={e => setVehiculoId(e.target.value)}>
+          <option value="">¿Qué vehículo? (opcional)</option>
+          {vehiculos.map(v => (
+            <option key={v.id} value={v.id}>
+              {v.descripcion}{v.patente ? ` · ${v.patente}` : ''}
+            </option>
+          ))}
+        </select>
+      )}
+
       <div className="flex gap-2">
         <input type="date" className={`${campo} w-auto`} value={fecha} onChange={e => setFecha(e.target.value)} />
         <input className={campo} placeholder="Nota opcional" value={detalle} onChange={e => setDetalle(e.target.value)} />
         <button className="btn-primary text-sm px-4 shrink-0" disabled={pending}
           onClick={() => start(async () => {
             onAviso(null)
-            const r = await registrarLavado({ subscription_id: subId, fecha, detalle })
+            const r = await registrarLavado({
+              subscription_id: subId, fecha, detalle, vehicle_id: auto || null,
+            })
             if (r.error) onAviso(r.error)
             setDetalle('')
+            setVehiculoId('')
             onListo()
           })}>
           {pending ? '…' : 'Marcar'}

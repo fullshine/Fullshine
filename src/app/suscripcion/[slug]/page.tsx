@@ -27,6 +27,7 @@ export default async function SuscripcionPage({ params }: { params: { slug: stri
   return (
     <PanelSuscripcion
       suscripcion={r.data.suscripcion}
+      vehiculos={r.data.vehiculos}
       lavados={r.data.lavados}
       extras={r.data.extras}
       avance={r.data.avance}

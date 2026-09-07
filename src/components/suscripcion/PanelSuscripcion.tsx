@@ -4,7 +4,7 @@ import { useTransition } from 'react'
 import { salirSuscripcion } from '@/actions/suscripciones'
 import { agruparPorMes, ETIQUETA_FRECUENCIA } from '@/lib/suscripciones'
 import type { Avance } from '@/lib/suscripciones'
-import type { Suscripcion, Lavado, Extra } from '@/actions/suscripciones'
+import type { Suscripcion, Lavado, Extra, Vehiculo } from '@/actions/suscripciones'
 import { formatCurrency } from '@/lib/utils'
 import { aFecha } from '@/lib/fechas'
 
@@ -14,12 +14,15 @@ function fechaLarga(iso: string) {
   })
 }
 
-export default function PanelSuscripcion({ suscripcion: s, lavados, extras, avance }: {
+export default function PanelSuscripcion({ suscripcion: s, vehiculos, lavados, extras, avance }: {
   suscripcion: Suscripcion
+  vehiculos: Vehiculo[]
   lavados: Lavado[]
   extras: Extra[]
   avance: Avance
 }) {
+  const nombreAuto = (id: string | null) =>
+    id ? vehiculos.find(v => v.id === id)?.descripcion ?? null : null
   const [, start] = useTransition()
 
   const porCobrar = extras.filter(e => !e.pagado).reduce((t, e) => t + e.precio_clp, 0)
@@ -37,11 +40,19 @@ export default function PanelSuscripcion({ suscripcion: s, lavados, extras, avan
         <div className="max-w-2xl mx-auto">
           <p className="text-[11px] uppercase tracking-widest text-gray-400">Fullshine Detailing</p>
           <h1 className="text-2xl font-bold mt-1">{s.nombre}</h1>
-          <p className="text-sm text-gray-300 mt-1">
-            {ETIQUETA_FRECUENCIA[s.frecuencia]}
-            {s.vehiculo && ` · ${s.vehiculo}`}
-            {s.patente && ` (${s.patente})`}
-          </p>
+          <p className="text-sm text-gray-300 mt-1">{ETIQUETA_FRECUENCIA[s.frecuencia]}</p>
+
+          {vehiculos.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {vehiculos.map(v => (
+                <span key={v.id}
+                  className="text-xs bg-white/10 rounded-full px-2.5 py-1 text-gray-200">
+                  🚗 {v.descripcion}
+                  {v.patente && <span className="text-gray-400 ml-1">{v.patente}</span>}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -156,6 +167,9 @@ export default function PanelSuscripcion({ suscripcion: s, lavados, extras, avan
                       <div key={l.id} className="flex items-center gap-2 py-2">
                         <span className="text-emerald-500">✓</span>
                         <span className="text-sm text-gray-700">{fechaLarga(l.fecha)}</span>
+                        {vehiculos.length > 1 && nombreAuto(l.vehicle_id) && (
+                          <span className="text-xs text-gray-500">{nombreAuto(l.vehicle_id)}</span>
+                        )}
                         {l.detalle && <span className="text-xs text-gray-400 truncate">{l.detalle}</span>}
                       </div>
                     ))}

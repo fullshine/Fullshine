@@ -45,10 +45,18 @@ export type Suscripcion = {
   created_at: string
 }
 
+export type Vehiculo = {
+  id: string
+  descripcion: string
+  patente: string | null
+  created_at: string
+}
+
 export type Lavado = {
   id: string
   fecha: string
   detalle: string | null
+  vehicle_id: string | null
   created_at: string
 }
 
@@ -80,6 +88,7 @@ export async function getSuscripciones(): Promise<ActionResult<(Suscripcion & {
   realizados: number
   avance: Avance
   extras_mes: number
+  vehiculos: Vehiculo[]
 })[]>> {
   const auth = await requiereAdmin()
   if (!auth.ok) return { success: false, error: auth.error }
@@ -99,10 +108,17 @@ export async function getSuscripciones(): Promise<ActionResult<(Suscripcion & {
     const ids = subs.map(s => s.id)
     const mesActual = hoyEnChile().substring(0, 7)
 
-    const [{ data: lavados }, { data: extras }] = await Promise.all([
+    const [{ data: lavados }, { data: extras }, { data: autos }] = await Promise.all([
       supabase.from('subscription_washes').select('subscription_id').in('subscription_id', ids),
       supabase.from('subscription_extras').select('subscription_id, fecha, precio_clp').in('subscription_id', ids),
+      supabase.from('subscription_vehicles').select('*').in('subscription_id', ids).order('created_at'),
     ])
+
+    const porSub: Record<string, Vehiculo[]> = {}
+    for (const v of (autos ?? []) as (Vehiculo & { subscription_id: string })[]) {
+      if (!porSub[v.subscription_id]) porSub[v.subscription_id] = []
+      porSub[v.subscription_id].push(v)
+    }
 
     const cuenta: Record<string, number> = {}
     for (const l of lavados ?? []) cuenta[l.subscription_id] = (cuenta[l.subscription_id] ?? 0) + 1
@@ -121,6 +137,7 @@ export async function getSuscripciones(): Promise<ActionResult<(Suscripcion & {
         return {
           ...s,
           realizados,
+          vehiculos: porSub[s.id] ?? [],
           extras_mes: extrasMes[s.id] ?? 0,
           avance: calcularAvance({
             inicio: s.inicio,
@@ -175,7 +192,7 @@ export async function crearSuscripcion(input: {
 
     const codigo = generarCodigo()
 
-    const { error } = await supabase.from('subscriptions').insert({
+    const { data: creada, error } = await supabase.from('subscriptions').insert({
       slug,
       access_code: codigo,
       nombre: input.nombre.trim(),
@@ -190,9 +207,18 @@ export async function crearSuscripcion(input: {
       inicio: input.inicio,
       termino,
       notas: input.notas?.trim() || null,
-    })
+    }).select('id').single()
 
-    if (error) return { success: false, error: error.message }
+    if (error || !creada) return { success: false, error: error?.message ?? 'No se pudo crear' }
+
+    // El primer vehículo va a la tabla propia; desde ahí se pueden sumar más.
+    if (input.vehiculo?.trim()) {
+      await supabase.from('subscription_vehicles').insert({
+        subscription_id: creada.id,
+        descripcion: input.vehiculo.trim(),
+        patente: input.patente?.trim().toUpperCase() || null,
+      })
+    }
 
     revalidatePath('/admin/suscripciones')
     return { success: true, data: { slug, codigo } }
@@ -241,6 +267,7 @@ export async function eliminarSuscripcion(id: string): Promise<ActionResult> {
 
 export async function getDetalle(id: string): Promise<ActionResult<{
   suscripcion: Suscripcion
+  vehiculos: Vehiculo[]
   lavados: Lavado[]
   extras: Extra[]
   avance: Avance
@@ -253,6 +280,7 @@ export async function getDetalle(id: string): Promise<ActionResult<{
 /** Lectura compartida entre el panel de administración y el portal del cliente. */
 async function leerDetalle(id: string): Promise<ActionResult<{
   suscripcion: Suscripcion
+  vehiculos: Vehiculo[]
   lavados: Lavado[]
   extras: Extra[]
   avance: Avance
@@ -264,9 +292,10 @@ async function leerDetalle(id: string): Promise<ActionResult<{
       .from('subscriptions').select('*').eq('id', id).single()
     if (error || !sub) return { success: false, error: 'Suscripción no encontrada' }
 
-    const [{ data: lavados }, { data: extras }] = await Promise.all([
+    const [{ data: lavados }, { data: extras }, { data: autos }] = await Promise.all([
       supabase.from('subscription_washes').select('*').eq('subscription_id', id).order('fecha', { ascending: false }),
       supabase.from('subscription_extras').select('*').eq('subscription_id', id).order('fecha', { ascending: false }),
+      supabase.from('subscription_vehicles').select('*').eq('subscription_id', id).order('created_at'),
     ])
 
     const s = sub as Suscripcion
@@ -274,6 +303,7 @@ async function leerDetalle(id: string): Promise<ActionResult<{
       success: true,
       data: {
         suscripcion: s,
+        vehiculos: (autos ?? []) as Vehiculo[],
         lavados: (lavados ?? []) as Lavado[],
         extras: (extras ?? []) as Extra[],
         avance: calcularAvance({
@@ -290,10 +320,60 @@ async function leerDetalle(id: string): Promise<ActionResult<{
   }
 }
 
+// ── Vehículos ───────────────────────────────────────────────────────────
+
+export async function agregarVehiculo(input: {
+  subscription_id: string
+  descripcion: string
+  patente?: string
+}): Promise<ActionResult> {
+  const auth = await requiereAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  try {
+    if (!input.descripcion.trim()) return { success: false, error: 'Falta la marca y modelo' }
+
+    const supabase = createAdminClient()
+    const { error } = await supabase.from('subscription_vehicles').insert({
+      subscription_id: input.subscription_id,
+      descripcion: input.descripcion.trim(),
+      patente: input.patente?.trim().toUpperCase() || null,
+    })
+    if (error) return { success: false, error: error.message }
+
+    revalidatePath('/admin/suscripciones')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Error al agregar el vehículo' }
+  }
+}
+
+export async function eliminarVehiculo(id: string): Promise<ActionResult> {
+  const auth = await requiereAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  try {
+    const supabase = createAdminClient()
+
+    // Los lavados hechos a ese auto se conservan y quedan sin vehículo:
+    // el cupo ya se consumió y no corresponde devolverlo.
+    const { error } = await supabase.from('subscription_vehicles').delete().eq('id', id)
+    if (error) return { success: false, error: error.message }
+
+    revalidatePath('/admin/suscripciones')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Error al eliminar el vehículo' }
+  }
+}
+
+// ── Lavados ─────────────────────────────────────────────────────────────
+
 export async function registrarLavado(input: {
   subscription_id: string
   fecha?: string
   detalle?: string
+  vehicle_id?: string | null
 }): Promise<ActionResult> {
   const auth = await requiereAdmin()
   if (!auth.ok) return { success: false, error: auth.error }
@@ -317,6 +397,7 @@ export async function registrarLavado(input: {
       subscription_id: input.subscription_id,
       fecha: input.fecha || hoyEnChile(),
       detalle: input.detalle?.trim() || null,
+      vehicle_id: input.vehicle_id || null,
     })
     if (error) return { success: false, error: error.message }
 
@@ -467,6 +548,7 @@ export async function salirSuscripcion(slug: string): Promise<ActionResult> {
 /** Datos del portal. Solo responde si la cookie de acceso es válida. */
 export async function getPanelCliente(slug: string): Promise<ActionResult<{
   suscripcion: Suscripcion
+  vehiculos: Vehiculo[]
   lavados: Lavado[]
   extras: Extra[]
   avance: Avance
