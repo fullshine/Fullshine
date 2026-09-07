@@ -103,7 +103,7 @@ function FormularioNueva({ onListo }: { onListo: () => void }) {
   const [f, setF] = useState({
     nombre: '', telefono: '', email: '', vehiculo: '', patente: '',
     frecuencia: 'mensual' as Frecuencia,
-    lavados_totales: 12, monto_clp: 0, inicio: hoy(), notas: '',
+    lavados_totales: 12, lavados_previos: 0, monto_clp: 0, inicio: hoy(), notas: '',
   })
 
   function set(k: string, v: string | number) { setF(p => ({ ...p, [k]: v })) }
@@ -189,6 +189,16 @@ function FormularioNueva({ onListo }: { onListo: () => void }) {
         </div>
       </div>
 
+      <div>
+        <label className={etiqueta}>Lavados que ya se hizo</label>
+        <input type="number" min={0} className={`${campo} w-32`} value={f.lavados_previos}
+          onChange={e => set('lavados_previos', Math.max(0, Number(e.target.value)))} />
+        <p className="text-[11px] text-gray-500 mt-1">
+          Para clientes que venían de antes. Se suma al contador sin tener que
+          cargar cada lavado uno por uno. Déjalo en 0 si parte de cero.
+        </p>
+      </div>
+
       <p className="text-[11px] text-gray-500">
         El plan vence un año exacto después del inicio.
       </p>
@@ -271,6 +281,9 @@ function Fila({ s, abierta, onToggle, onCambio }: {
 
           {msg && <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">{msg}</p>}
 
+          {/* Contador manual */}
+          <ContadorManual s={s} onCambio={onCambio} />
+
           {/* Registrar lavado */}
           <RegistrarLavado subId={s.id} onListo={() => { cargar(); onCambio() }} onAviso={setMsg} />
 
@@ -349,6 +362,76 @@ function Fila({ s, abierta, onToggle, onCambio }: {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * Ajuste directo del contador.
+ *
+ * Los lavados con fecha siguen siendo la fuente principal; esto solo mueve el
+ * arrastre. Se muestra el desglose para que quede claro de dónde sale el total
+ * y no parezca que el número se inventó solo.
+ */
+function ContadorManual({ s, onCambio }: {
+  s: NonNullable<Lista>[number]
+  onCambio: () => void
+}) {
+  const [pending, start] = useTransition()
+  const previos = s.lavados_previos ?? 0
+  const conFecha = s.realizados - previos
+  const [valor, setValor] = useState(previos)
+
+  useEffect(() => { setValor(previos) }, [previos])
+
+  const cambiado = valor !== previos
+
+  function guardar(nuevo: number) {
+    const v = Math.max(0, nuevo)
+    setValor(v)
+    start(async () => {
+      await actualizarSuscripcion(s.id, { lavados_previos: v })
+      onCambio()
+    })
+  }
+
+  return (
+    <div className="rounded-lg border border-gray-200 p-3">
+      <p className="text-xs font-semibold text-gray-700 mb-2">Contador de lavados</p>
+
+      <div className="flex items-center gap-2">
+        <button className="w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+          disabled={pending || valor === 0} onClick={() => guardar(valor - 1)}>
+          −
+        </button>
+
+        <input type="number" min={0} value={valor}
+          onChange={e => setValor(Math.max(0, Number(e.target.value)))}
+          className="w-20 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-center" />
+
+        <button className="w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+          disabled={pending} onClick={() => guardar(valor + 1)}>
+          +
+        </button>
+
+        {cambiado && (
+          <button className="btn-primary text-xs px-3 py-1.5" disabled={pending}
+            onClick={() => guardar(valor)}>
+            Guardar
+          </button>
+        )}
+
+        <span className="text-xs text-gray-500 ml-auto text-right">
+          Total usado: <strong className="text-gray-900">{previos + conFecha}</strong> de {s.lavados_totales}
+        </span>
+      </div>
+
+      <p className="text-[11px] text-gray-500 mt-2">
+        {previos} cargados a mano
+        {conFecha > 0 && ` + ${conFecha} con fecha registrada`}.
+        Usa este contador para clientes que venían de antes o para corregir el total sin
+        tener que anotar cada lavado.
+      </p>
     </div>
   )
 }

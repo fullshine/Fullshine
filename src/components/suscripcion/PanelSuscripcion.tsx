@@ -128,11 +128,18 @@ export default function PanelSuscripcion({ suscripcion: s, lavados, extras, avan
         <div className="rounded-2xl bg-white border border-gray-200 p-5">
           <h2 className="font-bold text-gray-900 mb-3">Lavados realizados</h2>
 
-          {lavados.length === 0 ? (
+          {s.lavados_previos > 0 && (
+            <p className="text-xs text-gray-500 mb-3 pb-3 border-b border-gray-100">
+              {s.lavados_previos} {s.lavados_previos === 1 ? 'lavado anterior' : 'lavados anteriores'} sin
+              fecha detallada, hechos antes de que empezáramos a llevar este registro.
+            </p>
+          )}
+
+          {lavados.length === 0 && s.lavados_previos === 0 ? (
             <p className="text-sm text-gray-400">
               Todavía no registramos lavados en tu plan.
             </p>
-          ) : (
+          ) : lavados.length === 0 ? null : (
             <div className="space-y-3">
               {agruparPorMes(lavados).map(g => (
                 <div key={g.mes}>

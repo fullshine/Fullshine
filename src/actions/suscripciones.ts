@@ -35,6 +35,8 @@ export type Suscripcion = {
   patente: string | null
   frecuencia: Frecuencia
   lavados_totales: number
+  /** Lavados hechos antes de llevar el registro detallado. */
+  lavados_previos: number
   monto_clp: number
   inicio: string
   termino: string
@@ -114,7 +116,8 @@ export async function getSuscripciones(): Promise<ActionResult<(Suscripcion & {
     return {
       success: true,
       data: (subs as Suscripcion[]).map(s => {
-        const realizados = cuenta[s.id] ?? 0
+        // El total usado suma el arrastre manual y los lavados con fecha.
+        const realizados = (s.lavados_previos ?? 0) + (cuenta[s.id] ?? 0)
         return {
           ...s,
           realizados,
@@ -142,6 +145,7 @@ export async function crearSuscripcion(input: {
   patente?: string
   frecuencia: Frecuencia
   lavados_totales?: number
+  lavados_previos?: number
   monto_clp: number
   inicio: string
   notas?: string
@@ -181,6 +185,7 @@ export async function crearSuscripcion(input: {
       patente: input.patente?.trim().toUpperCase() || null,
       frecuencia: input.frecuencia,
       lavados_totales: input.lavados_totales ?? LAVADOS_POR_FRECUENCIA[input.frecuencia],
+      lavados_previos: Math.max(0, input.lavados_previos ?? 0),
       monto_clp: input.monto_clp,
       inicio: input.inicio,
       termino,
@@ -201,7 +206,7 @@ export async function actualizarSuscripcion(
   id: string,
   cambios: Partial<Pick<Suscripcion,
     'nombre' | 'telefono' | 'email' | 'vehiculo' | 'patente' |
-    'lavados_totales' | 'monto_clp' | 'activa' | 'notas' | 'termino'>>
+    'lavados_totales' | 'lavados_previos' | 'monto_clp' | 'activa' | 'notas' | 'termino'>>
 ): Promise<ActionResult> {
   const auth = await requiereAdmin()
   if (!auth.ok) return { success: false, error: auth.error }
@@ -275,7 +280,7 @@ async function leerDetalle(id: string): Promise<ActionResult<{
           inicio: s.inicio,
           termino: s.termino,
           lavadosTotales: s.lavados_totales,
-          realizados: lavados?.length ?? 0,
+          realizados: (s.lavados_previos ?? 0) + (lavados?.length ?? 0),
         }),
       },
     }
@@ -298,11 +303,15 @@ export async function registrarLavado(input: {
 
     // Aviso, no bloqueo: puede haber acordado lavados extra con el cliente.
     const { data: sub } = await supabase
-      .from('subscriptions').select('lavados_totales').eq('id', input.subscription_id).single()
+      .from('subscriptions')
+      .select('lavados_totales, lavados_previos')
+      .eq('id', input.subscription_id).single()
     const { count } = await supabase
       .from('subscription_washes')
       .select('*', { count: 'exact', head: true })
       .eq('subscription_id', input.subscription_id)
+
+    const usados = (sub?.lavados_previos ?? 0) + (count ?? 0)
 
     const { error } = await supabase.from('subscription_washes').insert({
       subscription_id: input.subscription_id,
@@ -313,7 +322,7 @@ export async function registrarLavado(input: {
 
     revalidatePath('/admin/suscripciones')
 
-    if (sub && (count ?? 0) >= sub.lavados_totales) {
+    if (sub && usados >= sub.lavados_totales) {
       return { success: true, error: `Registrado, pero el cliente ya había usado sus ${sub.lavados_totales} lavados.` }
     }
     return { success: true }
