@@ -85,11 +85,35 @@ async function handler(req: NextRequest) {
 
   const resultado = {
     ejecutado: ahora.toISOString(),
+    base: '' as string,
     whatsapp: '' as string,
     recordatorios_24h: [] as string[],
     recordatorios_2h: [] as string[],
     mantenciones: null as ReporteMantenciones | null,
     errores: [] as string[],
+  }
+
+  // ── Vigilante de la base de datos ───────────────────────────────────────
+  // El plan gratuito de Supabase se pausa solo y a veces queda Unhealthy.
+  // Cuando eso pasa, la web pública sigue viéndose (páginas pre-generadas)
+  // pero reservar deja de funcionar. Sin este aviso, el primero en notarlo
+  // es un cliente que no pudo agendar.
+  try {
+    const { error } = await supabase
+      .from('services')
+      .select('id', { count: 'exact', head: true })
+      .limit(1)
+    if (error) throw new Error(error.message)
+    resultado.base = 'operativa'
+  } catch (e) {
+    resultado.base = 'sin respuesta'
+    resultado.errores.push(`base de datos: ${(e as Error).message}`)
+    await sendPushToAdmin(
+      '🚨 La base de datos no responde',
+      'Nadie puede reservar. Entra a Supabase: si dice Unhealthy, Settings → General → Restart project.',
+      '/admin/dashboard'
+    ).catch(() => {})
+    return NextResponse.json(resultado, { status: 503 })
   }
 
   // ── Vigilante de WhatsApp ───────────────────────────────────────────────

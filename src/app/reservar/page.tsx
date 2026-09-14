@@ -42,9 +42,42 @@ export default async function ReservarPage({ searchParams }: { searchParams?: { 
 
         <PromoNoticeReserva />
 
-        <Suspense fallback={<div className="text-white text-center">Cargando...</div>}>
-          <BookingForm services={services} preselect={searchParams?.servicio} category={searchParams?.categoria} />
-        </Suspense>
+        {services.length === 0 ? (
+          /* getServices() no lanza excepción: si la base no responde devuelve
+             una lista vacía. Sin este bloque el cliente veía un formulario sin
+             servicios y se iba sin entender nada ni saber cómo contactarnos. */
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+            <h2 className="text-lg font-semibold text-white">
+              No pudimos cargar los servicios
+            </h2>
+            <p className="text-sm text-gray-400 mt-2 leading-relaxed">
+              Es un problema momentáneo de nuestro sistema, no de tu conexión.
+              Escríbenos y te agendamos la hora al tiro, sin que tengas que
+              esperar a que esto se arregle.
+            </p>
+
+            <a
+              href="https://wa.me/56933654943?text=Hola%20Fullshine%2C%20quiero%20reservar%20una%20hora"
+              className="block w-full mt-5 py-3 rounded-lg bg-green-500 text-white font-semibold"
+            >
+              Reservar por WhatsApp
+            </a>
+            <a
+              href="tel:+56933654943"
+              className="block w-full mt-2 py-3 rounded-lg border border-white/20 text-gray-200"
+            >
+              Llamar al +56 9 3365 4943
+            </a>
+
+            <p className="text-[11px] text-gray-500 mt-4">
+              Camilo Henríquez 381, Concepción · Lun a Vie 09:00–18:00 · Sáb 09:00–14:00
+            </p>
+          </div>
+        ) : (
+          <Suspense fallback={<div className="text-white text-center">Cargando...</div>}>
+            <BookingForm services={services} preselect={searchParams?.servicio} category={searchParams?.categoria} />
+          </Suspense>
+        )}
       </div>
     </main>
   )
