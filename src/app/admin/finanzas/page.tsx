@@ -1,6 +1,7 @@
 import { getDashboardStats } from '@/actions/admin'
 import { getExpensesMonth } from '@/actions/expenses'
 import { getTaxPeriod } from '@/actions/tax'
+import { getPanelFinanzas } from '@/actions/finanzas'
 import FinanzasClient from '@/components/admin/FinanzasClient'
 
 export const metadata = { title: 'Finanzas | Fullshine Admin' }
@@ -11,15 +12,17 @@ export default async function FinanzasPage() {
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   const monthLabel = now.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })
 
-  const [statsResult, expensesResult, taxPeriodResult] = await Promise.all([
+  const [statsResult, expensesResult, taxPeriodResult, panelResult] = await Promise.all([
     getDashboardStats(),
     getExpensesMonth(),
     getTaxPeriod(currentMonth),
+    getPanelFinanzas(currentMonth),
   ])
 
   const stats    = statsResult.data
   const expenses = expensesResult.data ?? []
   const taxPeriod = taxPeriodResult.data!
+  const panel = panelResult.success ? panelResult.data ?? null : null
 
   return (
     <div className="p-4 md:p-6 space-y-5">
@@ -33,6 +36,7 @@ export default async function FinanzasPage() {
         initialExpenses={expenses}
         initialPeriod={taxPeriod}
         currentMonth={currentMonth}
+        initialPanel={panel}
       />
     </div>
   )
