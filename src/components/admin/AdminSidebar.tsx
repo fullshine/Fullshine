@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: '/admin/incompletas', label: 'Incompletas', icon: '🛒' },
   { href: '/admin/postulaciones', label: 'Postulaciones', icon: '👤' },
   { href: '/admin/socios', label: 'Socios', icon: '🤝' },
+  { href: '/admin/certificados', label: 'Certificados', icon: '📋' },
   { href: '/admin/servicios', label: 'Servicios', icon: '✨' },
   { href: '/admin/finanzas', label: 'Finanzas', icon: '💰' },
 ]
