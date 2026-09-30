@@ -252,6 +252,17 @@ export default function SociosPanel({
                   </button>
                 )}
 
+                {/* El certificado se arma con la patente de la factura, así que
+                    solo aparece cuando la tiene. Sin patente no hay vehículo
+                    que identificar. */}
+                {d.tipo === 'factura' && d.patente && (
+                  <a href={`/admin/certificado/doc/${d.id}`} target="_blank" rel="noopener"
+                    title={`Generar certificado de preparación — ${d.patente}`}
+                    className="rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 border border-amber-200 hover:bg-amber-100">
+                    📋 Informe
+                  </a>
+                )}
+
                 <button disabled={pending} onClick={() => abrir(d.file_path)}
                   className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 border border-blue-200 disabled:opacity-50">
                   Ver
