@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { getEnlaceDocumento, salir, type Documento, type VehiculoAtendido } from '@/actions/socios'
 import { formatCurrency } from '@/lib/utils'
 
-type Pestana = 'agendar' | 'historial' | 'documentos'
+type Pestana = 'agendar' | 'historial' | 'informes' | 'documentos'
 
 const ICONO_TIPO: Record<string, string> = {
   factura: '🧾',
@@ -49,9 +49,43 @@ export default function PortalSocio({
 
   const facturas = documentos.filter(d => d.tipo === 'factura')
   const fotos = documentos.filter(d => d.tipo === 'foto')
-  const otros = documentos.filter(d => d.tipo !== 'factura' && d.tipo !== 'foto')
+  const informes = documentos.filter(d => d.tipo === 'informe')
+  // Los informes salen de "otros": ahora tienen pestaña propia.
+  const otros = documentos.filter(
+    d => d.tipo !== 'factura' && d.tipo !== 'foto' && d.tipo !== 'informe'
+  )
 
   const q = busca.trim().toUpperCase()
+
+  /**
+   * Informes agrupados por vehículo.
+   *
+   * La automotora no busca "el informe del 27 de septiembre", busca el de
+   * una patente concreta porque está por vender ese auto. Por eso la patente
+   * manda y la fecha es secundaria.
+   */
+  const informesPorAuto = (() => {
+    const filtrados = q
+      ? informes.filter(d =>
+          (d.patente ?? '').toUpperCase().includes(q) ||
+          d.titulo.toUpperCase().includes(q))
+      : informes
+
+    const mapa = new Map<string, Documento[]>()
+    for (const d of filtrados) {
+      const clave = (d.patente ?? '').toUpperCase() || 'SIN PATENTE'
+      if (!mapa.has(clave)) mapa.set(clave, [])
+      mapa.get(clave)!.push(d)
+    }
+    return [...mapa.entries()]
+      .map(([patente, docs]) => ({ patente, docs }))
+      .sort((a, b) => {
+        // Los sin patente al final; el resto por fecha del más reciente
+        if (a.patente === 'SIN PATENTE') return 1
+        if (b.patente === 'SIN PATENTE') return -1
+        return (b.docs[0]?.created_at ?? '').localeCompare(a.docs[0]?.created_at ?? '')
+      })
+  })()
   const historialFiltrado = q
     ? historial.filter(h =>
         (h.patente ?? '').toUpperCase().includes(q) ||
@@ -72,7 +106,8 @@ export default function PortalSocio({
   const TABS: { id: Pestana; label: string; badge?: number }[] = [
     { id: 'agendar', label: 'Agendar' },
     { id: 'historial', label: 'Historial', badge: historial.length },
-    { id: 'documentos', label: 'Documentos', badge: documentos.length },
+    { id: 'informes', label: 'Informes', badge: informes.length },
+    { id: 'documentos', label: 'Documentos', badge: documentos.length - informes.length },
   ]
 
   return (
@@ -151,13 +186,88 @@ export default function PortalSocio({
       )}
 
       {/* ── DOCUMENTOS ── */}
+      {/* ── INFORMES POR VEHÍCULO ── */}
+      {tab === 'informes' && (
+        <div>
+          <input
+            value={busca} onChange={e => setBusca(e.target.value)}
+            placeholder="Buscar por patente…"
+            className="mb-5 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white placeholder:text-white/25 focus:border-amber-500/50 focus:outline-none"
+          />
+
+          {informesPorAuto.length === 0 ? (
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-10 text-center">
+              <p className="text-gray-400">
+                {q ? 'Ningún informe coincide con la búsqueda.' : 'Todavía no hay informes cargados.'}
+              </p>
+              {!q && (
+                <p className="mt-2 text-sm text-white/30">
+                  Acá va a aparecer el certificado de preparación de cada vehículo.
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {informesPorAuto.map(grupo => (
+                <div key={grupo.patente}
+                  className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+
+                  <div className="mb-3 flex items-baseline justify-between gap-3">
+                    <p className="font-mono text-lg font-bold tracking-wider text-amber-400">
+                      {grupo.patente}
+                    </p>
+                    <p className="text-xs text-white/30">
+                      {grupo.docs.length} {grupo.docs.length === 1 ? 'informe' : 'informes'}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {grupo.docs.map(d => (
+                      <button key={d.id} onClick={() => abrir(d.file_path)} disabled={pending}
+                        className="flex w-full items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-left transition-colors hover:border-amber-500/30 hover:bg-white/[0.06] disabled:opacity-50">
+                        <span className="text-xl" aria-hidden>📋</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-white">
+                            {d.titulo}
+                          </span>
+                          <span className="block text-xs text-white/35">
+                            {new Date(d.created_at).toLocaleDateString('es-CL', {
+                              day: 'numeric', month: 'long', year: 'numeric',
+                            })}
+                            {d.file_size ? ` · ${peso(d.file_size)}` : ''}
+                          </span>
+                          {d.descripcion && (
+                            <span className="mt-0.5 block truncate text-xs text-white/25">
+                              {d.descripcion}
+                            </span>
+                          )}
+                        </span>
+                        <span className="shrink-0 text-xs font-medium text-amber-400">Abrir</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <p className="mt-5 text-center text-xs text-white/25">
+            Cada informe detalla el trabajo realizado sobre ese vehículo.
+            Puedes descargarlo y publicarlo junto a la ficha de venta.
+          </p>
+        </div>
+      )}
+
       {tab === 'documentos' && (
         <div className="space-y-8">
-          {documentos.length === 0 ? (
+          {/* Los informes tienen pestaña propia, así que no cuentan acá:
+              sin este ajuste, un socio con solo informes veía una pestaña vacía. */}
+          {facturas.length + fotos.length + otros.length === 0 ? (
             <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-10 text-center">
               <p className="text-gray-400">Todavía no hay documentos cargados.</p>
               <p className="mt-2 text-sm text-gray-500">
-                Acá van a aparecer las facturas, informes y registros fotográficos.
+                Acá van a aparecer las facturas y los registros fotográficos.
+                {informes.length > 0 && ' Los informes por vehículo están en su propia pestaña.'}
               </p>
             </div>
           ) : (

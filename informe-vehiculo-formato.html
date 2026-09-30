@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe de preparación de vehículo · Fullshine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --tinta:#111827; --gris:#6b7280; --gris2:#9ca3af;
+    --linea:#e5e7eb; --ambar:#b26f05; --fondo:#f9fafb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#525659;font-family:'Inter',system-ui,sans-serif;color:var(--tinta)}
+
+  /* Barra solo para revisar en pantalla */
+  .barra{background:#1e293b;color:#cbd5e1;padding:12px 20px;font-size:13px;text-align:center}
+  .barra b{color:#f5b342}
+  .barra button{background:#f5b342;border:0;color:#111;font-weight:700;padding:7px 16px;border-radius:6px;margin-left:12px;cursor:pointer;font-family:inherit;font-size:13px}
+
+  /* Hoja A4 */
+  .hoja{
+    width:210mm;min-height:297mm;margin:22px auto;background:#fff;
+    padding:14mm 15mm;display:flex;flex-direction:column;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+
+  /* ---- Cabecera ---- */
+  .cab{display:flex;justify-content:space-between;align-items:flex-start;
+       border-bottom:2px solid var(--tinta);padding-bottom:10px}
+  .marca{display:flex;align-items:center;gap:11px}
+  .marca img{width:44px;height:44px;object-fit:contain}
+  .marca .n{font-size:17px;font-weight:800;letter-spacing:.09em;line-height:1}
+  .marca .s{font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gris);margin-top:3px}
+  .cab .der{text-align:right}
+  .cab .titulo{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .cab .folio{font-size:19px;font-weight:800;color:var(--ambar);line-height:1.1;margin-top:2px}
+  .cab .fecha{font-size:9.5px;color:var(--gris);margin-top:2px}
+
+  /* ---- Bloques ---- */
+  .bloque{margin-top:11px}
+  .rot{font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+       color:var(--ambar);border-bottom:1px solid var(--linea);padding-bottom:3px;margin-bottom:7px}
+
+  .campos{display:grid;grid-template-columns:repeat(4,1fr);gap:7px 14px}
+  .campo .e{font-size:8px;text-transform:uppercase;letter-spacing:.07em;color:var(--gris2)}
+  .campo .v{font-size:11.5px;font-weight:600;margin-top:1px}
+  .campo .v.vacio{color:#d1d5db;font-weight:400}
+
+  /* ---- Plan aplicado ---- */
+  .plan{background:var(--fondo);border-left:3px solid var(--ambar);padding:8px 12px;
+        display:flex;justify-content:space-between;align-items:center}
+  .plan .nom{font-size:13px;font-weight:700}
+  .plan .dur{font-size:9.5px;color:var(--gris)}
+
+  /* ---- Checklist ---- */
+  .dos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .lista{list-style:none;margin:0;padding:0}
+  .lista li{font-size:10px;line-height:1.65;padding-left:15px;position:relative;color:#374151}
+  .lista li::before{content:'✓';position:absolute;left:0;color:var(--ambar);font-weight:700;font-size:9.5px}
+  .lista li.no{color:#d1d5db}
+  .lista li.no::before{content:'—';color:#e5e7eb}
+  .sub{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+       color:var(--gris);margin:0 0 4px}
+
+  /* ---- Recepción ---- */
+  .recep{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .marcas{font-size:10px;line-height:1.7;color:#374151}
+  .marcas .it{display:flex;gap:6px;align-items:baseline}
+  .marcas .cua{width:8px;height:8px;border:1px solid #9ca3af;display:inline-block;flex-shrink:0;position:relative;top:1px}
+  .marcas .cua.x{background:var(--tinta);border-color:var(--tinta)}
+
+  .nota{border:1px solid var(--linea);border-radius:4px;padding:8px 10px;
+        font-size:10px;line-height:1.6;color:#374151;min-height:52px}
+  .nota.vacia{color:#d1d5db}
+
+  /* ---- Técnico ---- */
+  .tecnica{background:var(--fondo);padding:9px 12px;font-size:10px;line-height:1.65;color:#374151}
+  .tecnica b{color:var(--tinta)}
+
+  /* ---- Firmas ---- */
+  .firmas{margin-top:auto;padding-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:34px}
+  .firma{text-align:center}
+  .firma .linea{border-top:1px solid var(--tinta);margin-bottom:4px}
+  .firma .q{font-size:10px;font-weight:600}
+  .firma .d{font-size:8.5px;color:var(--gris);margin-top:1px}
+
+  .pie{margin-top:12px;border-top:1px solid var(--linea);padding-top:7px;
+       font-size:8px;color:var(--gris2);line-height:1.5;text-align:center}
+
+  @page{size:A4;margin:0}
+  @media print{
+    body{background:#fff}
+    .barra{display:none}
+    .hoja{margin:0;box-shadow:none;width:auto;min-height:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="barra">
+  <b>Formato propuesto</b> · datos de ejemplo para que lo veas lleno
+  <button onclick="window.print()">Ver cómo imprime</button>
+</div>
+
+<div class="hoja">
+
+  <!-- CABECERA -->
+  <div class="cab">
+    <div class="marca">
+      <img src="./public/logo.png" alt="">
+      <div>
+        <div class="n">FULLSHINE</div>
+        <div class="s">Detailing Premium</div>
+      </div>
+    </div>
+    <div class="der">
+      <div class="titulo">Informe de preparación</div>
+      <div class="folio">FA-2026-0042</div>
+      <div class="fecha">Emitido el 29 de septiembre de 2026</div>
+    </div>
+  </div>
+
+  <!-- CLIENTE Y VEHÍCULO -->
+  <div class="bloque">
+    <div class="rot">Vehículo</div>
+    <div class="campos">
+      <div class="campo"><div class="e">Automotora</div><div class="v">Automotora Fortia</div></div>
+      <div class="campo"><div class="e">Marca y modelo</div><div class="v">Toyota Corolla 1.8</div></div>
+      <div class="campo"><div class="e">Año</div><div class="v">2021</div></div>
+      <div class="campo"><div class="e">Patente</div><div class="v">KXRT·42</div></div>
+      <div class="campo"><div class="e">Color</div><div class="v">Gris plata</div></div>
+      <div class="campo"><div class="e">Kilometraje</div><div class="v">64.310 km</div></div>
+      <div class="campo"><div class="e">Ingreso</div><div class="v">26 sep · 09:00</div></div>
+      <div class="campo"><div class="e">Entrega</div><div class="v">27 sep · 17:30</div></div>
+    </div>
+  </div>
+
+  <!-- PLAN -->
+  <div class="bloque">
+    <div class="rot">Servicio aplicado</div>
+    <div class="plan">
+      <div class="nom">Plan Pulido + Interior</div>
+      <div class="dur">8 horas de trabajo · 2 técnicos</div>
+    </div>
+  </div>
+
+  <!-- TRABAJO REALIZADO -->
+  <div class="bloque">
+    <div class="rot">Trabajo realizado</div>
+    <div class="dos">
+      <div>
+        <p class="sub">Exterior</p>
+        <ul class="lista">
+          <li>Lavado técnico con método de dos baldes</li>
+          <li>Descontaminación química de carrocería</li>
+          <li>Descontaminación mecánica con clay bar</li>
+          <li>Pulido abrillantador 3 en 1</li>
+          <li>Limpieza profunda de llantas y pasarruedas</li>
+          <li>Vidrios interiores y exteriores</li>
+          <li>Encerado premium de protección</li>
+          <li>Hidratación de plásticos exteriores</li>
+          <li>Sellado de neumáticos</li>
+          <li class="no">Corrección de pintura en dos pasos</li>
+        </ul>
+      </div>
+      <div>
+        <p class="sub">Interior</p>
+        <ul class="lista">
+          <li>Aspirado profundo de habitáculo y maletero</li>
+          <li>Limpieza de asientos</li>
+          <li>Limpieza de cielo de tapiz</li>
+          <li>Paneles de puertas y tablero</li>
+          <li>Limpieza de ductos de ventilación</li>
+          <li>Hidratación de plásticos y cueros</li>
+          <li>Vidrios interiores sin marcas</li>
+          <li>Aromatización final</li>
+          <li class="no">Desmontaje de asientos</li>
+          <li class="no">Sellado de plásticos interiores</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTADO DE RECEPCIÓN -->
+  <div class="bloque">
+    <div class="rot">Estado al recibir el vehículo</div>
+    <div class="recep">
+      <div class="marcas">
+        <div class="it"><span class="cua x"></span><span>Rayones superficiales en barniz</span></div>
+        <div class="it"><span class="cua x"></span><span>Marcas de remolino por lavado</span></div>
+        <div class="it"><span class="cua"></span><span>Rayones profundos hasta el color</span></div>
+        <div class="it"><span class="cua"></span><span>Abolladuras o golpes</span></div>
+        <div class="it"><span class="cua x"></span><span>Manchas en tapiz</span></div>
+        <div class="it"><span class="cua"></span><span>Vidrios o focos dañados</span></div>
+      </div>
+      <div class="nota">
+        Rayones de lavado en capó y ambas puertas del costado derecho, corregidos en su
+        mayoría con el pulido. Mancha de bebida en el asiento trasero central: se atenuó
+        pero persiste una sombra leve.
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSERVACIONES TÉCNICAS -->
+  <div class="bloque">
+    <div class="rot">Observaciones técnicas</div>
+    <div class="tecnica">
+      <b>Medición de espesor de pintura:</b> promedio de 118 micras en paneles originales.
+      El <b>guardabarros trasero derecho marca 214 micras</b>, lo que indica repintado previo.
+      Ese panel se pulió con abrasivo suave y no admite correcciones adicionales.
+      El resto de la carrocería conserva barniz de fábrica en buen estado.
+    </div>
+  </div>
+
+  <!-- FIRMAS -->
+  <div class="firmas">
+    <div class="firma">
+      <div class="linea"></div>
+      <div class="q">Juan Sáez</div>
+      <div class="d">Fullshine Detailing Premium</div>
+    </div>
+    <div class="firma">
+      <div class="linea"></div>
+      <div class="q">Recibe conforme</div>
+      <div class="d">Automotora Fortia · nombre y fecha</div>
+    </div>
+  </div>
+
+  <div class="pie">
+    Fullshine Detailing Premium · Camilo Henríquez 381, Concepción · +56 9 3365 4943 · fullshine.autos<br>
+    Este informe detalla el trabajo técnico realizado. Los valores se consolidan en la factura mensual del convenio.
+  </div>
+
+</div>
+
+</body>
+</html>

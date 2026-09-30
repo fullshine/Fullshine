@@ -93,15 +93,29 @@ export default function SociosPanel({
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-600">Título *</label>
           <input name="titulo" className={campo} required
-            placeholder={tipo === 'factura' ? 'Factura semana del 12 al 16 de agosto' : 'Antes y después — Peugeot 3008'} />
+            placeholder={
+              tipo === 'factura' ? 'Factura semana del 12 al 16 de agosto'
+              : tipo === 'informe' ? 'Certificado de preparación — Toyota Corolla 2021'
+              : 'Antes y después — Peugeot 3008'
+            } />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-600">
-              Patente <span className="text-gray-400">(opcional)</span>
+              Patente {tipo === 'informe'
+                ? <span className="text-amber-600">*</span>
+                : <span className="text-gray-400">(opcional)</span>}
             </label>
-            <input name="patente" className={`${campo} uppercase`} placeholder="ABCD12" />
+            {/* En un informe la patente es obligatoria: el portal los agrupa por
+                vehículo, y uno sin patente queda en "SIN PATENTE" donde nadie lo busca. */}
+            <input name="patente" className={`${campo} uppercase`} placeholder="ABCD12"
+              required={tipo === 'informe'} />
+            {tipo === 'informe' && (
+              <p className="mt-1 text-[11px] text-gray-500">
+                El socio busca los informes por patente.
+              </p>
+            )}
           </div>
           {tipo === 'factura' && (
             <>

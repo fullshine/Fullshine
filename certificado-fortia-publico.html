@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certificado de preparación · Fullshine para Fortia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --tinta:#0f172a; --gris:#64748b; --gris2:#94a3b8;
+    --linea:#e2e8f0; --ambar:#b26f05; --ambar-cl:#fef3c7;
+    --verde:#047857; --fondo:#f8fafc;
+    --display:'Sora',sans-serif; --texto:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#525659;font-family:var(--texto);color:var(--tinta)}
+
+  .barra{background:#1e293b;color:#cbd5e1;padding:12px 20px;font-size:13px;text-align:center}
+  .barra b{color:#f5b342}
+  .barra button{background:#f5b342;border:0;color:#111;font-weight:700;padding:7px 16px;border-radius:6px;margin-left:12px;cursor:pointer;font-family:inherit;font-size:13px}
+
+  .hoja{width:210mm;min-height:297mm;margin:22px auto;background:#fff;
+        padding:13mm 14mm;display:flex;flex-direction:column;
+        box-shadow:0 8px 30px rgba(0,0,0,.35)}
+
+  /* Cabecera co-marca */
+  .cab{display:flex;justify-content:space-between;align-items:center;
+       border-bottom:2px solid var(--tinta);padding-bottom:10px}
+  .marca{display:flex;align-items:center;gap:10px}
+  .marca img{width:42px;height:42px;object-fit:contain}
+  .marca .n{font-family:var(--display);font-size:16px;font-weight:800;letter-spacing:.08em;line-height:1}
+  .marca .s{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--gris);margin-top:3px}
+  .para{text-align:right;font-size:9px;color:var(--gris);line-height:1.5}
+  .para b{display:block;font-size:12px;color:var(--tinta);font-weight:700}
+
+  /* Titular */
+  .titular{text-align:center;padding:16px 0 13px}
+  .titular .k{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.2em;
+              text-transform:uppercase;color:var(--ambar)}
+  .titular h1{font-family:var(--display);font-size:25px;font-weight:800;margin:5px 0 6px;letter-spacing:-.02em}
+  .titular p{font-size:11px;color:var(--gris);margin:0;line-height:1.55;max-width:74%;margin-inline:auto}
+
+  /* Vehículo */
+  .veh{background:var(--fondo);border-radius:6px;padding:11px 14px;
+       display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .veh .c .e{font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--gris2)}
+  .veh .c .v{font-size:11.5px;font-weight:700;margin-top:1px}
+
+  .rot{font-family:var(--display);font-size:8.5px;font-weight:700;letter-spacing:.15em;
+       text-transform:uppercase;color:var(--ambar);border-bottom:1px solid var(--linea);
+       padding-bottom:3px;margin:13px 0 8px}
+
+  /* Estado de entrega — lo positivo */
+  .entrega{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .e-it{border:1px solid var(--linea);border-radius:6px;padding:9px 11px}
+  .e-it .t{font-size:10px;font-weight:700;display:flex;align-items:center;gap:5px}
+  .e-it .t svg{width:12px;height:12px;color:var(--verde);flex-shrink:0}
+  .e-it .d{font-size:9px;color:var(--gris);line-height:1.5;margin-top:3px}
+
+  /* Checklist */
+  .dos{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+  .lista{list-style:none;margin:0;padding:0}
+  .lista li{font-size:9.5px;line-height:1.62;padding-left:13px;position:relative;color:#334155}
+  .lista li::before{content:'';position:absolute;left:2px;top:6.5px;width:4px;height:4px;
+                    border-radius:50%;background:var(--ambar)}
+  .sub{font-family:var(--display);font-size:8px;font-weight:700;text-transform:uppercase;
+       letter-spacing:.1em;color:var(--gris);margin:0 0 4px}
+
+  /* Gift card */
+  .gift{margin-top:13px;display:flex;gap:0;border-radius:9px;overflow:hidden;
+        border:1.5px solid var(--tinta)}
+  .gift .izq{background:var(--tinta);color:#fff;padding:14px 16px;
+             display:flex;flex-direction:column;justify-content:center;min-width:152px}
+  .gift .izq .et{font-family:var(--display);font-size:7.5px;font-weight:700;
+                 letter-spacing:.22em;text-transform:uppercase;color:#f5b342}
+  .gift .izq .n{font-family:var(--display);font-size:42px;font-weight:800;
+                line-height:.9;margin:4px 0 2px;letter-spacing:-.04em}
+  .gift .izq .n small{font-size:20px;font-weight:700}
+  .gift .izq .d{font-size:8.5px;color:#cbd5e1;line-height:1.4}
+
+  .gift .med{flex:1;padding:12px 15px;background:linear-gradient(105deg,#fffbeb,#fff)}
+  .gift .med h2{font-family:var(--display);font-size:14.5px;font-weight:800;
+                margin:0 0 4px;letter-spacing:-.01em;line-height:1.2}
+  .gift .med p{font-size:9px;color:#475569;line-height:1.5;margin:0 0 5px}
+  .gift .cod{font-size:8.5px;color:var(--gris)}
+  .gift .cod span{font-family:var(--display);font-weight:700;color:var(--tinta);
+                  background:var(--ambar-cl);padding:2px 7px;border-radius:3px;letter-spacing:.06em}
+  .gift .cond{font-size:7px;color:var(--gris2);line-height:1.45;margin-top:5px}
+
+  .gift .qr{padding:12px 14px;display:flex;flex-direction:column;align-items:center;
+            justify-content:center;border-left:1px dashed #cbd5e1;background:#fff}
+  .gift .qr svg{width:68px;height:68px;display:block}
+  .gift .qr .t{font-size:6.5px;letter-spacing:.1em;text-transform:uppercase;
+               color:var(--gris2);margin-top:4px}
+
+  /* Pie */
+  .pie-zona{margin-top:auto;padding-top:14px}
+  .firma{display:flex;justify-content:space-between;align-items:flex-end;gap:20px}
+  .firma .f{text-align:center;min-width:180px}
+  .firma .linea{border-top:1px solid var(--tinta);margin-bottom:4px}
+  .firma .q{font-size:9.5px;font-weight:600}
+  .firma .d{font-size:8px;color:var(--gris);margin-top:1px}
+  .sello{text-align:right;font-size:8.5px;color:var(--gris);line-height:1.5}
+  .sello b{display:block;font-family:var(--display);font-size:10px;color:var(--verde)}
+
+  .pie{margin-top:11px;border-top:1px solid var(--linea);padding-top:7px;
+       font-size:7.5px;color:var(--gris2);line-height:1.5;text-align:center}
+
+  @page{size:A4;margin:0}
+  @media print{
+    body{background:#fff}
+    .barra{display:none}
+    .hoja{margin:0;box-shadow:none;width:auto;min-height:auto}
+    .gift .med{background:#fffbeb !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .veh{background:#f8fafc !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .gift .izq{background:#0f172a !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+
+<div class="barra">
+  <b>Versión pública</b> · la que ve el comprador en la ficha de Fortia
+  <button onclick="window.print()">Ver cómo imprime</button>
+</div>
+
+<div class="hoja">
+
+  <div class="cab">
+    <div class="marca">
+      <img src="./public/logo.png" alt="">
+      <div>
+        <div class="n">FULLSHINE</div>
+        <div class="s">Detailing Premium</div>
+      </div>
+    </div>
+    <div class="para">
+      Preparado para
+      <b>Automotora Fortia</b>
+      Certificado FA-2026-0042 · 29 sep 2026
+    </div>
+  </div>
+
+  <div class="titular">
+    <p class="k">Certificado de preparación</p>
+    <h1>Este vehículo fue preparado por especialistas</h1>
+    <p>
+      Antes de salir a la venta, esta unidad pasó por un proceso completo de detailing
+      profesional en taller: corrección de pintura, descontaminación y
+      acondicionamiento interior. No es un lavado: son ocho horas de trabajo técnico.
+    </p>
+  </div>
+
+  <div class="veh">
+    <div class="c"><div class="e">Marca y modelo</div><div class="v">Toyota Corolla 1.8</div></div>
+    <div class="c"><div class="e">Año</div><div class="v">2021</div></div>
+    <div class="c"><div class="e">Color</div><div class="v">Gris plata</div></div>
+    <div class="c"><div class="e">Patente</div><div class="v">KXRT·42</div></div>
+    <div class="c"><div class="e">Preparado el</div><div class="v">27 sep 2026</div></div>
+  </div>
+
+  <p class="rot">Cómo se entrega el vehículo</p>
+  <div class="entrega">
+    <div class="e-it">
+      <div class="t">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Pintura corregida
+      </div>
+      <div class="d">Rayones de lavado y marcas de remolino eliminados con pulido abrillantador. Brillo parejo en toda la carrocería.</div>
+    </div>
+    <div class="e-it">
+      <div class="t">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Superficie descontaminada
+      </div>
+      <div class="d">Descontaminación química y mecánica. La pintura quedó lisa al tacto, libre de partículas incrustadas.</div>
+    </div>
+    <div class="e-it">
+      <div class="t">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Interior acondicionado
+      </div>
+      <div class="d">Asientos, cielo, paneles y ductos limpios en profundidad. Plásticos y cueros hidratados.</div>
+    </div>
+  </div>
+
+  <p class="rot">Detalle del trabajo realizado</p>
+  <div class="dos">
+    <div>
+      <p class="sub">Exterior</p>
+      <ul class="lista">
+        <li>Lavado técnico con método de dos baldes</li>
+        <li>Descontaminación química de carrocería</li>
+        <li>Descontaminación mecánica con clay bar</li>
+        <li>Pulido abrillantador 3 en 1</li>
+        <li>Limpieza profunda de llantas y pasarruedas</li>
+        <li>Encerado premium de protección</li>
+        <li>Hidratación de plásticos exteriores</li>
+        <li>Sellado de neumáticos</li>
+      </ul>
+    </div>
+    <div>
+      <p class="sub">Interior</p>
+      <ul class="lista">
+        <li>Aspirado profundo de habitáculo y maletero</li>
+        <li>Limpieza de asientos y cielo de tapiz</li>
+        <li>Paneles de puertas y tablero</li>
+        <li>Limpieza de ductos de ventilación</li>
+        <li>Hidratación de plásticos y cueros</li>
+        <li>Vidrios interiores y exteriores sin marcas</li>
+        <li>Aromatización final</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="gift">
+    <div class="izq">
+      <div class="et">Gift card</div>
+      <div class="n">25<small>%</small></div>
+      <div class="d">de descuento<br>para el nuevo dueño</div>
+    </div>
+
+    <div class="med">
+      <h2>Protege tu auto con tratamiento cerámico</h2>
+      <p>
+        Cerámica Nasiol ZR53 de 10H: 3 años de protección de fábrica, extensibles
+        a 5 con la mantención semestral. Sella la pintura contra rayos UV,
+        contaminación y micro-rayas del lavado.
+      </p>
+      <p class="cod">Código <span>FS25-FA0042</span> · escanea o entra a fullshine.autos/giftcard</p>
+      <p class="cond">
+        Válida hasta el 31 de marzo de 2027 · Un uso por vehículo · Aplica sobre el valor
+        de lista de los tratamientos cerámicos de 3 a 5 años · No acumulable con otras promociones.
+      </p>
+    </div>
+
+    <div class="qr">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path fill="#0f172a" d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM8 0h1v1h-1zM10 0h1v1h-1zM11 0h1v1h-1zM12 0h1v1h-1zM14 0h1v1h-1zM18 0h1v1h-1zM20 0h1v1h-1zM21 0h1v1h-1zM26 0h1v1h-1zM27 0h1v1h-1zM28 0h1v1h-1zM29 0h1v1h-1zM30 0h1v1h-1zM31 0h1v1h-1zM32 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM11 1h1v1h-1zM12 1h1v1h-1zM16 1h1v1h-1zM17 1h1v1h-1zM19 1h1v1h-1zM21 1h1v1h-1zM22 1h1v1h-1zM24 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM8 2h1v1h-1zM10 2h1v1h-1zM17 2h1v1h-1zM18 2h1v1h-1zM19 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM23 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM24 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM29 3h1v1h-1zM30 3h1v1h-1zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM15 4h1v1h-1zM18 4h1v1h-1zM20 4h1v1h-1zM21 4h1v1h-1zM23 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM29 4h1v1h-1zM30 4h1v1h-1zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM11 5h1v1h-1zM12 5h1v1h-1zM20 5h1v1h-1zM23 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM29 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM10 7h1v1h-1zM11 7h1v1h-1zM12 7h1v1h-1zM13 7h1v1h-1zM18 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM22 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM11 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM15 8h1v1h-1zM16 8h1v1h-1zM17 8h1v1h-1zM19 8h1v1h-1zM23 8h1v1h-1zM24 8h1v1h-1zM25 8h1v1h-1zM28 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM0 9h1v1h-1zM1 9h1v1h-1zM2 9h1v1h-1zM3 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM8 9h1v1h-1zM9 9h1v1h-1zM12 9h1v1h-1zM14 9h1v1h-1zM15 9h1v1h-1zM18 9h1v1h-1zM19 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM28 9h1v1h-1zM29 9h1v1h-1zM30 9h1v1h-1zM2 10h1v1h-1zM3 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM8 10h1v1h-1zM10 10h1v1h-1zM11 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM15 10h1v1h-1zM16 10h1v1h-1zM17 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM21 10h1v1h-1zM23 10h1v1h-1zM24 10h1v1h-1zM25 10h1v1h-1zM28 10h1v1h-1zM29 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM0 11h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM4 11h1v1h-1zM7 11h1v1h-1zM10 11h1v1h-1zM11 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM17 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM25 11h1v1h-1zM27 11h1v1h-1zM30 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM2 12h1v1h-1zM3 12h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM9 12h1v1h-1zM12 12h1v1h-1zM13 12h1v1h-1zM14 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM18 12h1v1h-1zM20 12h1v1h-1zM22 12h1v1h-1zM24 12h1v1h-1zM26 12h1v1h-1zM31 12h1v1h-1zM32 12h1v1h-1zM0 13h1v1h-1zM1 13h1v1h-1zM4 13h1v1h-1zM7 13h1v1h-1zM11 13h1v1h-1zM12 13h1v1h-1zM16 13h1v1h-1zM19 13h1v1h-1zM21 13h1v1h-1zM22 13h1v1h-1zM23 13h1v1h-1zM24 13h1v1h-1zM25 13h1v1h-1zM26 13h1v1h-1zM30 13h1v1h-1zM3 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM8 14h1v1h-1zM14 14h1v1h-1zM16 14h1v1h-1zM18 14h1v1h-1zM21 14h1v1h-1zM26 14h1v1h-1zM29 14h1v1h-1zM30 14h1v1h-1zM0 15h1v1h-1zM1 15h1v1h-1zM2 15h1v1h-1zM3 15h1v1h-1zM8 15h1v1h-1zM10 15h1v1h-1zM11 15h1v1h-1zM13 15h1v1h-1zM15 15h1v1h-1zM19 15h1v1h-1zM22 15h1v1h-1zM25 15h1v1h-1zM28 15h1v1h-1zM29 15h1v1h-1zM30 15h1v1h-1zM32 15h1v1h-1zM1 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM14 16h1v1h-1zM19 16h1v1h-1zM20 16h1v1h-1zM22 16h1v1h-1zM23 16h1v1h-1zM24 16h1v1h-1zM25 16h1v1h-1zM26 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM0 17h1v1h-1zM1 17h1v1h-1zM8 17h1v1h-1zM9 17h1v1h-1zM12 17h1v1h-1zM14 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM19 17h1v1h-1zM20 17h1v1h-1zM22 17h1v1h-1zM24 17h1v1h-1zM25 17h1v1h-1zM26 17h1v1h-1zM28 17h1v1h-1zM30 17h1v1h-1zM32 17h1v1h-1zM0 18h1v1h-1zM1 18h1v1h-1zM2 18h1v1h-1zM3 18h1v1h-1zM6 18h1v1h-1zM9 18h1v1h-1zM13 18h1v1h-1zM15 18h1v1h-1zM19 18h1v1h-1zM21 18h1v1h-1zM22 18h1v1h-1zM23 18h1v1h-1zM26 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM30 18h1v1h-1zM32 18h1v1h-1zM1 19h1v1h-1zM2 19h1v1h-1zM4 19h1v1h-1zM5 19h1v1h-1zM8 19h1v1h-1zM9 19h1v1h-1zM10 19h1v1h-1zM11 19h1v1h-1zM14 19h1v1h-1zM15 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM23 19h1v1h-1zM25 19h1v1h-1zM28 19h1v1h-1zM29 19h1v1h-1zM30 19h1v1h-1zM31 19h1v1h-1zM32 19h1v1h-1zM0 20h1v1h-1zM1 20h1v1h-1zM3 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM10 20h1v1h-1zM13 20h1v1h-1zM15 20h1v1h-1zM22 20h1v1h-1zM27 20h1v1h-1zM29 20h1v1h-1zM0 21h1v1h-1zM1 21h1v1h-1zM4 21h1v1h-1zM5 21h1v1h-1zM7 21h1v1h-1zM9 21h1v1h-1zM10 21h1v1h-1zM11 21h1v1h-1zM12 21h1v1h-1zM16 21h1v1h-1zM18 21h1v1h-1zM20 21h1v1h-1zM21 21h1v1h-1zM23 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM30 21h1v1h-1zM0 22h1v1h-1zM4 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM10 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM16 22h1v1h-1zM17 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM26 22h1v1h-1zM28 22h1v1h-1zM29 22h1v1h-1zM31 22h1v1h-1zM32 22h1v1h-1zM0 23h1v1h-1zM2 23h1v1h-1zM3 23h1v1h-1zM10 23h1v1h-1zM11 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM19 23h1v1h-1zM22 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM26 23h1v1h-1zM27 23h1v1h-1zM30 23h1v1h-1zM32 23h1v1h-1zM0 24h1v1h-1zM1 24h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM7 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM10 24h1v1h-1zM12 24h1v1h-1zM13 24h1v1h-1zM15 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM27 24h1v1h-1zM28 24h1v1h-1zM29 24h1v1h-1zM31 24h1v1h-1zM32 24h1v1h-1zM8 25h1v1h-1zM9 25h1v1h-1zM10 25h1v1h-1zM11 25h1v1h-1zM14 25h1v1h-1zM15 25h1v1h-1zM16 25h1v1h-1zM22 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM28 25h1v1h-1zM30 25h1v1h-1zM0 26h1v1h-1zM1 26h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM9 26h1v1h-1zM11 26h1v1h-1zM15 26h1v1h-1zM18 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM22 26h1v1h-1zM23 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM28 26h1v1h-1zM30 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h1v1h-1zM11 27h1v1h-1zM15 27h1v1h-1zM20 27h1v1h-1zM22 27h1v1h-1zM23 27h1v1h-1zM24 27h1v1h-1zM28 27h1v1h-1zM29 27h1v1h-1zM30 27h1v1h-1zM0 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM9 28h1v1h-1zM11 28h1v1h-1zM12 28h1v1h-1zM14 28h1v1h-1zM17 28h1v1h-1zM18 28h1v1h-1zM19 28h1v1h-1zM23 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1zM31 28h1v1h-1zM32 28h1v1h-1zM0 29h1v1h-1zM2 29h1v1h-1zM3 29h1v1h-1zM4 29h1v1h-1zM6 29h1v1h-1zM8 29h1v1h-1zM12 29h1v1h-1zM13 29h1v1h-1zM14 29h1v1h-1zM17 29h1v1h-1zM19 29h1v1h-1zM25 29h1v1h-1zM27 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM0 30h1v1h-1zM2 30h1v1h-1zM3 30h1v1h-1zM4 30h1v1h-1zM6 30h1v1h-1zM9 30h1v1h-1zM16 30h1v1h-1zM17 30h1v1h-1zM19 30h1v1h-1zM20 30h1v1h-1zM22 30h1v1h-1zM24 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM31 30h1v1h-1zM32 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM10 31h1v1h-1zM15 31h1v1h-1zM16 31h1v1h-1zM18 31h1v1h-1zM19 31h1v1h-1zM22 31h1v1h-1zM23 31h1v1h-1zM25 31h1v1h-1zM26 31h1v1h-1zM27 31h1v1h-1zM28 31h1v1h-1zM30 31h1v1h-1zM31 31h1v1h-1zM32 31h1v1h-1zM0 32h1v1h-1zM1 32h1v1h-1zM2 32h1v1h-1zM3 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM11 32h1v1h-1zM12 32h1v1h-1zM14 32h1v1h-1zM16 32h1v1h-1zM17 32h1v1h-1zM19 32h1v1h-1zM24 32h1v1h-1zM26 32h1v1h-1zM27 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1z"/></svg>
+      <div class="t">Escanear</div>
+    </div>
+  </div>
+
+  <div class="pie-zona">
+    <div class="firma">
+      <div class="f">
+        <div class="linea"></div>
+        <div class="q">Juan Sáez</div>
+        <div class="d">Fullshine Detailing Premium</div>
+      </div>
+      <div class="sello">
+        <b>Trabajo certificado</b>
+        Camilo Henríquez 381, Concepción<br>
+        +56 9 3365 4943 · fullshine.autos
+      </div>
+    </div>
+
+    <div class="pie">
+      Este certificado detalla el trabajo de preparación realizado por Fullshine Detailing Premium
+      sobre el vehículo individualizado. No constituye garantía sobre el estado mecánico ni
+      estructural de la unidad.
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
