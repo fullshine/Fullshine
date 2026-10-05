@@ -83,6 +83,7 @@ function findPreselected(services: Service[], key?: string): Service | undefined
   const k = slugify(key)
   if (!k) return undefined
   return (
+    services.find(s => s.id === key) ??
     services.find(s => slugify(s.name) === k) ??
     services.find(s => slugify(s.name).includes(k)) ??
     services.find(s => k.split('-').every(t => slugify(s.name).includes(t))) ??
@@ -694,3 +695,4 @@ function Row({ label, value }: { label: string; value: string }) {
     </div>
   )
 }
+
