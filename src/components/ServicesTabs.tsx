@@ -1,5 +1,6 @@
 'use client'
 
+import { isMetalCoat } from '@/lib/ceramicos'
 import { useState } from 'react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
@@ -62,6 +63,12 @@ export default function ServicesTabs({
   const [active, setActive] = useState(orderedCategories[0])
 
   const services = grouped[active] ?? []
+  const sections = active === 'ceramico'
+    ? [
+        { title: 'Protección de 1 año · Nasiol Metal Coat', services: services.filter(isMetalCoat) },
+        { title: 'Protección de 3 años · Nasiol ZR53', services: services.filter(s => !isMetalCoat(s)) },
+      ].filter(section => section.services.length > 0)
+    : [{ title: '', services }]
   const discount = active === 'ceramico' ? PROMO_CERAMICO : PROMO_OTROS
   const discountLabel = `${Math.round(discount * 100)}% OFF`
   // Solo se muestra la promo en las categorías que sí tienen descuento
@@ -88,8 +95,11 @@ export default function ServicesTabs({
       </div>
 
       {/* Service cards */}
+      {sections.map(section => (
+      <section key={section.title} className="mb-8">
+      {section.title && <h3 className="text-xl font-bold text-amber-400 mb-4">{section.title}</h3>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {services.map(service => {
+        {section.services.map(service => {
           const prices = service.prices ?? []
           const priceByType: Record<string, number> = {}
           prices.forEach((p: any) => { if (p.price_clp) priceByType[p.vehicle_type] = p.price_clp })
@@ -144,6 +154,9 @@ export default function ServicesTabs({
           )
         })}
       </div>
+
+      </section>
+      ))}
 
       <div className="text-center mt-10">
         <Link

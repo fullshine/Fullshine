@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { createBooking, getAvailableSlots } from '@/actions/bookings'
 import type { BookingFormData, VehicleType, TimeSlot } from '@/types'
 import { cn, formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
+import { isMetalCoat } from '@/lib/ceramicos'
 import ServiceDescription from '@/components/ServiceDescription'
 import { isPromoActive, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
 import { track } from '@/lib/fbq'
@@ -317,13 +318,14 @@ export default function BookingForm({
                   lavado_detallado: 'Lavado Detallado',
                   tapiz:            'Tapiz',
                   pulido:           'Pulidos',
-                  ceramico:         'Tratamiento Cerámico',
+                  ceramico_1:       'Cerámico · Protección de 1 año',
+                  ceramico_3:       'Cerámico · Protección de 3 años',
                   adicional:        'Adicionales',
                   precompra:        'Servicio Precompra',
                 }
-                const CATEGORY_ORDER = ['revision', 'lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'adicional', 'precompra']
+                const CATEGORY_ORDER = ['revision', 'lavado_detallado', 'tapiz', 'pulido', 'ceramico_1', 'ceramico_3', 'adicional', 'precompra']
                 const grouped = services.reduce<Record<string, typeof services>>((acc, s) => {
-                  const cat = s.category ?? 'add_on'
+                  const cat = s.category === 'ceramico' ? (isMetalCoat(s) ? 'ceramico_1' : 'ceramico_3') : s.category ?? 'add_on'
                   if (!acc[cat]) acc[cat] = []
                   acc[cat].push(s)
                   return acc

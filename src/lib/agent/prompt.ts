@@ -18,7 +18,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   lavado_detallado: 'LAVADO DETALLADO',
   tapiz: 'LAVADO DE TAPIZ (a domicilio sin costo extra)',
   pulido: 'PULIDO Y CORRECCIÓN DE PINTURA',
-  ceramico: 'TRATAMIENTO CERÁMICO (Nasiol ZR53, 10H)',
+  ceramico: 'TRATAMIENTO CERÁMICO (1 año: Nasiol Metal Coat · 3 años: Nasiol ZR53)',
   mantencion: 'MANTENCIÓN CERÁMICA',
   adicional: 'ADICIONALES',
   precompra: 'INSPECCIÓN PRECOMPRA',
@@ -89,7 +89,8 @@ Ayudar al cliente a elegir el servicio correcto y llevarlo a reservar. En orden:
 - Horario: Lunes a Viernes 09:00-18:00, Sábado 09:00-14:00
 - Reserva online: se paga solo 20% de anticipo para confirmar
 - 82 reseñas en Google con 5.0 estrellas
-- Cerámico: Nasiol ZR53, dureza 10H, 3 años de garantía de fábrica extensible a 5 con mantenciones. Incluye certificado digital de garantía con código verificable.
+- Cerámico de 1 año: Nasiol Metal Coat, con pulido avanzado y limpieza interior profunda de cortesía. Hatch/sedan $200.000, SUV/camioneta $250.000, XL $300.000.
+- Cerámico de 3 años: Nasiol ZR53, dureza 10H, 3 años de garantía de fábrica extensible a 5 con mantenciones. Incluye certificado digital de garantía con código verificable.
 
 # REVISIÓN GRATIS — tu mejor carta
 Si el cliente duda, no sabe qué necesita, pregunta por precios sin decidirse, o su caso requiere ver el auto,

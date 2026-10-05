@@ -64,7 +64,7 @@ export default async function CertificatePage({ params }: { params: { code: stri
               <Row label="Servicio aplicado" value={cert.service_name} highlight />
               <Row label="Producto" value={cert.product_name} />
               <Row label="Fecha de aplicación" value={formatDate(cert.applied_at)} />
-              <Row label="Garantía" value={`${cert.warranty_years} años de protección Nasiol ZR53`} />
+              <Row label="Garantía" value={`${cert.warranty_years} ${cert.warranty_years === 1 ? 'año' : 'años'} de protección ${cert.product_name}`} />
             </div>
 
             <div className="h-px bg-white/5" />

@@ -377,7 +377,7 @@ export default async function HomePage() {
           <FadeUp>
             <p className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-2 text-center">Tratamientos Cerámicos</p>
             <h2 className="text-3xl font-bold text-white text-center mb-3">¿Cuál es el indicado para ti?</h2>
-            <p className="text-gray-400 text-center mb-12">Todos incluyen Nasiol ZR53 (10H) — 3 años de protección, extensible a 5 con mantenciones</p>
+            <p className="text-gray-400 text-center mb-12">Comparativa de planes de 3 años con Nasiol ZR53 (10H), extensibles a 5 con mantenciones. También disponible protección de 1 año con Nasiol Metal Coat en nuestros servicios.</p>
           </FadeUp>
 
           <div className="overflow-x-auto">

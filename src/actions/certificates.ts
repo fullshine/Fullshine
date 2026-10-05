@@ -1,5 +1,6 @@
 'use server'
 
+import { isMetalCoat } from '@/lib/ceramicos'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendCertificateToClient } from '@/lib/whatsapp'
 import { puedeNotificar } from '@/lib/notificaciones'
@@ -17,7 +18,7 @@ export async function generateCertificate(bookingId: string) {
         *,
         customer:customers(full_name, phone),
         vehicle:vehicles(*),
-        service:services(name, category)
+        service:services(name, category, description)
       `)
       .eq('id', bookingId)
       .single<{
@@ -26,7 +27,7 @@ export async function generateCertificate(bookingId: string) {
         scheduled_at?: string
         customer: { full_name: string; phone: string } | null
         vehicle: Record<string, string | null> | null
-        service: { name: string; category: string } | null
+        service: { name: string; category: string; description?: string } | null
       }>()
 
     if (error) {
@@ -101,8 +102,10 @@ export async function generateCertificate(bookingId: string) {
     }
     const appliedAtStr = appliedDate.toISOString().split('T')[0]
 
+    const metalCoat = isMetalCoat(booking.service ?? {})
+    const warrantyYears = metalCoat ? 1 : 3
     const expiresDate = new Date(appliedDate)
-    expiresDate.setFullYear(expiresDate.getFullYear() + 3)
+    expiresDate.setFullYear(expiresDate.getFullYear() + warrantyYears)
     const expiresAtStr = expiresDate.toISOString().split('T')[0]
 
     // Código correlativo FS-2026-0042.
@@ -130,9 +133,9 @@ export async function generateCertificate(bookingId: string) {
           vehicle_model:    vModelo,
           vehicle_plate:    vPatente,
           service_name:     booking.service?.name ?? '',
-          product_name:     'Nasiol ZR53',
+          product_name:     metalCoat ? 'Nasiol Metal Coat' : 'Nasiol ZR53',
           applied_at:       appliedAtStr,
-          warranty_years:   3,
+          warranty_years:   warrantyYears,
           expires_at:       expiresAtStr,
         })
 
