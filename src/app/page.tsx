@@ -13,6 +13,7 @@ import WhatsAppButton from '@/components/WhatsAppButton'
 import StatsBar from '@/components/StatsBar'
 import ServicesTabs from '@/components/ServicesTabs'
 import GalleryCarousel from '@/components/GalleryCarousel'
+import { BUSINESS } from '@/lib/seo'
 import SiteFooter from '@/components/SiteFooter'
 // ServiceDescription is used inside ServicesTabs
 
@@ -258,6 +259,22 @@ export default async function HomePage() {
           <div className="w-6 h-10 border-2 border-brand-500/30 rounded-full flex items-start justify-center pt-2">
             <div className="w-1 h-2 bg-brand-500/50 rounded-full" />
           </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="ubicacion-taller" className="bg-gray-900 border-y border-white/10 px-4 py-7">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-1">Visítanos en Concepción</p>
+            <h2 id="ubicacion-taller" className="text-xl font-bold text-white">Nuestro taller</h2>
+            <address className="not-italic mt-1 text-gray-200">{BUSINESS.street}, {BUSINESS.city}</address>
+            <p className="mt-2 text-sm text-gray-300">Lunes a viernes 09:00–18:00 · Sábado 09:00–14:00</p>
+          </div>
+          <a href={'https://maps.google.com/?q=' + encodeURIComponent(BUSINESS.street + ', ' + BUSINESS.city)}
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex justify-center items-center rounded-xl bg-amber-500 hover:bg-amber-400 px-6 py-3 text-sm font-bold text-black transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
+            Cómo llegar ↗
+          </a>
         </div>
       </section>
 

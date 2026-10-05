@@ -8,6 +8,7 @@ import ServiceDescription from '@/components/ServiceDescription'
 import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
 
 const CATEGORY_LABELS: Record<string, string> = {
+  revision: 'Revisión gratis',
   lavado_detallado: 'Lavado',
   tapiz: 'Tapiz',
   pulido: 'Pulidos',
@@ -18,6 +19,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
+  revision: '🔍',
   lavado_detallado: '🚿',
   tapiz: '🧹',
   pulido: '✨',

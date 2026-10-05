@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { createBooking, getAvailableSlots } from '@/actions/bookings'
 import type { BookingFormData, VehicleType, TimeSlot } from '@/types'
 import { cn, formatCurrency, getVehicleTypeLabel } from '@/lib/utils'
+import { SERVICE_CATEGORY_LABELS, orderedServiceCategories, compareServicePlans } from '@/lib/catalogo-servicios'
 import { isMetalCoat } from '@/lib/ceramicos'
 import ServiceDescription from '@/components/ServiceDescription'
 import { isPromoActive, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
@@ -117,6 +118,9 @@ export default function BookingForm({
   const STEPS = isRevision ? STEPS_REVISION : STEPS_FULL
   const autoService = isRevision ? services[0] : preselected
 
+  const [serviceCategory, setServiceCategory] = useState(preselected?.category ?? 'todos')
+  const availableCategories = orderedServiceCategories(services)
+  const shownServices = serviceCategory === 'todos' ? services : services.filter(service => service.category === serviceCategory)
   const [step, setStep] = useState(0)
   const [form, setForm] = useState<BookingFormData>(
     autoService ? { ...INITIAL_FORM, service_id: autoService.id } : INITIAL_FORM
@@ -309,6 +313,28 @@ export default function BookingForm({
             </div>
 
             <h3 className="font-semibold text-gray-900 pt-2">Elige tu servicio</h3>
+            {availableCategories.length > 1 && (
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar servicios por categoría">
+                {['todos', ...availableCategories].map(cat => (
+                  <button key={cat} type="button" aria-pressed={serviceCategory === cat}
+                    onClick={() => {
+                      setServiceCategory(cat)
+                      if (selectedService && cat !== 'todos' && selectedService.category !== cat) {
+                        setForm(prev => ({ ...prev, service_id: '', scheduled_date: '', scheduled_time: '' }))
+                        setSlots([])
+                      }
+                    }}
+                    className={cn('rounded-full border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500', serviceCategory === cat ? 'bg-brand-500 border-brand-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-brand-400')}>
+                    {cat === 'todos' ? 'Todos' : SERVICE_CATEGORY_LABELS[cat] ?? cat}
+                  </button>
+                ))}
+              </div>
+            )}
+            {selectedService && (
+              <p role="status" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-gray-800">
+                Seleccionado: <strong>{selectedService.name}</strong>
+              </p>
+            )}
             {showErrors && !form.service_id && (
               <p className="text-xs text-red-500 -mt-1">Selecciona un servicio para continuar</p>
             )}
@@ -321,11 +347,12 @@ export default function BookingForm({
                   pulido:           'Pulidos',
                   ceramico_1:       'Cerámico · Protección de 1 año',
                   ceramico_3:       'Cerámico · Protección de 3 años',
+                  mantencion:       'Mantención',
                   adicional:        'Adicionales',
                   precompra:        'Servicio Precompra',
                 }
-                const CATEGORY_ORDER = ['revision', 'lavado_detallado', 'tapiz', 'pulido', 'ceramico_1', 'ceramico_3', 'adicional', 'precompra']
-                const grouped = services.reduce<Record<string, typeof services>>((acc, s) => {
+                const CATEGORY_ORDER = ['revision', 'lavado_detallado', 'tapiz', 'pulido', 'ceramico_1', 'ceramico_3', 'mantencion', 'adicional', 'precompra']
+                const grouped = shownServices.reduce<Record<string, typeof services>>((acc, s) => {
                   const cat = s.category === 'ceramico' ? (isMetalCoat(s) ? 'ceramico_1' : 'ceramico_3') : s.category ?? 'add_on'
                   if (!acc[cat]) acc[cat] = []
                   acc[cat].push(s)
@@ -341,13 +368,17 @@ export default function BookingForm({
                       {CATEGORY_LABELS[cat] ?? cat}
                     </p>
                     <div className="space-y-2">
-                      {grouped[cat].map(service => {
+                      {[...grouped[cat]].sort(compareServicePlans).map(service => {
                         const priceRecord = service.prices?.find(p => p.vehicle_type === form.vehicle_type)
                         const price = priceRecord?.price_clp
                         const disc = price ? getDiscount(price, service.category) : null
                         return (
                           <button key={service.id} type="button"
-                            onClick={() => set('service_id', service.id)}
+                            aria-pressed={form.service_id === service.id}
+                            onClick={() => {
+                              setForm(prev => ({ ...prev, service_id: service.id, scheduled_date: '', scheduled_time: '' }))
+                              setSlots([])
+                            }}
                             className={cn(
                               'w-full text-left p-4 rounded-xl border-2 transition-all',
                               form.service_id === service.id
