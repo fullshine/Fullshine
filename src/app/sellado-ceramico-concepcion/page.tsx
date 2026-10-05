@@ -6,6 +6,7 @@ import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO, PROMO_SHORT } fro
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import CeramicYearPromo from '@/components/CeramicYearPromo'
 
 export const revalidate = 3600
 
@@ -171,6 +172,10 @@ export default async function SelladoCeramicoPage() {
       </section>
 
       {/* NASIOL ZR53 HIGHLIGHT */}
+      <div className="max-w-2xl mx-auto px-4 pb-10">
+        <CeramicYearPromo />
+      </div>
+
       <section className="py-16 px-4 bg-amber-500/5 border-y border-amber-500/10">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
