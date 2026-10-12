@@ -5,7 +5,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
 import ServiceDescription from '@/components/ServiceDescription'
-import CeramicYearPromo from '@/components/CeramicYearPromo'
 import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -118,11 +117,6 @@ export default function ServicesTabs({
         </div>
       )}
 
-      {active === 'ceramico' && selectedYears === 1 && (
-        <div className="max-w-2xl mx-auto mb-8">
-          <CeramicYearPromo />
-        </div>
-      )}
 
       {/* Service cards */}
       {sections.map(section => (

@@ -9,7 +9,6 @@ import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } 
 import FaqSection from '@/components/FaqSection'
 import SocialProofStrip from '@/components/SocialProofStrip'
 import PromoBar from '@/components/PromoBar'
-import CeramicYearPromo from '@/components/CeramicYearPromo'
 import WhatsAppButton from '@/components/WhatsAppButton'
 import StatsBar from '@/components/StatsBar'
 import ServicesTabs from '@/components/ServicesTabs'
@@ -240,9 +239,6 @@ export default async function HomePage() {
               Lavado detallado, sellado cerámico, pulido y tapiz — a domicilio o en taller.
             </p>
           </FadeUp>
-          <div className="max-w-xl mx-auto mb-6">
-            <CeramicYearPromo />
-          </div>
           <FadeUp delay={0.55}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/reservar"
