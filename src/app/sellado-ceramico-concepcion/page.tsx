@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { isMetalCoat } from '@/lib/ceramicos'
 import { Metadata } from 'next'
 import { getServicesByCategory } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
@@ -157,7 +158,7 @@ export default async function SelladoCeramicoPage() {
             San Pedro de la Paz, Chiguayante, Talcahuano y Hualpén.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
+            <Link href="/reservar?categoria=ceramico" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
               Reservar ahora
             </Link>
             <a href="https://wa.me/56933654943?text=Hola%2C%20quiero%20cotizar%20un%20sellado%20cer%C3%A1mico" target="_blank" rel="noopener noreferrer"
@@ -224,7 +225,7 @@ export default async function SelladoCeramicoPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={`/reservar?servicio=ceramico-${tier.name.toLowerCase()}`} className={`mt-6 block text-center font-bold py-3 rounded-full text-sm transition-colors ${tier.popular ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}>
+                <Link href={'/reservar?categoria=ceramico&servicio=' + encodeURIComponent(services.find(service => !isMetalCoat(service) && service.name.toLowerCase().includes(tier.name.toLowerCase()))?.id ?? ('ceramico-' + tier.name.toLowerCase() + '-3-anos'))} className={`mt-6 block text-center font-bold py-3 rounded-full text-sm transition-colors ${tier.popular ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}>
                   Reservar {tier.name}
                 </Link>
               </div>
@@ -373,7 +374,7 @@ export default async function SelladoCeramicoPage() {
         <div className="max-w-xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">¿Listo para proteger tu auto?</h2>
           <p className="text-gray-400 mb-8">Reserva online en minutos. Confirmación inmediata por WhatsApp.</p>
-          <Link href="/reservar" className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
+          <Link href="/reservar?categoria=ceramico" className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
             Reservar sellado cerámico
           </Link>
           <p className="mt-4 text-gray-500 text-sm">Concepción y San Pedro de la Paz · Solo anticipo del 20% para confirmar</p>

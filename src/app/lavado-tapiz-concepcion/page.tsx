@@ -109,7 +109,7 @@ export default async function LavadoTapizPage() {
             🏠 A domicilio sin costo adicional
           </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
+            <Link href="/reservar?categoria=tapiz" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
               Reservar ahora
             </Link>
             <a href="https://wa.me/56933654943?text=Hola%2C%20quiero%20cotizar%20lavado%20de%20tapiz" target="_blank" rel="noopener noreferrer"
@@ -215,6 +215,11 @@ export default async function LavadoTapizPage() {
                         ) : null
                       ))}
                     </div>
+                    <Link href={'/reservar?categoria=tapiz&servicio=' + encodeURIComponent(service.id)}
+                      aria-label={'Reservar ' + service.name}
+                      className="mt-5 block rounded-xl bg-amber-500 hover:bg-amber-400 px-4 py-3 text-center text-sm font-bold text-black transition-colors">
+                      Reservar este servicio
+                    </Link>
                   </div>
                 )
               })}
@@ -243,7 +248,7 @@ export default async function LavadoTapizPage() {
         <div className="max-w-xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">¿Interior sucio o con olores?</h2>
           <p className="text-gray-400 mb-8">Lo dejamos impecable. Vamos donde tú estés en Concepción y San Pedro de la Paz.</p>
-          <Link href="/reservar" className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
+          <Link href="/reservar?categoria=tapiz" className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
             Reservar lavado de tapiz
           </Link>
           <p className="mt-4 text-gray-500 text-sm">Solo 20% de anticipo · Confirmación inmediata</p>

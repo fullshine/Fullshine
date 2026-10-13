@@ -106,7 +106,7 @@ export default async function LavadoDetalladoPage() {
             No es un lavado simple. Es una limpieza técnica profunda de interior y exterior que deja tu auto impecable, con descontaminación de pintura y vidrios incluida.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
+            <Link href="/reservar?categoria=lavado_detallado" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
               Reservar ahora
             </Link>
             <a href="https://wa.me/56933654943?text=Hola%2C%20quiero%20cotizar%20un%20lavado%20detallado" target="_blank" rel="noopener noreferrer"
@@ -188,7 +188,7 @@ export default async function LavadoDetalladoPage() {
         <div className="max-w-xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">Tu auto merece un lavado de verdad</h2>
           <p className="text-gray-400 mb-8">Agenda en minutos, confirmación instantánea por WhatsApp.</p>
-          <Link href="/reservar" className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
+          <Link href="/reservar?categoria=lavado_detallado" className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
             Reservar lavado detallado
           </Link>
           <p className="mt-4 text-gray-500 text-sm">Concepción y San Pedro de la Paz · Solo 20% de anticipo</p>

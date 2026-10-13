@@ -86,7 +86,7 @@ export default async function PulidoAutoPage() {
             Recuperamos el brillo original de tu auto eliminando rayones finos, hologramas y oxidación con máquinas profesionales y pastas de alta gama.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
+            <Link href="/reservar?categoria=pulido" className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105">
               Reservar ahora
             </Link>
             <a href="https://wa.me/56933654943?text=Hola%2C%20quiero%20cotizar%20un%20pulido%20para%20mi%20auto" target="_blank" rel="noopener noreferrer"
@@ -163,6 +163,11 @@ export default async function PulidoAutoPage() {
                         ) : null
                       ))}
                     </div>
+                    <Link href={'/reservar?categoria=pulido&servicio=' + encodeURIComponent(service.id)}
+                      aria-label={'Reservar ' + service.name}
+                      className="mt-5 block rounded-xl bg-amber-500 hover:bg-amber-400 px-4 py-3 text-center text-sm font-bold text-black transition-colors">
+                      Reservar este servicio
+                    </Link>
                   </div>
                 )
               })}
@@ -191,7 +196,7 @@ export default async function PulidoAutoPage() {
         <div className="max-w-xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">¿Tu pintura necesita una segunda vida?</h2>
           <p className="text-gray-400 mb-8">Agenda hoy. Confirmación inmediata por WhatsApp.</p>
-          <Link href="/reservar" className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
+          <Link href="/reservar?categoria=pulido" className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-black text-xl px-12 py-5 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20">
             Reservar pulido
           </Link>
           <p className="mt-4 text-gray-500 text-sm">Concepción y San Pedro de la Paz · Solo 20% de anticipo</p>

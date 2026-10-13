@@ -182,12 +182,12 @@ export default function ServicesTabs({
               ) : (
                 <p className="text-gray-500 text-sm border-t border-white/5 pt-3">Consultar precio</p>
               )}
-              {active === 'ceramico' && (
+              {(
                 <div className="mt-auto pt-5">
-                  <Link href={'/reservar?categoria=ceramico&servicio=' + encodeURIComponent(service.id)}
+                  <Link href={'/reservar?categoria=' + encodeURIComponent(active) + '&servicio=' + encodeURIComponent(service.id)}
                     aria-label={'Reservar ' + service.name}
                     className="block w-full text-center bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-4 py-3 rounded-xl transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
-                    Reservar este plan
+                    Reservar este servicio
                   </Link>
                 </div>
               )}
@@ -201,7 +201,7 @@ export default function ServicesTabs({
 
       <div className="text-center mt-10">
         <Link
-          href="/reservar"
+          href={'/reservar?categoria=' + encodeURIComponent(active)}
           className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold text-lg px-10 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-amber-500/20"
         >
           Reservar mi turno
