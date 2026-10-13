@@ -1,3 +1,4 @@
+import SiteNav from '@/components/SiteNav'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Metadata } from 'next'
@@ -170,37 +171,7 @@ export default async function HomePage() {
       <PromoBar />
 
       {/* NAV */}
-      <nav className="fixed left-0 right-0 z-[65] bg-gray-950/80 backdrop-blur-md border-b border-white/5"
-        style={{ top: 'var(--promo-h, 0px)' }}>
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 shrink-0">
-            <Image src="/logo.png" alt="Fullshine" width={44} height={44} className="rounded-full" />
-            <div className="hidden sm:block">
-              <p className="font-bold text-white leading-none tracking-wide">FULLSHINE</p>
-              <p className="text-xs text-gray-400 tracking-widest uppercase">Detailing Premium</p>
-            </div>
-          </div>
-          {/* Anclas de navegación */}
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-400">
-            <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
-            <Link href="/revision-gratis-concepcion" className="text-green-400 hover:text-green-300 font-semibold transition-colors">
-              Revisión gratis
-            </Link>
-            <a href="#resenas" className="hover:text-white transition-colors">Reseñas</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-            <a href="#empresas" className="hover:text-white transition-colors">Empresas</a>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link href="/revision-gratis-concepcion"
-              className="hidden sm:inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-sm px-4 py-2 rounded-full transition-colors whitespace-nowrap">
-              🔍 Revisión GRATIS
-            </Link>
-            <Link href="/reservar" className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-5 py-2 rounded-full transition-colors">
-              Reservar
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <SiteNav />
 
       {/* HERO */}
       <section aria-labelledby="portada-titulo" className="relative overflow-hidden px-4 pt-28 pb-10 sm:pt-32 sm:pb-12">

@@ -39,3 +39,6 @@
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 }
+
+/* Fixed navigation anchor offset */
+[id] { scroll-margin-top: calc(88px + var(--promo-h, 0px)); }
