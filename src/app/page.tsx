@@ -12,6 +12,7 @@ import PromoBar from '@/components/PromoBar'
 import StatsBar from '@/components/StatsBar'
 import ServicesTabs from '@/components/ServicesTabs'
 import GalleryCarousel from '@/components/GalleryCarousel'
+import CasoDocumentado from '@/components/CasoDocumentado'
 import { BUSINESS } from '@/lib/seo'
 import SiteFooter from '@/components/SiteFooter'
 // ServiceDescription is used inside ServicesTabs
@@ -384,6 +385,8 @@ export default async function HomePage() {
           <GalleryCarousel />
         </div>
       </section>
+
+      <CasoDocumentado />
 
       {/* COMPARATIVA CERÁMICOS */}
       <section className="py-24 px-4 bg-gray-900/40 border-t border-white/5">
