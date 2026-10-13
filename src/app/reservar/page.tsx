@@ -78,6 +78,14 @@ export default async function ReservarPage({ searchParams }: { searchParams?: { 
             <BookingForm services={services} preselect={searchParams?.servicio} category={searchParams?.categoria} />
           </Suspense>
         )}
+        <p className="mt-6 text-center text-sm text-gray-400">
+          ¿Necesitas ayuda para reservar?{' '}
+          <a href="https://wa.me/56933654943?text=Hola%20Fullshine%2C%20necesito%20ayuda%20para%20reservar"
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center font-semibold text-green-400 underline underline-offset-4">
+            Escríbenos por WhatsApp
+          </a>
+        </p>
       </div>
     </main>
   )

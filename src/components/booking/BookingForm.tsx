@@ -11,6 +11,17 @@ import { isPromoActive, PROMO_CERAMICO, PROMO_OTROS } from '@/lib/promo'
 import { track } from '@/lib/fbq'
 import { guardarBorrador } from '@/actions/borradores'
 
+const needs: Record<string, { title: string; detail: string }> = {
+                      revision: { title: 'No sé qué necesita', detail: 'Diagnóstico gratuito para orientarte' },
+                      lavado_detallado: { title: 'Limpiar mi auto', detail: 'Lavado detallado de interior y exterior' },
+                      tapiz: { title: 'Limpiar tapices e interior', detail: 'Asientos, manchas y limpieza profunda' },
+                      pulido: { title: 'Recuperar el brillo', detail: 'Pulido y corrección de pintura' },
+                      ceramico: { title: 'Proteger la pintura', detail: 'Tratamientos cerámicos de 1 o 3 años' },
+                      mantencion: { title: 'Mantener mi cerámico', detail: 'Cuidado de una protección ya aplicada' },
+                      adicional: { title: 'Otros cuidados', detail: 'Motor, focos y servicios adicionales' },
+                      precompra: { title: 'Preparar mi auto para vender', detail: 'Mejorar su presentación para la venta' },
+                    }
+
 const VEHICLE_TYPES: VehicleType[] = ['hatch_sedan', 'suv_camioneta', 'pickup_xl']
 
 type StepKey = 'servicio' | 'fecha' | 'datos' | 'confirmar'
@@ -122,6 +133,7 @@ export default function BookingForm({
   const [serviceCategory, setServiceCategory] = useState(
     preselected?.category ?? (availableCategories.length === 1 ? availableCategories[0] : '')
   )
+  const [choosingNeed, setChoosingNeed] = useState(!preselected && availableCategories.length > 1)
   const [ceramicYears, setCeramicYears] = useState<1 | 3>(preselected && isMetalCoat(preselected) ? 1 : 3)
   const availableCeramicYears = ([1, 3] as const).filter(year =>
     services.some(service => service.category === 'ceramico' && isMetalCoat(service) === (year === 1))
@@ -302,27 +314,18 @@ export default function BookingForm({
         {/* Servicio (con tipo de vehículo para ver precio exacto) */}
         {current === 'servicio' && (
           <>
-            {availableCategories.length > 1 && (
+            {availableCategories.length > 1 && choosingNeed && (
               <div>
                 <h3 className="font-semibold text-gray-900">¿Qué necesitas para tu auto?</h3>
                 <p className="mt-1 mb-3 text-sm text-gray-500">Elige una opción para ver los servicios que corresponden.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="group" aria-label="Qué necesita tu auto">
                   {availableCategories.map(cat => {
-                    const needs: Record<string, { title: string; detail: string }> = {
-                      revision: { title: 'No sé qué necesita', detail: 'Diagnóstico gratuito para orientarte' },
-                      lavado_detallado: { title: 'Limpiar mi auto', detail: 'Lavado detallado de interior y exterior' },
-                      tapiz: { title: 'Limpiar tapices e interior', detail: 'Asientos, manchas y limpieza profunda' },
-                      pulido: { title: 'Recuperar el brillo', detail: 'Pulido y corrección de pintura' },
-                      ceramico: { title: 'Proteger la pintura', detail: 'Tratamientos cerámicos de 1 o 3 años' },
-                      mantencion: { title: 'Mantener mi cerámico', detail: 'Cuidado de una protección ya aplicada' },
-                      adicional: { title: 'Otros cuidados', detail: 'Motor, focos y servicios adicionales' },
-                      precompra: { title: 'Preparar mi auto para vender', detail: 'Mejorar su presentación para la venta' },
-                    }
                     const need = needs[cat] ?? { title: SERVICE_CATEGORY_LABELS[cat] ?? cat, detail: 'Ver servicios disponibles' }
                     return (
                       <button key={cat} type="button" aria-pressed={serviceCategory === cat}
                         onClick={() => {
                           setServiceCategory(cat)
+                          setChoosingNeed(false)
                           if (selectedService && selectedService.category !== cat) {
                             setForm(prev => ({ ...prev, service_id: '', scheduled_date: '', scheduled_time: '' }))
                             setSlots([])
@@ -337,7 +340,19 @@ export default function BookingForm({
                 </div>
               </div>
             )}
-            {serviceCategory && <div>
+            {serviceCategory && availableCategories.length > 1 && !choosingNeed && (
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-brand-200 bg-brand-50 p-3">
+                <div>
+                  <p className="text-xs text-gray-500">Tu necesidad</p>
+                  <p className="text-sm font-semibold text-gray-900">{needs[serviceCategory]?.title ?? SERVICE_CATEGORY_LABELS[serviceCategory] ?? serviceCategory}</p>
+                </div>
+                <button type="button" onClick={() => setChoosingNeed(true)}
+                  className="min-h-[44px] shrink-0 rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-800 hover:border-brand-500">
+                  Cambiar
+                </button>
+              </div>
+            )}
+'            {serviceCategory && <div>'
               <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
               <div className="grid grid-cols-3 gap-2">
                 {VEHICLE_TYPES.map(type => (

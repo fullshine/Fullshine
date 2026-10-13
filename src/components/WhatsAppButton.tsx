@@ -11,7 +11,7 @@ import { track } from '@/lib/fbq'
  * ya es cliente: el mensaje genérico de "quiero información sobre sus
  * servicios" no le sirve, y esas páginas traen su propio enlace de contacto.
  */
-const RUTAS_OCULTAS = ['/admin', '/login', '/socios', '/suscripcion']
+const RUTAS_OCULTAS = ['/admin', '/login', '/socios', '/suscripcion', '/reservar']
 
 export default function WhatsAppButton() {
   const [visible, setVisible] = useState(false)
