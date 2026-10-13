@@ -8,9 +8,7 @@ import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO } from '@/lib/prom
 import { FadeUp, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
 // ServiceDescription moved to ServicesTabs
 import FaqSection from '@/components/FaqSection'
-import SocialProofStrip from '@/components/SocialProofStrip'
 import PromoBar from '@/components/PromoBar'
-import StatsBar from '@/components/StatsBar'
 import ServicesTabs from '@/components/ServicesTabs'
 import GalleryCarousel from '@/components/GalleryCarousel'
 import CasoDocumentado from '@/components/CasoDocumentado'
@@ -89,13 +87,6 @@ const CATEGORY_ORDER = ['lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'mant
  * para clientes finales. Se reservan solo desde /socios/[empresa].
  */
 const CATEGORIAS_PRIVADAS = ['automotora']
-
-const WHY_US = [
-  { icon: '🏆', title: 'Calidad premium', desc: 'Productos de primera línea y técnicas profesionales en cada servicio.' },
-  { icon: '⏱️', title: 'Puntualidad garantizada', desc: 'Respetamos tu tiempo. Turnos fijos de mañana y tarde sin esperas.' },
-  { icon: '🔒', title: 'Tu auto en buenas manos', desc: '2 técnicos especializados con años de experiencia en detailing.' },
-  { icon: '📱', title: 'Reserva en minutos', desc: 'Agenda online 24/7 y recibe confirmación por WhatsApp al instante.' },
-]
 
 const REVIEWS = [
   {
@@ -207,6 +198,31 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* SERVICES */}
+      <section id="servicios" className="pt-8 pb-12 sm:pt-10 sm:pb-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div>
+            <h2 className="text-3xl font-bold text-center mb-3">Nuestros servicios</h2>
+            <p className="text-gray-400 text-center mb-10">Precios por tipo de vehículo. Selecciona al reservar.</p>
+          </div>
+          <ServicesTabs grouped={grouped as any} orderedCategories={orderedCategories} />
+          {/* Links internos a páginas de servicio — importante para SEO */}
+          <div className="mt-10 flex flex-wrap justify-center gap-3 text-sm">
+            {[
+              { href: '/lavado-detallado-concepcion',  label: 'Lavado Detallado' },
+              { href: '/lavado-tapiz-concepcion',      label: 'Lavado de Tapiz' },
+              { href: '/pulido-auto-concepcion',       label: 'Pulido y Corrección' },
+              { href: '/sellado-ceramico-concepcion',  label: 'Sellado Cerámico' },
+            ].map(link => (
+              <Link key={link.href} href={link.href}
+                className="text-gray-500 hover:text-amber-400 underline underline-offset-4 transition-colors text-xs">
+                → {link.label} en Concepción
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section aria-labelledby="especialista-titulo" className="bg-gray-950 px-4 pb-10 sm:pb-12">
         <div className="max-w-5xl mx-auto rounded-2xl border border-white/10 bg-gray-900/60 p-5 sm:p-7 grid gap-6 md:grid-cols-[1fr_1.2fr] md:items-center">
           <div className="flex items-center gap-4">
@@ -227,121 +243,11 @@ export default async function HomePage() {
               Revisamos la pintura bajo luz de inspección y tomamos mediciones de espesor
               antes de recomendar un pulido. Te explicamos qué se puede mejorar y qué límites tiene el tratamiento.
             </p>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="ubicacion-taller" className="bg-gray-900 border-y border-white/10 px-4 py-7">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-1">Visítanos en Concepción</p>
-            <h2 id="ubicacion-taller" className="text-xl font-bold text-white">Nuestro taller</h2>
-            <address className="not-italic mt-1 text-gray-200">{BUSINESS.street}, {BUSINESS.city}</address>
-            <p className="mt-2 text-sm text-gray-300">Lunes a viernes 09:00–18:00 · Sábado 09:00–14:00</p>
-          </div>
-          <a href={'https://maps.google.com/?q=' + encodeURIComponent(BUSINESS.street + ', ' + BUSINESS.city)}
-            target="_blank" rel="noopener noreferrer"
-            className="inline-flex justify-center items-center rounded-xl bg-amber-500 hover:bg-amber-400 px-6 py-3 text-sm font-bold text-black transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
-            Cómo llegar ↗
-          </a>
-        </div>
-      </section>
-
-      <SocialProofStrip />
-      <StatsBar />
-
-      {/* TRUCK SHOWCASE */}
-      <section className="relative py-0 overflow-hidden bg-gray-950">
-        <ParallaxSection className="relative w-full">
-          <Image src="/truck.jpg" alt="Fullshine - Camioneta brandizada"
-            width={1600} height={800} className="w-full object-cover max-h-[520px]" priority />
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/30 to-transparent flex items-center">
-            <div className="px-8 md:px-16 max-w-lg">
-              <FadeUp delay={0.15}>
-                <p className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-2">Nuestra flota</p>
-                <h2 className="text-3xl md:text-4xl font-black text-white leading-tight mb-3">
-                  Donde tú prefieras
-                </h2>
-                <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-                  Atendemos en nuestro taller en Concepción o vamos donde estés con todo el equipamiento para un resultado profesional.
-                </p>
-                <div className="mt-5 flex gap-3 flex-wrap">
-                  <span className="bg-white/10 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/10">🏠 A domicilio</span>
-                  <span className="bg-white/10 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/10">🔧 En taller · Concepción</span>
-                  <span className="bg-white/10 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/10">San Pedro de la Paz</span>
-                </div>
-              </FadeUp>
-            </div>
-          </div>
-        </ParallaxSection>
-      </section>
-
-      {/* WHY US */}
-      <section className="py-24 px-4 bg-gray-900/50">
-        <div className="max-w-6xl mx-auto">
-          <FadeUp>
-            <h2 className="text-3xl font-bold text-center mb-3">¿Por qué Fullshine?</h2>
-            <p className="text-gray-400 text-center mb-12">Detailing de calidad no es un lujo, es cuidar tu inversión.</p>
-          </FadeUp>
-          <StaggerList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {WHY_US.map((item, i) => (
-              <StaggerItem key={i}>
-                <HoverCard className="bg-gray-900 border border-white/5 rounded-2xl p-6 hover:border-amber-500/30 transition-colors h-full">
-                  <div className="text-3xl mb-3">{item.icon}</div>
-                  <h3 className="font-bold text-white mb-2">{item.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
-                </HoverCard>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </div>
-      </section>
-
-      {/* SERVICES */}
-      <section id="servicios" className="py-24 px-4">
-        <div className="max-w-6xl mx-auto">
-          <FadeUp>
-            <h2 className="text-3xl font-bold text-center mb-3">Nuestros servicios</h2>
-            <p className="text-gray-400 text-center mb-10">Precios por tipo de vehículo. Selecciona al reservar.</p>
-          </FadeUp>
-          <ServicesTabs grouped={grouped as any} orderedCategories={orderedCategories} />
-          {/* Links internos a páginas de servicio — importante para SEO */}
-          <div className="mt-10 flex flex-wrap justify-center gap-3 text-sm">
-            {[
-              { href: '/lavado-detallado-concepcion',  label: 'Lavado Detallado' },
-              { href: '/lavado-tapiz-concepcion',      label: 'Lavado de Tapiz' },
-              { href: '/pulido-auto-concepcion',       label: 'Pulido y Corrección' },
-              { href: '/sellado-ceramico-concepcion',  label: 'Sellado Cerámico' },
-            ].map(link => (
-              <Link key={link.href} href={link.href}
-                className="text-gray-500 hover:text-amber-400 underline underline-offset-4 transition-colors text-xs">
-                → {link.label} en Concepción
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* REVISIÓN GRATIS — lead magnet */}
-      <section className="py-20 px-4 bg-gradient-to-b from-green-950/20 to-gray-950 border-y border-green-500/15">
-        <div className="max-w-3xl mx-auto text-center">
-          <FadeUp>
-            <span className="inline-block bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-5">
-              Sin costo · Sin compromiso
-            </span>
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-              ¿No sabes qué necesita tu auto?
-            </h2>
-            <p className="text-gray-400 mb-3 max-w-xl mx-auto leading-relaxed">
-              Te hacemos una <strong className="text-white">revisión gratis</strong>: medimos el espesor de la laca,
-              evaluamos qué rayones se pueden corregir y detectamos la contaminación de la pintura.
-            </p>
-            <p className="text-gray-600 text-sm mb-8">15-20 minutos · Diagnóstico honesto · Sin presión de venta</p>
             <Link href="/revision-gratis-concepcion"
-              className="inline-block bg-green-500 hover:bg-green-400 text-black font-black text-lg px-10 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-green-500/25">
-              🔍 Agendar revisión gratis
+              className="mt-3 inline-flex min-h-[44px] items-center text-sm font-semibold text-amber-400 hover:text-amber-300 underline underline-offset-4">
+              ¿No sabes cuál elegir? Agenda un diagnóstico gratis
             </Link>
-          </FadeUp>
+          </div>
         </div>
       </section>
 
@@ -506,6 +412,48 @@ export default async function HomePage() {
       </section>
 
       <div id="faq"><FaqSection /></div>
+
+      <section aria-labelledby="ubicacion-taller" className="bg-gray-900 border-y border-white/10 px-4 py-7">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-1">Visítanos en Concepción</p>
+            <h2 id="ubicacion-taller" className="text-xl font-bold text-white">Nuestro taller</h2>
+            <address className="not-italic mt-1 text-gray-200">{BUSINESS.street}, {BUSINESS.city}</address>
+            <p className="mt-2 text-sm text-gray-300">Lunes a viernes 09:00–18:00 · Sábado 09:00–14:00</p>
+          </div>
+          <a href={'https://maps.google.com/?q=' + encodeURIComponent(BUSINESS.street + ', ' + BUSINESS.city)}
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex justify-center items-center rounded-xl bg-amber-500 hover:bg-amber-400 px-6 py-3 text-sm font-bold text-black transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
+            Cómo llegar ↗
+          </a>
+        </div>
+      </section>
+
+      {/* TRUCK SHOWCASE */}
+      <section className="relative py-0 overflow-hidden bg-gray-950">
+        <ParallaxSection className="relative w-full">
+          <Image src="/truck.jpg" alt="Fullshine - Camioneta brandizada"
+            width={1600} height={800} className="w-full object-cover max-h-[520px]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/30 to-transparent flex items-center">
+            <div className="px-8 md:px-16 max-w-lg">
+              <FadeUp delay={0.15}>
+                <p className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-2">Nuestra flota</p>
+                <h2 className="text-3xl md:text-4xl font-black text-white leading-tight mb-3">
+                  Donde tú prefieras
+                </h2>
+                <p className="text-gray-300 text-sm md:text-base leading-relaxed">
+                  Atendemos en nuestro taller en Concepción o vamos donde estés con todo el equipamiento para un resultado profesional.
+                </p>
+                <div className="mt-5 flex gap-3 flex-wrap">
+                  <span className="bg-white/10 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/10">🏠 A domicilio</span>
+                  <span className="bg-white/10 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/10">🔧 En taller · Concepción</span>
+                  <span className="bg-white/10 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/10">San Pedro de la Paz</span>
+                </div>
+              </FadeUp>
+            </div>
+          </div>
+        </ParallaxSection>
+      </section>
 
       {/* BUSINESS SUBSCRIPTION */}
       <section id="empresas" className="py-24 px-4 bg-gray-900/60 border-t border-white/5">
