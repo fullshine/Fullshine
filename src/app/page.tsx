@@ -4,7 +4,7 @@ import { Metadata } from 'next'
 import { getServices } from '@/actions/bookings'
 import { formatCurrency } from '@/lib/utils'
 import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO } from '@/lib/promo'
-import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
+import { FadeUp, StaggerList, StaggerItem, HoverCard, ParallaxSection } from '@/components/animations'
 // ServiceDescription moved to ServicesTabs
 import FaqSection from '@/components/FaqSection'
 import SocialProofStrip from '@/components/SocialProofStrip'
@@ -202,60 +202,59 @@ export default async function HomePage() {
       </nav>
 
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center justify-center text-center px-4 pt-32 pb-20">
-        {/* Foto de resultado como fondo */}
+      <section aria-labelledby="portada-titulo" className="relative overflow-hidden px-4 pt-28 pb-10 sm:pt-32 sm:pb-12">
         <Image src="/hero-jaguar.jpg" alt="Jaguar detallado por Fullshine" fill
-          className="object-cover object-center" priority />
-        {/* Overlay oscuro para legibilidad */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/65 to-black/85" />
+          sizes="100vw" className="object-cover object-center" priority />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/75 to-gray-950" />
 
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <FadeIn delay={0.1}>
-            {/* Logo con halo ámbar */}
-            <Image src="/logo.png" alt="Fullshine Detailing Premium" width={160} height={160}
-              className="mx-auto mb-8 drop-shadow-[0_0_60px_rgba(233,150,13,0.35)]" />
-          </FadeIn>
-          <FadeUp delay={0.25}>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-4">
-              Concepción &amp; San Pedro de la Paz
-            </p>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4 leading-[1.05]">
-              Detailing Premium{' '}<br />
-              {/* Gradiente metálico plata → blanco → plata */}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-chrome-400 via-white to-chrome-300">
-                en Concepción
-              </span>
-            </h1>
-          </FadeUp>
-          <FadeUp delay={0.4}>
-            {/* Línea ámbar decorativa */}
-            <div className="w-16 h-0.5 bg-brand-500 mx-auto mb-4 rounded-full" />
-            <p className="text-chrome-200 text-xl md:text-2xl mb-2 max-w-xl mx-auto font-semibold italic">
-              Tu auto merece brillar de verdad.
-            </p>
-            <p className="text-chrome-400 text-base md:text-lg mb-10 max-w-xl mx-auto">
-              Lavado detallado, sellado cerámico, pulido y tapiz — a domicilio o en taller.
-            </p>
-          </FadeUp>
-          <FadeUp delay={0.55}>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/reservar"
-                className="bg-brand-500 hover:bg-brand-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-brand-500/25">
-                Reservar ahora
-              </Link>
-              <Link href="/revision-gratis-concepcion"
-                className="border-2 border-green-500/60 hover:border-green-400 bg-green-500/10 hover:bg-green-500/20 text-green-300 hover:text-white font-bold text-lg px-8 py-4 rounded-full transition-all">
-                🔍 Revisión GRATIS
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-400 mb-4">
+            Concepción &amp; San Pedro de la Paz
+          </p>
+          <h1 id="portada-titulo" className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
+            Detailing premium<br />en Concepción
+          </h1>
+          <p className="mt-5 text-lg sm:text-xl font-semibold text-amber-300">
+            Primero evaluamos tu auto. Después recomendamos.
+          </p>
+          <p className="mt-3 text-base text-gray-200 max-w-xl mx-auto leading-relaxed">
+            Lavado detallado, pulido y protección cerámica. En nuestro taller o a domicilio,
+            con precios claros y atención de especialistas.
+          </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="#servicios"
+              className="rounded-full bg-amber-500 hover:bg-amber-400 px-7 py-3.5 text-base font-bold text-black transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400">
+              Ver servicios y precios
+            </Link>
+            <Link href="/revision-gratis-concepcion"
+              className="rounded-full border border-white/40 hover:border-white bg-white/5 hover:bg-white/10 px-7 py-3.5 text-base font-semibold text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+              Agendar diagnóstico gratis
+            </Link>
+          </div>
+          <p className="mt-4 text-sm text-gray-300">Diagnóstico sin costo y sin compromiso.</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="especialista-titulo" className="bg-gray-950 px-4 pb-10 sm:pb-12">
+        <div className="max-w-5xl mx-auto rounded-2xl border border-white/10 bg-gray-900/60 p-5 sm:p-7 grid gap-6 md:grid-cols-[1fr_1.2fr] md:items-center">
+          <div className="flex items-center gap-4">
+            <Image src="/juan-medidor.jpg" alt="Juan Sáez evaluando la pintura con un medidor de espesor"
+              width={96} height={112} sizes="96px" className="h-28 w-24 shrink-0 rounded-xl object-cover" />
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Tu auto, en buenas manos</p>
+              <h2 id="especialista-titulo" className="mt-2 text-xl font-bold text-white">Juan Sáez</h2>
+              <p className="mt-1 text-sm text-gray-300">Especialista en corrección de pintura</p>
+              <Link href="/nosotros" className="mt-3 inline-block text-sm font-semibold text-amber-400 hover:text-amber-300 underline underline-offset-4">
+                Conoce cómo trabajamos
               </Link>
             </div>
-            <p className="mt-6 text-chrome-700 text-sm tracking-wide">
-              Concepción y San Pedro de la Paz · Lun–Vie 09:00–18:00 · Sáb 09:00–14:00
+          </div>
+          <div className="md:border-l md:border-white/10 md:pl-7">
+            <h3 className="font-bold text-white">Una recomendación según el estado de tu pintura</h3>
+            <p className="mt-2 text-sm leading-relaxed text-gray-300">
+              Revisamos la pintura bajo luz de inspección y tomamos mediciones de espesor
+              antes de recomendar un pulido. Te explicamos qué se puede mejorar y qué límites tiene el tratamiento.
             </p>
-          </FadeUp>
-        </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-brand-500/30 rounded-full flex items-start justify-center pt-2">
-            <div className="w-1 h-2 bg-brand-500/50 rounded-full" />
           </div>
         </div>
       </section>
