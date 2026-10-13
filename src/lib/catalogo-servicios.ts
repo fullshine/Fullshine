@@ -1,7 +1,7 @@
 export const SERVICE_CATEGORY_LABELS: Record<string, string> = {
   revision: 'Revisión gratis', lavado_detallado: 'Lavado', tapiz: 'Tapiz',
   pulido: 'Pulidos', ceramico: 'Cerámico', mantencion: 'Mantención',
-  adicional: 'Adicionales', precompra: 'Precompra',
+  adicional: 'Adicionales', precompra: 'Preparación para vender',
 }
 export const SERVICE_CATEGORY_ORDER = ['revision', 'lavado_detallado', 'tapiz', 'pulido', 'ceramico', 'mantencion', 'adicional', 'precompra']
 export function orderedServiceCategories(services: { category: string }[]): string[] {

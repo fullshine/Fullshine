@@ -349,7 +349,7 @@ export default function BookingForm({
                   ceramico_3:       'Cerámico · Protección de 3 años',
                   mantencion:       'Mantención',
                   adicional:        'Adicionales',
-                  precompra:        'Servicio Precompra',
+                  precompra:        'Preparación para vender',
                 }
                 const CATEGORY_ORDER = ['revision', 'lavado_detallado', 'tapiz', 'pulido', 'ceramico_1', 'ceramico_3', 'mantencion', 'adicional', 'precompra']
                 const grouped = shownServices.reduce<Record<string, typeof services>>((acc, s) => {

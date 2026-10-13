@@ -9,7 +9,6 @@ import { FadeUp, FadeIn, StaggerList, StaggerItem, HoverCard, ParallaxSection } 
 import FaqSection from '@/components/FaqSection'
 import SocialProofStrip from '@/components/SocialProofStrip'
 import PromoBar from '@/components/PromoBar'
-import WhatsAppButton from '@/components/WhatsAppButton'
 import StatsBar from '@/components/StatsBar'
 import ServicesTabs from '@/components/ServicesTabs'
 import GalleryCarousel from '@/components/GalleryCarousel'
@@ -58,7 +57,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   pulido: 'Pulidos',
   ceramico: 'Tratamiento Cerámico',
   adicional: 'Adicionales',
-  precompra: 'Servicio Precompra',
+  precompra: 'Preparación para vender',
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -168,7 +167,6 @@ export default async function HomePage() {
     <div className="min-h-screen bg-gray-950 text-white">
 
       <PromoBar />
-      <WhatsAppButton />
 
       {/* NAV */}
       <nav className="fixed left-0 right-0 z-[65] bg-gray-950/80 backdrop-blur-md border-b border-white/5"

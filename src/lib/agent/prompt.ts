@@ -21,7 +21,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   ceramico: 'TRATAMIENTO CERÁMICO (1 año: Nasiol Metal Coat · 3 años: Nasiol ZR53)',
   mantencion: 'MANTENCIÓN CERÁMICA',
   adicional: 'ADICIONALES',
-  precompra: 'INSPECCIÓN PRECOMPRA',
+  precompra: 'PREPARACIÓN PARA VENDER',
 }
 
 function fmt(n: number): string {

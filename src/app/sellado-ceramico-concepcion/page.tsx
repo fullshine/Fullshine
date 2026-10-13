@@ -5,7 +5,6 @@ import { formatCurrency } from '@/lib/utils'
 import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO, PROMO_SHORT } from '@/lib/promo'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
-import WhatsAppButton from '@/components/WhatsAppButton'
 
 export const revalidate = 3600
 
@@ -140,7 +139,6 @@ export default async function SelladoCeramicoPage() {
     <div className="min-h-screen bg-gray-950 text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([schemaService, schemaFAQ, schemaBreadcrumb]) }} />
       <SiteNav />
-      <WhatsAppButton />
 
       {/* HERO */}
       <section className="pt-32 pb-20 px-4 text-center bg-gradient-to-b from-gray-900 to-gray-950">

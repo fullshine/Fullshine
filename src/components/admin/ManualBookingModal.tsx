@@ -20,7 +20,7 @@ const CATEGORIAS: Record<string, string> = {
   ceramico: 'Tratamiento cerámico',
   mantencion: 'Mantención',
   adicional: 'Adicionales',
-  precompra: 'Precompra',
+  precompra: 'Preparación para vender',
   automotora: 'Convenio automotora',
 }
 

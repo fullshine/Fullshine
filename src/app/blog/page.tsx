@@ -3,7 +3,6 @@ import { Metadata } from 'next'
 import { POSTS } from '@/lib/blog'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
-import WhatsAppButton from '@/components/WhatsAppButton'
 
 export const revalidate = 3600
 
@@ -29,7 +28,6 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <SiteNav />
-      <WhatsAppButton />
 
       <section className="pt-32 pb-16 px-4 text-center bg-gradient-to-b from-gray-900 to-gray-950">
         <div className="max-w-3xl mx-auto">

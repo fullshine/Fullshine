@@ -6,7 +6,6 @@ const STATS = [
   { value: 300, suffix: '+', label: 'Autos sellados', icon: '🚗' },
   { value: 4,   suffix: ' años', label: 'De experiencia', icon: '📅' },
   { value: 5.0, suffix: '★', label: 'En Google Reviews', icon: '⭐', decimals: 1 },
-  { value: 100, suffix: '%', label: 'Clientes satisfechos', icon: '😊' },
 ]
 
 function Counter({ target, suffix, decimals = 0 }: { target: number; suffix: string; decimals?: number }) {
@@ -58,7 +57,7 @@ function Counter({ target, suffix, decimals = 0 }: { target: number; suffix: str
 export default function StatsBar() {
   return (
     <section className="py-14 px-4 bg-gray-950 border-y border-white/5">
-      <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
         {STATS.map((s, i) => (
           <div key={i} className="text-center">
             <p className="text-2xl mb-1">{s.icon}</p>

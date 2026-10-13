@@ -2,7 +2,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Metadata } from 'next'
 import { isPromoActive, promoPrice, formatCLP, PROMO_CERAMICO } from '@/lib/promo'
-import WhatsAppButton from '@/components/WhatsAppButton'
 import GalleryCarousel from '@/components/GalleryCarousel'
 import PixelEvent from '@/components/PixelEvent'
 
@@ -72,7 +71,6 @@ export default function OfertaCeramicoLanding() {
         contentName="Landing oferta cerámico 20% OFF"
         contentCategory="ceramico"
       />
-      <WhatsAppButton />
 
       {/* NAV MINIMAL — sin menú para no fugar tráfico de la campaña */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">

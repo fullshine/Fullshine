@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
-import WhatsAppButton from '@/components/WhatsAppButton'
 import GalleryCarousel from '@/components/GalleryCarousel'
 import PixelEvent from '@/components/PixelEvent'
 
@@ -159,7 +158,6 @@ export default function RevisionGratisPage() {
         contentCategory="revision"
       />
       <SiteNav />
-      <WhatsAppButton />
 
       {/* HERO */}
       <section className="pt-32 pb-16 px-4 text-center bg-gradient-to-b from-gray-900 to-gray-950">

@@ -5,7 +5,6 @@ import { formatCurrency } from '@/lib/utils'
 import { isPromoActive, promoPrice, formatCLP, PROMO_OTROS } from '@/lib/promo'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
-import WhatsAppButton from '@/components/WhatsAppButton'
 
 export const revalidate = 3600
 
@@ -38,9 +37,9 @@ const PROCESO = [
 ]
 
 const FAQS = [
-  { q: '¿El pulido elimina todos los rayones?', a: 'Depende de la profundidad. Los rayones superficiales (que no llegan a la base) se eliminan completamente. Los profundos se reducen significativamente pero no desaparecen del todo — para esos casos existe el retoque de pintura.' },
-  { q: '¿Con qué frecuencia debo pulir mi auto?', a: 'Un auto bien cuidado puede pulirse cada 1-2 años. Si tienes sellado cerámico, el pulido es menos frecuente ya que la cerámica protege la pintura.' },
-  { q: '¿El pulido adelgaza la pintura?', a: 'Con equipos modernos y pasta correcta, el desgaste es mínimo. Un auto puede pulirse muchas veces a lo largo de su vida sin problema. Usamos técnicas de un solo paso cuando es posible para minimizar el desgaste.' },
+  { q: '¿El pulido elimina todos los rayones?', a: 'El resultado depende de la profundidad de los defectos y del estado de la pintura. Evaluamos cada vehículo antes de recomendar una corrección. Algunos rayones pueden reducirse o eliminarse; otros requieren retoque o repintado.' },
+  { q: '¿Con qué frecuencia debo pulir mi auto?', a: 'No recomendamos una frecuencia fija. Evaluamos el estado de la pintura y su historial antes de indicar otro pulido. Una mantención adecuada ayuda a conservar el acabado.' },
+  { q: '¿El pulido adelgaza la pintura?', a: 'La corrección abrasiva retira una parte del barniz. Evaluamos las mediciones, el estado y el historial de la pintura para definir una intervención prudente. No todos los defectos pueden corregirse sin comprometer el acabado.' },
   { q: '¿Cuánto tiempo demora?', a: 'Un pulido de mantenimiento toma 3-5 horas. Una corrección completa puede tomar 1-2 días dependiendo del estado de la pintura y el tamaño del vehículo.' },
 ]
 
@@ -74,7 +73,6 @@ export default async function PulidoAutoPage() {
     <div className="min-h-screen bg-gray-950 text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaService) }} />
       <SiteNav />
-      <WhatsAppButton />
 
       {/* HERO */}
       <section className="pt-32 pb-20 px-4 text-center bg-gradient-to-b from-gray-900 to-gray-950">

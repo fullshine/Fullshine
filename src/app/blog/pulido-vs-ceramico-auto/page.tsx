@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation'
 import { getPost } from '@/lib/blog'
 import SiteNav from '@/components/SiteNav'
 import SiteFooter from '@/components/SiteFooter'
-import WhatsAppButton from '@/components/WhatsAppButton'
 
 export const revalidate = 3600
 
@@ -87,7 +86,6 @@ export default function ArticlePulidoVsCeramico() {
     <div className="min-h-screen bg-gray-950 text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([schema, schemaFAQ]) }} />
       <SiteNav />
-      <WhatsAppButton />
 
       {/* HERO */}
       <section className="pt-32 pb-12 px-4 bg-gradient-to-b from-gray-900 to-gray-950">

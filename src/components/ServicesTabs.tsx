@@ -15,7 +15,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   ceramico: 'Cerámico',
   mantencion: 'Mantención',
   adicional: 'Adicionales',
-  precompra: 'Precompra',
+  precompra: 'Preparación para vender',
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
