@@ -118,9 +118,18 @@ export default function BookingForm({
   const STEPS = isRevision ? STEPS_REVISION : STEPS_FULL
   const autoService = isRevision ? services[0] : preselected
 
-  const [serviceCategory, setServiceCategory] = useState(preselected?.category ?? 'todos')
   const availableCategories = orderedServiceCategories(services)
-  const shownServices = serviceCategory === 'todos' ? services : services.filter(service => service.category === serviceCategory)
+  const [serviceCategory, setServiceCategory] = useState(
+    preselected?.category ?? (availableCategories.length === 1 ? availableCategories[0] : '')
+  )
+  const [ceramicYears, setCeramicYears] = useState<1 | 3>(preselected && isMetalCoat(preselected) ? 1 : 3)
+  const availableCeramicYears = ([1, 3] as const).filter(year =>
+    services.some(service => service.category === 'ceramico' && isMetalCoat(service) === (year === 1))
+  )
+  const selectedCeramicYears = availableCeramicYears.includes(ceramicYears) ? ceramicYears : availableCeramicYears[0]
+  const shownServices = services.filter(service => service.category === serviceCategory && (
+    serviceCategory !== 'ceramico' || isMetalCoat(service) === (selectedCeramicYears === 1)
+  ))
   const [step, setStep] = useState(0)
   const [form, setForm] = useState<BookingFormData>(
     autoService ? { ...INITIAL_FORM, service_id: autoService.id } : INITIAL_FORM
@@ -293,7 +302,42 @@ export default function BookingForm({
         {/* Servicio (con tipo de vehículo para ver precio exacto) */}
         {current === 'servicio' && (
           <>
-            <div>
+            {availableCategories.length > 1 && (
+              <div>
+                <h3 className="font-semibold text-gray-900">¿Qué necesitas para tu auto?</h3>
+                <p className="mt-1 mb-3 text-sm text-gray-500">Elige una opción para ver los servicios que corresponden.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="group" aria-label="Qué necesita tu auto">
+                  {availableCategories.map(cat => {
+                    const needs: Record<string, { title: string; detail: string }> = {
+                      revision: { title: 'No sé qué necesita', detail: 'Diagnóstico gratuito para orientarte' },
+                      lavado_detallado: { title: 'Limpiar mi auto', detail: 'Lavado detallado de interior y exterior' },
+                      tapiz: { title: 'Limpiar tapices e interior', detail: 'Asientos, manchas y limpieza profunda' },
+                      pulido: { title: 'Recuperar el brillo', detail: 'Pulido y corrección de pintura' },
+                      ceramico: { title: 'Proteger la pintura', detail: 'Tratamientos cerámicos de 1 o 3 años' },
+                      mantencion: { title: 'Mantener mi cerámico', detail: 'Cuidado de una protección ya aplicada' },
+                      adicional: { title: 'Otros cuidados', detail: 'Motor, focos y servicios adicionales' },
+                      precompra: { title: 'Preparar mi auto para vender', detail: 'Mejorar su presentación para la venta' },
+                    }
+                    const need = needs[cat] ?? { title: SERVICE_CATEGORY_LABELS[cat] ?? cat, detail: 'Ver servicios disponibles' }
+                    return (
+                      <button key={cat} type="button" aria-pressed={serviceCategory === cat}
+                        onClick={() => {
+                          setServiceCategory(cat)
+                          if (selectedService && selectedService.category !== cat) {
+                            setForm(prev => ({ ...prev, service_id: '', scheduled_date: '', scheduled_time: '' }))
+                            setSlots([])
+                          }
+                        }}
+                        className={cn('rounded-xl border-2 p-3 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500', serviceCategory === cat ? 'border-brand-500 bg-brand-50' : 'border-gray-200 bg-white hover:border-brand-400')}>
+                        <span className="block text-sm font-semibold text-gray-900">{need.title}</span>
+                        <span className="mt-1 block text-xs text-gray-500">{need.detail}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+            {serviceCategory && <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de vehículo *</label>
               <div className="grid grid-cols-3 gap-2">
                 {VEHICLE_TYPES.map(type => (
@@ -310,26 +354,29 @@ export default function BookingForm({
                 ))}
               </div>
               <p className="text-xs text-gray-400 mt-1">Los precios se ajustan según tu vehículo</p>
-            </div>
+            </div>}
 
-            <h3 className="font-semibold text-gray-900 pt-2">Elige tu servicio</h3>
-            {availableCategories.length > 1 && (
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar servicios por categoría">
-                {['todos', ...availableCategories].map(cat => (
-                  <button key={cat} type="button" aria-pressed={serviceCategory === cat}
-                    onClick={() => {
-                      setServiceCategory(cat)
-                      if (selectedService && cat !== 'todos' && selectedService.category !== cat) {
-                        setForm(prev => ({ ...prev, service_id: '', scheduled_date: '', scheduled_time: '' }))
-                        setSlots([])
-                      }
-                    }}
-                    className={cn('rounded-full border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500', serviceCategory === cat ? 'bg-brand-500 border-brand-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-brand-400')}>
-                    {cat === 'todos' ? 'Todos' : SERVICE_CATEGORY_LABELS[cat] ?? cat}
-                  </button>
-                ))}
+                        {serviceCategory === 'ceramico' && availableCeramicYears.length > 1 && (
+              <div role="group" aria-label="Duración de la protección cerámica">
+                <p className="mb-2 text-sm font-medium text-gray-700">¿Cuánto tiempo de protección buscas?</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {availableCeramicYears.map(year => (
+                    <button key={year} type="button" aria-pressed={selectedCeramicYears === year}
+                      onClick={() => {
+                        setCeramicYears(year)
+                        if (selectedService && isMetalCoat(selectedService) !== (year === 1)) {
+                          setForm(prev => ({ ...prev, service_id: '', scheduled_date: '', scheduled_time: '' }))
+                          setSlots([])
+                        }
+                      }}
+                      className={cn('rounded-lg border px-3 py-3 text-sm font-medium', selectedCeramicYears === year ? 'border-brand-500 bg-brand-50 text-gray-900' : 'border-gray-300 text-gray-700')}>
+                      {year === 1 ? '1 año · Metal Coat' : '3 años · ZR53'}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
+            {serviceCategory && <h3 className="font-semibold text-gray-900 pt-2">Elige tu servicio</h3>}
             {selectedService && (
               <p role="status" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-gray-800">
                 Seleccionado: <strong>{selectedService.name}</strong>
