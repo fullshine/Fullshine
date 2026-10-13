@@ -42,3 +42,28 @@
 
 /* Fixed navigation anchor offset */
 [id] { scroll-margin-top: calc(88px + var(--promo-h, 0px)); }
+
+/* Fullshine: restrained light, depth and motion */
+.fullshine-home { background-image: radial-gradient(ellipse at 100% 20%, rgb(245 158 11 / .035), transparent 45%); }
+.modern-hero::after { content: ''; pointer-events: none; position: absolute; inset: auto 8% 0; height: 1px; background: linear-gradient(90deg, transparent, rgb(251 191 36 / .55), transparent); }
+.hero-accent { background: linear-gradient(110deg, #fff7ed 10%, #fcd34d 55%, #f59e0b); background-clip: text; -webkit-background-clip: text; color: transparent; }
+.shine-button { position: relative; isolation: isolate; overflow: hidden; box-shadow: 0 8px 30px rgb(245 158 11 / .15); }
+.shine-button::after { content: ''; position: absolute; inset: -50% auto -50% -70%; width: 45%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / .35), transparent); transform: skewX(-20deg); pointer-events: none; }
+.specialist-panel { background-image: linear-gradient(120deg, rgb(245 158 11 / .05), transparent 60%); }
+.service-tab { transition: background-color .25s, color .25s, border-color .25s, box-shadow .25s; }
+.service-tab:focus-visible { outline: 2px solid #fbbf24; outline-offset: 4px; }
+.modern-service-card { background-image: radial-gradient(ellipse at top right, rgb(245 158 11 / .06), transparent 65%); transition: transform .3s cubic-bezier(.22,1,.36,1), border-color .3s, box-shadow .3s; }
+@keyframes fullshine-arrive { from { transform: translateY(14px); } to { transform: translateY(0); } }
+@keyframes fullshine-sheen { to { left: 130%; } }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-content { animation: fullshine-arrive .75s cubic-bezier(.22,1,.36,1) both; }
+  .modern-service-card { animation: fullshine-arrive .45s cubic-bezier(.22,1,.36,1) both; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .modern-service-card:hover { transform: translateY(-4px); border-color: rgb(245 158 11 / .45); box-shadow: 0 18px 35px -20px rgb(245 158 11 / .25); }
+  .shine-button:hover::after { animation: fullshine-sheen .7s ease-out; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .fullshine-home *, .fullshine-home *::before, .fullshine-home *::after { animation: none !important; transition: none !important; }
+}

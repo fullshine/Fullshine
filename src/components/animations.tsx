@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import { motion, useInView, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 import { useRef, ReactNode } from 'react'
 
 // Fade + slide up on scroll
@@ -13,6 +13,7 @@ export function FadeUp({
   delay?: number
   className?: string
 }) {
+  const reduceMotion = useReducedMotion()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-60px' })
 
@@ -20,9 +21,9 @@ export function FadeUp({
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, y: 32 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={false}
+      animate={isInView || reduceMotion ? { opacity: 1, y: 0 } : { opacity: 1, y: 20 }}
+      transition={{ duration: reduceMotion ? 0 : 0.65, delay: reduceMotion ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -39,6 +40,7 @@ export function StaggerList({
   className?: string
   staggerDelay?: number
 }) {
+  const reduceMotion = useReducedMotion()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-60px' })
 
@@ -46,10 +48,10 @@ export function StaggerList({
     <motion.div
       ref={ref}
       className={className}
-      initial="hidden"
-      animate={isInView ? 'visible' : 'hidden'}
+      initial={false}
+      animate={isInView || reduceMotion ? 'visible' : 'hidden'}
       variants={{
-        visible: { transition: { staggerChildren: staggerDelay } },
+        visible: { transition: { staggerChildren: reduceMotion ? 0 : staggerDelay } },
         hidden: {},
       }}
     >
@@ -66,12 +68,13 @@ export function StaggerItem({
   children: ReactNode
   className?: string
 }) {
+  const reduceMotion = useReducedMotion()
   return (
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y: 24 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+        hidden: { opacity: 1, y: 16 },
+        visible: { opacity: 1, y: 0, transition: { duration: reduceMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] } },
       }}
     >
       {children}
@@ -87,10 +90,11 @@ export function HoverCard({
   children: ReactNode
   className?: string
 }) {
+  const reduceMotion = useReducedMotion()
   return (
     <motion.div
       className={className}
-      whileHover={{ y: -6, scale: 1.02 }}
+      whileHover={reduceMotion ? undefined : { y: -4 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
     >
       {children}
@@ -106,13 +110,14 @@ export function ParallaxSection({
   children: ReactNode
   className?: string
 }) {
+  const reduceMotion = useReducedMotion()
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
   const y = useTransform(scrollYProgress, [0, 1], ['-8%', '8%'])
 
   return (
     <div ref={ref} className={`overflow-hidden ${className}`}>
-      <motion.div style={{ y }} className="w-full h-full">
+      <motion.div style={{ y: reduceMotion ? 0 : y }} className="w-full h-full">
         {children}
       </motion.div>
     </div>
@@ -129,6 +134,7 @@ export function FadeIn({
   delay?: number
   className?: string
 }) {
+  const reduceMotion = useReducedMotion()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-40px' })
 
@@ -136,9 +142,9 @@ export function FadeIn({
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0 }}
+      initial={false}
       animate={isInView ? { opacity: 1 } : {}}
-      transition={{ duration: 0.7, delay }}
+      transition={{ duration: reduceMotion ? 0 : 0.7, delay: reduceMotion ? 0 : delay }}
     >
       {children}
     </motion.div>

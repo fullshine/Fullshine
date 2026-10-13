@@ -157,7 +157,7 @@ export default async function HomePage() {
   ].filter(k => !CATEGORIAS_PRIVADAS.includes(k))
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="fullshine-home min-h-screen bg-gray-950 text-white">
 
       <PromoBar />
 
@@ -165,17 +165,17 @@ export default async function HomePage() {
       <SiteNav />
 
       {/* HERO */}
-      <section aria-labelledby="portada-titulo" className="relative overflow-hidden px-4 pt-28 pb-10 sm:pt-32 sm:pb-12">
+      <section aria-labelledby="portada-titulo" className="modern-hero relative overflow-hidden px-4 pt-28 pb-10 sm:pt-32 sm:pb-12">
         <Image src="/hero-jaguar.jpg" alt="Jaguar detallado por Fullshine" fill
           sizes="100vw" className="object-cover object-center" priority />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/75 to-gray-950" />
 
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
+        <div className="hero-content relative z-10 max-w-3xl mx-auto text-center">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-400 mb-4">
             Concepción &amp; San Pedro de la Paz
           </p>
           <h1 id="portada-titulo" className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
-            Detailing premium<br />en Concepción
+            Detailing premium<br /><span className="hero-accent">en Concepción</span>
           </h1>
           <p className="mt-5 text-lg sm:text-xl font-semibold text-amber-300">
             Primero evaluamos tu auto. Después recomendamos.
@@ -186,7 +186,7 @@ export default async function HomePage() {
           </p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="#servicios"
-              className="rounded-full bg-amber-500 hover:bg-amber-400 px-7 py-3.5 text-base font-bold text-black transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400">
+              className="shine-button rounded-full bg-amber-500 hover:bg-amber-400 px-7 py-3.5 text-base font-bold text-black transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400">
               Ver servicios y precios
             </Link>
             <Link href="/revision-gratis-concepcion"
@@ -224,7 +224,7 @@ export default async function HomePage() {
       </section>
 
       <section aria-labelledby="especialista-titulo" className="bg-gray-950 px-4 pb-10 sm:pb-12">
-        <div className="max-w-5xl mx-auto rounded-2xl border border-white/10 bg-gray-900/60 p-5 sm:p-7 grid gap-6 md:grid-cols-[1fr_1.2fr] md:items-center">
+        <div className="specialist-panel max-w-5xl mx-auto rounded-2xl border border-white/10 bg-gray-900/60 p-5 sm:p-7 grid gap-6 md:grid-cols-[1fr_1.2fr] md:items-center">
           <div className="flex items-center gap-4">
             <Image src="/juan-medidor.jpg" alt="Juan Sáez evaluando la pintura con un medidor de espesor"
               width={96} height={112} sizes="96px" className="h-28 w-24 shrink-0 rounded-xl object-cover" />

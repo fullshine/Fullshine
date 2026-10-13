@@ -92,8 +92,9 @@ export default function ServicesTabs({
         {orderedCategories.map(cat => (
           <button
             key={cat}
+            type="button" aria-pressed={active === cat}
             onClick={() => setActive(cat)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+            className={`service-tab relative min-h-[44px] flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
               active === cat
                 ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/25'
                 : 'bg-gray-900 text-gray-400 hover:text-white border border-white/5 hover:border-white/15'
@@ -120,10 +121,10 @@ export default function ServicesTabs({
 
       {/* Service cards */}
       {sections.map(section => (
-      <section key={section.title} className="mb-8">
+      <section key={`${active}-${section.title}`} className="service-panel mb-8">
       {section.title && <h3 className="text-xl font-bold text-amber-400 mb-4">{section.title}</h3>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {section.services.map(service => {
+        {section.services.map((service, index) => {
           const prices = service.prices ?? []
           const priceByType: Record<string, number> = {}
           prices.forEach((p: any) => { if (p.price_clp) priceByType[p.vehicle_type] = p.price_clp })
@@ -133,7 +134,7 @@ export default function ServicesTabs({
           )?.[1] ?? CATEGORY_ICONS[active] ?? '🔧'
 
           return (
-            <div key={service.id} className="bg-gray-900 border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-colors h-full flex flex-col">
+            <div key={service.id} style={{ animationDelay: `${Math.min(index, 5) * 45}ms` }} className="modern-service-card bg-gray-900 border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-colors h-full flex flex-col">
               <div className="flex justify-between items-start gap-4 mb-3">
                 <div className="flex-1">
                   <p className="font-semibold text-white flex items-center gap-2">
