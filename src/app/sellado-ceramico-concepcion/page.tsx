@@ -10,8 +10,8 @@ import SiteFooter from '@/components/SiteFooter'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Tratamiento Cerámico en Concepción | Sellado Nasiol ZR53 10H — Fullshine',
-  description: 'Tratamiento cerámico para autos en Concepción y San Pedro de la Paz. Sellado Nasiol ZR53 (10H) desde $300.000: 3 años de protección de fábrica, extensible a 5. Precios claros y reserva online.',
+  title: 'Sellado Cerámico en Concepción | Tratamientos — Fullshine',
+  description: 'Sellado cerámico en Concepción con diagnóstico de pintura gratis. Compara planes, precios y duración de la protección. Reserva tu evaluación en Fullshine.',
   keywords: [
     'tratamiento cerámico Concepción',
     'sellado cerámico Concepción',
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: 'https://www.fullshine.autos/sellado-ceramico-concepcion' },
   openGraph: {
-    title: 'Tratamiento Cerámico en Concepción | Nasiol ZR53 10H — Fullshine',
-    description: 'Tratamiento cerámico profesional con Nasiol ZR53 (10H). Platino desde $300.000, Gold desde $350.000, Elite desde $500.000.',
+    title: 'Sellado Cerámico en Concepción | Tratamientos — Fullshine',
+    description: 'Evalúa la pintura de tu auto y compara tratamientos cerámicos de 1 y 3 años. Diagnóstico gratuito y reserva online en Fullshine.',
     url: 'https://www.fullshine.autos/sellado-ceramico-concepcion',
     siteName: 'Fullshine Detailing Premium',
     locale: 'es_CL',
@@ -60,7 +60,7 @@ const PROCESS = [
 const FAQS = [
   {
     q: '¿Cuánto cuesta un tratamiento cerámico en Concepción?',
-    a: 'En Fullshine el tratamiento cerámico parte en $300.000 (paquete Platino), $350.000 el Gold y $500.000 el Elite. El precio varía según el tipo de vehículo y el estado de la pintura. Todos incluyen lavado técnico, descontaminación, pulido de corrección y aplicación de Nasiol ZR53 10H. En el mercado local vas a encontrar desde $80.000 hasta $600.000: la diferencia está en la cerámica que se usa y en si incluye o no la preparación de la pintura.',
+    a: 'Ofrecemos tratamientos cerámicos de 1 año con Nasiol Metal Coat y de 3 años con Nasiol ZR53. Los paquetes de 3 años parten en $300.000 para Platino, $350.000 para Gold y $500.000 para Elite. Consulta la tabla de precios de esta página para comparar ambas duraciones y el valor según tu vehículo. El diagnóstico gratuito permite evaluar la preparación que necesita tu pintura antes de recomendar un plan.',
   },
   {
     q: '¿Es lo mismo tratamiento cerámico que sellado cerámico?',
@@ -85,7 +85,7 @@ export default async function SelladoCeramicoPage() {
   const schemaService = {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: 'Tratamiento Cerámico en Concepción',
+    name: 'Sellado y tratamiento cerámico en Concepción',
     alternateName: ['Sellado Cerámico Concepción', 'Coating Cerámico Concepción'],
     serviceType: 'Tratamiento cerámico automotriz',
     provider: {
@@ -111,9 +111,9 @@ export default async function SelladoCeramicoPage() {
     ],
     description: 'Tratamiento cerámico profesional en Concepción con Nasiol ZR53 (10H). 3 años de protección de fábrica, extensible a 5 con mantenciones. Tres paquetes: Platino, Gold y Elite.',
     offers: [
-      { '@type': 'Offer', name: 'Cerámico Platino', priceSpecification: { '@type': 'PriceSpecification', minPrice: 300000, priceCurrency: 'CLP' } },
-      { '@type': 'Offer', name: 'Cerámico Gold', priceSpecification: { '@type': 'PriceSpecification', minPrice: 350000, priceCurrency: 'CLP' } },
-      { '@type': 'Offer', name: 'Cerámico Elite', priceSpecification: { '@type': 'PriceSpecification', minPrice: 500000, priceCurrency: 'CLP' } },
+      { '@type': 'Offer', name: 'Cerámico Platino 3 años', priceSpecification: { '@type': 'PriceSpecification', minPrice: 300000, priceCurrency: 'CLP' } },
+      { '@type': 'Offer', name: 'Cerámico Gold 3 años', priceSpecification: { '@type': 'PriceSpecification', minPrice: 350000, priceCurrency: 'CLP' } },
+      { '@type': 'Offer', name: 'Cerámico Elite 3 años', priceSpecification: { '@type': 'PriceSpecification', minPrice: 500000, priceCurrency: 'CLP' } },
     ],
   }
 
@@ -146,11 +146,11 @@ export default async function SelladoCeramicoPage() {
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-4">Concepción &amp; San Pedro de la Paz</p>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
-            Tratamiento Cerámico{' '}<br />
+            Sellado y tratamiento cerámico{' '}<br />
             <span className="text-amber-400">en Concepción</span>
           </h1>
           <p className="text-gray-300 text-lg mb-4 max-w-xl mx-auto">
-            Protege tu pintura con <strong className="text-white">Nasiol ZR53</strong> — cerámica certificada 10H, una de las más duras del mercado. 3 años de protección de fábrica (extensible a 5 con mantenciones), brillo espejo y efecto hidrofóbico durante toda la vigencia del tratamiento.
+            Protege la pintura de tu auto con un tratamiento cerámico elegido según su estado y el cuidado que buscas. Primero evaluamos la pintura; después te recomendamos la preparación y el plan adecuado. Compara opciones de 1 año con <strong className="text-white">Nasiol Metal Coat</strong> y de 3 años con <strong className="text-white">Nasiol ZR53</strong>.
           </p>
           <p className="text-gray-400 text-sm mb-6 max-w-xl mx-auto">
             También conocido como <strong className="text-gray-300">sellado cerámico</strong> o{' '}
@@ -190,7 +190,7 @@ export default async function SelladoCeramicoPage() {
       {/* PAQUETES */}
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-3">Elige tu paquete cerámico</h2>
+          <h2 className="text-3xl font-bold text-center mb-3">Paquetes cerámicos de 3 años</h2>
           <p className="text-gray-400 text-center mb-12">Todos incluyen Nasiol ZR53 (10H) — 3 años de protección, extensible a 5 con mantenciones</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TIERS.map(tier => (

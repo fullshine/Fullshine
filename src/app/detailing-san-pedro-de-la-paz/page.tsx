@@ -12,9 +12,9 @@ export const revalidate = 3600
 const PATH = '/detailing-san-pedro-de-la-paz'
 
 export const metadata = buildMetadata({
-  title: 'Detailing y Tratamiento Cerámico en San Pedro de la Paz — Fullshine',
+  title: 'Lavado de Autos en San Pedro de la Paz | Fullshine',
   description:
-    'Detailing automotriz para San Pedro de la Paz: tratamiento cerámico, pulido y lavado detallado. Taller a 10 minutos por el Puente Llacolén. Diagnóstico gratuito con medición de espesor de laca.',
+    'Lavado de autos a domicilio en San Pedro de la Paz, lavado detallado y limpieza de tapiz. Revisa servicios y precios. También atendemos en taller en Concepción.',
   path: PATH,
   keywords: [
     'detailing San Pedro de la Paz',
@@ -27,6 +27,10 @@ export const metadata = buildMetadata({
 })
 
 const FAQS = [
+  {
+    q: '¿Hacen lavado de autos a domicilio en San Pedro de la Paz?',
+    a: 'Sí. Ofrecemos lavado detallado y limpieza de tapiz a domicilio en San Pedro de la Paz, sin costo adicional por traslado. Necesitamos un espacio adecuado para trabajar. Al reservar, confirma las condiciones del lugar y la disponibilidad. También puedes traer tu vehículo a nuestro taller en Camilo Henríquez 381, Concepción.',
+  },
   {
     q: '¿Atienden clientes de San Pedro de la Paz?',
     a: 'Sí, es una parte importante de nuestros clientes. Nuestro taller está en Camilo Henríquez 381, Concepción centro, a unos 10 a 15 minutos desde San Pedro cruzando el Puente Llacolén o el Puente Juan Pablo II, según el sector.',
@@ -61,11 +65,11 @@ export default function DetailingSanPedro() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLd(
           schemaService({
-            name: 'Detailing automotriz para San Pedro de la Paz',
-            serviceType: 'Detailing y estética automotriz',
-            alternateName: ['Tratamiento cerámico San Pedro de la Paz'],
+            name: 'Lavado de autos y detailing en San Pedro de la Paz',
+            serviceType: 'Lavado detallado, limpieza de tapiz y detailing automotriz',
+            alternateName: ['Lavado de autos San Pedro de la Paz', 'Tratamiento cerámico San Pedro de la Paz'],
             description:
-              'Servicios de detailing para clientes de San Pedro de la Paz: tratamiento cerámico Nasiol ZR53, corrección de pintura, lavado detallado y limpieza de tapiz. Taller en Concepción centro.',
+              'Lavado detallado y limpieza de tapiz a domicilio en San Pedro de la Paz. Tratamiento cerámico y corrección de pintura en nuestro taller de Concepción.',
             path: PATH,
           }),
           schemaFAQ(FAQS),
@@ -79,15 +83,15 @@ export default function DetailingSanPedro() {
           <div className="max-w-4xl mx-auto">
             <Breadcrumbs items={MIGAS} />
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-4">
-              A 10 minutos por el Puente Llacolén
+              A domicilio en San Pedro de la Paz · Taller en Concepción
             </p>
             <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
-              Detailing en <span className="text-amber-400">San Pedro de la Paz</span>
+              Lavado de autos y detailing en <span className="text-amber-400">San Pedro de la Paz</span>
             </h1>
             <p className="text-gray-300 text-lg leading-relaxed mb-6 max-w-2xl">
-              Tratamiento cerámico, corrección de pintura y lavado detallado para vehículos de
-              San Pedro de la Paz. Nuestro taller está en Camilo Henríquez 381, Concepción
-              centro — a 10 o 15 minutos cruzando el puente.
+              Lavado detallado y limpieza de tapiz a domicilio en San Pedro de la Paz,
+              sin costo adicional por traslado. También atendemos en nuestro taller de
+              Camilo Henríquez 381, Concepción, donde realizamos pulido y tratamiento cerámico.
             </p>
             <p className="text-gray-400 leading-relaxed mb-8 max-w-2xl">
               <strong className="text-gray-200">Mismo precio que en Concepción</strong>, sin recargo
@@ -96,8 +100,12 @@ export default function DetailingSanPedro() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/diagnostico"
+              <Link href="/reservar?categoria=lavado_detallado"
                 className="bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-full transition-all hover:scale-105 text-center">
+                Reservar lavado
+              </Link>
+              <Link href="/diagnostico"
+                className="border border-white/20 hover:border-white/40 text-white font-semibold text-lg px-8 py-4 rounded-full transition-colors text-center">
                 Diagnóstico gratuito
               </Link>
               <a href={`https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent('Hola, soy de San Pedro de la Paz y quiero información sobre detailing')}`}
