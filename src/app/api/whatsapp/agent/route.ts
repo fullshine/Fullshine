@@ -14,6 +14,8 @@ export const maxDuration = 30
 
 const SECRET = process.env.AGENT_WEBHOOK_SECRET
 const BRANCH_PHONE = (process.env.NEXT_PUBLIC_BRANCH_PHONE ?? '56933654943').replace(/\D/g, '')
+// Número del responsable, separado del número conectado si el proveedor no admite mensajes a sí mismo.
+const HANDOFF_PHONE = (process.env.AGENT_HANDOFF_PHONE ?? BRANCH_PHONE).replace(/\D/g, '')
 const MAX_AGE_MS = 5 * 60 * 1000 // ignorar mensajes con más de 5 min (backlog de reintentos)
 
 interface GreenWebhook {
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Mensajes del propio negocio → canal de comandos de admin
-    if (phone === BRANCH_PHONE) {
+    if (phone === BRANCH_PHONE || phone === HANDOFF_PHONE) {
       const response = await handleAdminCommand(text)
       if (response) await sendRawMessage(phone, response)
       return NextResponse.json({ status: 'admin' })
@@ -90,9 +92,10 @@ export async function POST(request: NextRequest) {
 
     if (result.handoff) {
       await sendRawMessage(
-        BRANCH_PHONE,
+        HANDOFF_PHONE,
         `🤝 *Derivación del bot*\n\nEl cliente +${phone} necesita atención humana.\n` +
         `El bot quedó pausado para este número.\n\n` +
+        `Contexto reciente (mensajes, no confirmación de reserva):\n${result.handoffContext ?? text.slice(0, 1000)}\n\n` +
         `Escríbele directo por WhatsApp. Cuando termines: "activar ${phone}"`
       )
     }

@@ -1,0 +1,58 @@
+import {guidedReply, type GuidedState} from '@/lib/agent/guided-flow'
+const now = new Date('2026-10-22T15:00:00Z')
+const run = (state: GuidedState | null, text: string) => guidedReply(state, text, now)
+
+test.each([['1', '$169.990'], ['2', '$189.000'], ['3', '$209.990']])('cotiza %s, exige aceptación y deriva sin confirmar reserva', (category, price) => {
+ let step = run(null, 'Vi el reel de octubre')
+ expect(step.state.step).toBe('vehicle')
+ step = run(step.state, 'Toyota Corolla')
+ step = run(step.state, category)
+ expect(step.reply).toContain(price)
+ const ambiguous = run(step.state, 'si')
+ expect(ambiguous.state.accepted).not.toBe(true)
+ step = run(step.state, 'ACEPTO')
+ expect(step.state.accepted).toBe(true)
+ step = run(step.state, '3 de noviembre 14:00')
+ expect(step.handoff).toBe(true)
+ expect(step.handoffContext).toContain('Cliente listo para cierre')
+ expect(step.handoffContext).toContain(price)
+ expect(step.reply).toContain('Aún no hay una hora reservada')
+})
+test.each(['Chevrolet Silverado','Ford F150','Toyota 4Runner'])('XL tiene prioridad: %s', vehicle => {
+ const step = run(run(null, 'promo').state, vehicle)
+ expect(step.state.category).toBe('pickup_xl')
+ expect(step.reply).toContain('$209.990')
+})
+test('preguntas frecuentes conservan estado y condiciones pendientes', () => {
+ const step = run(run(run(null, 'promo').state, 'Toyota RAV4').state, '2')
+ const faq = run(step.state, '¿A domicilio?')
+ expect(faq.reply).toContain('exclusivamente en taller')
+ expect(faq.state).toEqual(step.state)
+ expect(faq.state.accepted).not.toBe(true)
+})
+test('cambiar vehículo borra precio y aceptación anterior', () => {
+ const result = run({version:1,step:'schedule',vehicle:'Toyota RAV4',category:'suv_camioneta',accepted:true,misses:0}, 'CAMBIAR')
+ expect(result.state.step).toBe('vehicle')
+ expect(result.state.accepted).toBeUndefined()
+ expect(result.state.category).toBeUndefined()
+})
+test.each(['0','Quiero hablar con una persona','[el cliente envió una imagen]','stop'])('derivación global: %s', text => {
+ expect(run(null,text).handoff).toBe(true)
+})
+test('no confunde el rechazo con aceptación', () => {
+ const result = run({version:1,step:'accept',vehicle:'Toyota RAV4',category:'suv_camioneta',misses:0}, 'no acepto')
+ expect(result.handoff).toBe(true)
+ expect(result.handoffContext).toContain('no está listo')
+ expect(result.state.accepted).not.toBe(true)
+})
+test('vence aunque el cliente haya obtenido una cotización previa', () => {
+ const result = guidedReply({version:1,step:'schedule',vehicle:'Toyota RAV4',category:'suv_camioneta',accepted:true,misses:0}, '2 noviembre', new Date('2026-11-01T03:00:00Z'))
+ expect(result.handoffContext).not.toContain('Cliente listo para cierre')
+ expect(result.reply).toContain('no está disponible para nuevas reservas')
+})
+test('dos respuestas no reconocidas derivan', () => {
+ let result = run(null,'promo')
+ result = run(result.state,'???')
+ expect(result.handoff).toBe(false)
+ expect(run(result.state,'???').handoff).toBe(true)
+})
