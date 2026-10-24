@@ -116,9 +116,11 @@ export async function processIncomingMessage(
   }
 
   const result = await salesReply(conv.flow_state, text)
-  const { error } = await createAdminClient().from('agent_conversations')
-    .update({ flow_state: result.state, ...(result.handoff ? { status: 'paused' } : {}) }).eq('id', conv.id)
+  const { data: updated, error } = await createAdminClient().from('agent_conversations')
+    .update({ flow_state: result.state, ...(result.handoff ? { status: 'paused' } : {}) })
+    .eq('id', conv.id).eq('status', 'active').select('id').maybeSingle()
   if (error) throw new Error('No se pudo guardar o pausar el flujo guiado')
+  if (!updated) return { reply: null, handoff: false } // a human took over while preparing the reply
   await saveMessage(conv.id, 'assistant', result.reply)
   return { reply: result.reply, handoff: result.handoff,
     ...(result.handoff ? { handoffContext: result.handoffContext } : {}) }
@@ -138,7 +140,7 @@ export async function handleAdminCommand(text: string): Promise<string | null> {
     const status = action === 'pausar' ? 'paused' : 'active'
     const { data } = await supabase
       .from('agent_conversations')
-      .update({ status, ...(status === 'active' ? { flow_state: null } : {}) })
+      .update({ status, flow_state: status === 'active' ? null : {manualTakeover: true} })
       .eq('phone', phone)
       .select('id')
       .maybeSingle()

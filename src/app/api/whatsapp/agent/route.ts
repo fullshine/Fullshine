@@ -1,13 +1,14 @@
 // =============================================
-// FULLSHINE - Webhook GreenAPI → Agente IA
+// FULLSHINE - Webhook GreenAPI → Asistente guiado
 // Configurar en GreenAPI:
 //   webhookUrl = https://www.fullshine.autos/api/whatsapp/agent?token=<AGENT_WEBHOOK_SECRET>
-//   solo evento: incomingMessageReceived
+//   eventos: incomingMessageReceived + outgoingMessageReceived (teléfono/web)
 // =============================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { processIncomingMessage, handleAdminCommand } from '@/lib/agent'
 import { sendRawMessage } from '@/lib/whatsapp'
+import { pauseForHuman, canSendAgentMessage } from '@/lib/agent/takeover'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -56,8 +57,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
-  // Solo mensajes entrantes (nunca ecos de salida ni estados)
-  if (body.typeWebhook !== 'incomingMessageReceived') {
+  // Entrantes y salientes manuales; ignorar ecos de API y estados.
+  if (body.typeWebhook !== 'incomingMessageReceived' && body.typeWebhook !== 'outgoingMessageReceived') {
     return NextResponse.json({ status: 'ignored' })
   }
 
@@ -71,6 +72,23 @@ export async function POST(request: NextRequest) {
   }
 
   const phone = chatId.replace('@c.us', '')
+  if (body.typeWebhook === 'outgoingMessageReceived') {
+    if (!body.idMessage) return NextResponse.json({ status: 'ignored' })
+    try {
+      // Messages to the admin/self chat can still control paused conversations.
+      if (phone === BRANCH_PHONE || phone === HANDOFF_PHONE) {
+        const command = extractText(body.messageData)
+        const response = command ? await handleAdminCommand(command) : null
+        if (response) await sendRawMessage(phone, response)
+        return NextResponse.json({ status: 'admin' })
+      }
+      await pauseForHuman(phone)
+      return NextResponse.json({ status: 'human_takeover' })
+    } catch {
+      // A failed pause MUST be retried by Green API.
+      return NextResponse.json({ status: 'pause_failed' }, { status: 503 })
+    }
+  }
   const text = extractText(body.messageData)
   if (!text || !body.idMessage) return NextResponse.json({ status: 'ignored' })
 
@@ -87,10 +105,11 @@ export async function POST(request: NextRequest) {
     if (result.reply) {
       // Delay humanizado (2-5s) — nadie responde en 200ms
       await new Promise(r => setTimeout(r, 2000 + Math.random() * 3000))
+      if (!(await canSendAgentMessage(phone, result.handoff))) return NextResponse.json({ status: 'paused' })
       await sendRawMessage(phone, result.reply)
     }
 
-    if (result.handoff) {
+    if (result.handoff && await canSendAgentMessage(phone, true)) {
       await sendRawMessage(
         HANDOFF_PHONE,
         `🤝 *Derivación del bot*\n\nEl cliente +${phone} necesita atención humana.\n` +

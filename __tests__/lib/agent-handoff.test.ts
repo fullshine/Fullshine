@@ -21,13 +21,17 @@ jest.mock('@/lib/supabase/server', () => ({
       insert: async (message: {role: string}) => ({
         error: table === 'agent_messages' && message.role === 'user' && state.duplicate ? {code: '23505'} : null,
       }),
-      update: (value: Record<string, unknown>) => ({
-        eq: async () => {
+      update: (value: Record<string, unknown>) => {
+        const apply = () => {
           updates.push(value)
           if (value.status === 'paused' && !state.pauseError) state.status = 'paused'
-          return {error: value.status === 'paused' && state.pauseError ? {message: 'unavailable'} : null}
-        },
-      }),
+          return {data: {id:'c1'}, error: value.status === 'paused' && state.pauseError ? {message:'unavailable'} : null}
+        }
+        return {eq: () => ({
+          then: (resolve: (value:unknown)=>unknown) => Promise.resolve(apply()).then(resolve),
+          eq: () => ({select: () => ({maybeSingle: async () => state.status === 'active' ? apply() : {data:null,error:null}})}),
+        })}
+      },
     }),
   }),
 }))
