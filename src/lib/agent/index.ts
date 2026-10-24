@@ -4,7 +4,8 @@
 // =============================================
 
 import { createAdminClient } from '@/lib/supabase/server'
-import { guidedReply, type GuidedState } from './guided-flow'
+import { salesReply } from './catalog-router'
+import type { SalesState } from './catalog-flow'
 
 const DAILY_REPLY_CAP = 40      // respuestas máx. por contacto en 24h (anti-abuso)
 
@@ -18,7 +19,7 @@ interface Conversation {
   id: string
   phone: string
   status: 'active' | 'paused'
-  flow_state?: GuidedState | null
+  flow_state?: SalesState | null
 }
 
 async function getOrCreateConversation(phone: string, name?: string): Promise<Conversation> {
@@ -114,7 +115,7 @@ export async function processIncomingMessage(
     return { reply: null, handoff: true, handoffContext: 'Límite de respuestas alcanzado. Último mensaje del cliente: ' + text.slice(0, 1000) }
   }
 
-  const result = guidedReply(conv.flow_state, text)
+  const result = await salesReply(conv.flow_state, text)
   const { error } = await createAdminClient().from('agent_conversations')
     .update({ flow_state: result.state, ...(result.handoff ? { status: 'paused' } : {}) }).eq('id', conv.id)
   if (error) throw new Error('No se pudo guardar o pausar el flujo guiado')
