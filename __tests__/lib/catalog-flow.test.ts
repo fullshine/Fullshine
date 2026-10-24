@@ -8,11 +8,11 @@ const services: CatalogService[] = [
  {id:'c1',name:'Cerámico Platino 1 año',category:'ceramico',duration_hours:8,prices:[]},
  {id:'c3',name:'Cerámico Platino 3 años',category:'ceramico',duration_hours:8,prices:[]},
 ]
-const run=(s: SalesState|null,text:string,cat=services)=>catalogReply(s,text,cat,now)
+const profile: SalesState={version:2,step:'home',vehicle:'Toyota Corolla',vehicleType:'hatch_sedan',misses:0}
+const run=(s: SalesState|null,text:string,cat=services)=>catalogReply(s ?? profile,text,cat,now)
 function quote(category='tapiz', vehicle='Toyota Corolla', type='1') {
- let r=run(null,category)
- for(const msg of ['1','1',vehicle])r=run(r.state,msg)
- if(r.state.step==='category')r=run(r.state,type)
+ let r=run({...profile, vehicle, vehicleType: /F150/.test(vehicle) ? 'pickup_xl' : type==='1'?'hatch_sedan':type==='2'?'suv_camioneta':'pickup_xl'},category)
+ for(const msg of ['1','1'])r=run(r.state,msg)
  return r
 }
 beforeEach(()=>jest.useFakeTimers().setSystemTime(now))
@@ -50,7 +50,7 @@ test('cambio de precio invalida aceptación y pide confirmación nueva',()=>{
 })
 test('cambiar y volver borran la aceptación',()=>{
  const r=run(quote().state,'ACEPTO')
- for(const command of ['volver','cambiar'])expect(run(r.state,command).state).toMatchObject({step:'vehicle',accepted:false})
+ for(const command of ['volver','cambiar'])expect(run(r.state,command).state).not.toMatchObject({accepted:true})
  expect(run(r.state,'menú').state).not.toHaveProperty('accepted')
 })
 test('números del menú apuntan a los IDs vistos aunque se reordene el catálogo',()=>{
@@ -59,16 +59,45 @@ test('números del menú apuntan a los IDs vistos aunque se reordene el catálog
 })
 test('catálogo normal sigue disponible tras octubre y promoción respeta vencimiento',()=>{
  const later=new Date('2026-11-02T15:00:00Z')
- expect(catalogReply(null,'tapiz',services,later).handoff).toBe(false)
- expect(catalogReply(null,'promo',services,later).handoff).toBe(true)
+ expect(catalogReply(profile,'tapiz',services,later).handoff).toBe(false)
+ expect(catalogReply(profile,'promo',services,later).handoff).toBe(true)
 })
 test('conserva campaña en curso y permite salir al catálogo',()=>{
  const s:SalesState={version:1,step:'vehicle',misses:0}
  expect(run(s,'Toyota RAV4').state).toMatchObject({version:1,step:'category'})
- expect(run(s,'servicios').state).toMatchObject({version:2,step:'categories'})
+ expect(run(s,'servicios').state).toMatchObject({version:2,step:'initial_vehicle'})
 })
 test.each(['0','stop','[el cliente envió una imagen]','¿A domicilio?'])('deriva sin inventar ante %s',text=>expect(run(quote().state,text).handoff).toBe(true))
 test('caída de catálogo y servicio retirado no inventan precios',()=>{
  expect(run(null,'servicios',[]).handoff).toBe(true)
  expect(run(quote().state,'ACEPTO',[]).handoff).toBe(true)
+})
+
+test('primero pide modelo, luego categoría y solo después muestra menú',()=>{
+ let r=catalogReply(null,'hola',services,now)
+ expect(r.state.step).toBe('initial_vehicle');expect(r.reply).not.toContain('Promoción pulido')
+ r=catalogReply(r.state,'Toyota RAV4',services,now)
+ expect(r.state.step).toBe('initial_category');expect(r.reply).toContain('Sedán/hatchback')
+ r=catalogReply(r.state,'2',services,now)
+ expect(r.state.step).toBe('home');expect(r.reply).toContain('Toyota RAV4')
+ expect(r.reply).toContain('Ver todos los servicios')
+ r=catalogReply(r.state,'1',services,now)
+ expect(r.state.step).toBe('accept');expect(r.reply).toContain('$189.000')
+})
+test('detalle muestra solo precio de la categoría declarada y no vuelve a pedir modelo',()=>{
+ let r=run(null,'tapiz');r=run(r.state,'1')
+ expect(r.reply).toContain('$100.000');expect(r.reply).not.toContain('$150.000')
+ r=run(r.state,'1');expect(r.state.step).toBe('accept')
+ expect(r.state).toMatchObject({vehicle:'Toyota Corolla',vehicleType:'hatch_sedan'})
+})
+test('volver al menú conserva el vehículo; cambiar lo borra y solicita uno nuevo',()=>{
+ const r=run(quote().state,'menú')
+ expect(r.state).toMatchObject({step:'home',vehicle:'Toyota Corolla'})
+ expect(run(r.state,'cambiar').state).toMatchObject({step:'initial_vehicle'})
+})
+test('un XL no queda cotizado como sedán aunque seleccione 1',()=>{
+ let r=catalogReply(null,'hola',services,now)
+ r=catalogReply(r.state,'Ford F150',services,now)
+ r=catalogReply(r.state,'1',services,now)
+ expect(r.state).toMatchObject({step:'home',vehicleType:'pickup_xl'})
 })
