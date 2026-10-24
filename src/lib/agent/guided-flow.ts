@@ -23,7 +23,7 @@ const labels: Record<Category, string> = {
 const normalize = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
 const price = (category: Category) => '$' + OCTOBER_CAMPAIGN.prices[category].toLocaleString('es-CL')
 const xl = (text: string) => /\b(silverado|f[ -]?150|4[ -]?runner)\b/.test(normalize(text))
-const categoryQuestion = '¿Qué categoría corresponde?\n1. Sedán/hatchback\n2. SUV/camioneta\n3. XL: Silverado, F-150, 4Runner o cualquier vehículo de tres corridas de asientos.\nResponde 1, 2 o 3. Si no sabes, escribe 0 para consultar con una persona.'
+const categoryQuestion = 'RESPONDE SOLO CON EL NÚMERO de la categoría de tu vehículo:\n1. Sedán/hatchback\n2. SUV/camioneta\n3. XL: Silverado, F-150, 4Runner o cualquier vehículo de tres corridas de asientos.\nResponde 1, 2 o 3. Si no sabes, escribe 0 para consultar con una persona.'
 const vehicleQuestion = 'Escribe la marca y modelo de tu vehículo (ejemplo: Toyota RAV4).'
 const menu = 'Soy el asistente automático de Fullshine.\n1. Promoción pulido abrillantador + tapiz Platino\n2. Otro servicio o consulta\n0. Hablar con una persona\nResponde con el número.'
 

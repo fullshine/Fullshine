@@ -25,7 +25,7 @@ const labels = {hatch_sedan: 'Sedán/hatchback', suv_camioneta: 'SUV/camioneta',
 const order = ['lavado_detallado','tapiz','pulido','ceramico','mantencion','adicional','precompra','revision']
 const nav = '\n\nMENÚ: inicio · VOLVER: paso anterior · 0: una persona'
 const vehicleQuestion = 'Escribe la marca y modelo de tu vehículo (ejemplo: Toyota RAV4).'
-const categoryQuestion = '¿Qué categoría corresponde?\n1. Sedán/hatchback\n2. SUV/camioneta\n3. XL: Silverado, F-150, 4Runner o cualquier vehículo de tres corridas.\nSi no sabes, escribe 0.'
+const categoryQuestion = 'RESPONDE SOLO CON EL NÚMERO de la categoría de tu vehículo:\n1. Sedán/hatchback\n2. SUV/camioneta\n3. XL: Silverado, F-150, 4Runner o cualquier vehículo de tres corridas.\nSi no sabes, escribe 0.'
 const xl = (s: string) => /\b(silverado|f[ -]?150|4[ -]?runner|3 corridas|tres corridas)\b/.test(norm(s))
 const fresh = (profile?: {vehicle?: string; vehicleType?: Vehicle}): CatalogState => ({version: 2, step: profile?.vehicle && profile.vehicleType ? 'home' : 'initial_vehicle', misses: 0, vehicle: profile?.vehicle, vehicleType: profile?.vehicleType})
 
