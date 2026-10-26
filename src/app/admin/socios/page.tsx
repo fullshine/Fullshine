@@ -13,7 +13,9 @@ export default async function AdminSociosPage({
     error?: string
   }
 
-  const activo = searchParams?.socio ?? socios[0]?.id ?? ''
+  const activo = socios.find(s => s.id === searchParams?.socio)?.id
+    ?? socios.find(s => s.slug === 'fortia')?.id
+    ?? socios[0]?.id ?? ''
   const docs = activo ? await getDocumentos(activo) : { data: [] }
 
   return (
@@ -54,7 +56,12 @@ export default async function AdminSociosPage({
         </div>
       )}
 
-      <SociosPanel socios={socios} documentos={docs.data} socioActivo={activo} />
+      {'error' in docs && docs.error && (
+        <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          No se pudieron cargar los documentos: {docs.error}
+        </p>
+      )}
+      <SociosPanel key={activo} socios={socios} documentos={docs.data} socioActivo={activo} />
     </div>
   )
 }

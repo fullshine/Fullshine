@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   subirDocumento, eliminarDocumento, getEnlaceDocumento, marcarPago,
   type Socio, type Documento,
@@ -21,6 +22,7 @@ export default function SociosPanel({
   documentos: Documento[]
   socioActivo: string
 }) {
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [msg, setMsg] = useState<string | null>(null)
   const [tipo, setTipo] = useState('factura')
@@ -78,7 +80,11 @@ export default function SociosPanel({
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-600">Socio</label>
-            <select name="partner_id" defaultValue={socio?.id} className={campo} required>
+            <select name="partner_id" value={socio?.id} className={campo} required disabled={pending}
+              onChange={e => {
+                const id = e.target.value
+                startTransition(() => router.push(`/admin/socios?socio=${encodeURIComponent(id)}`, { scroll: false }))
+              }}>
               {socios.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
@@ -200,7 +206,7 @@ export default function SociosPanel({
       {/* Listado */}
       <div>
         <h2 className="mb-3 font-bold text-gray-900">
-          Documentos cargados <span className="text-gray-400">({documentos.length})</span>
+          Documentos de {socio?.name} <span className="text-gray-400">({documentos.length})</span>
         </h2>
 
         {documentos.length === 0 ? (
