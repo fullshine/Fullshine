@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { processIncomingMessage, handleAdminCommand } from '@/lib/agent'
 import { sendRawMessage } from '@/lib/whatsapp'
 import { pauseForHuman, canSendAgentMessage } from '@/lib/agent/takeover'
+import { ingestCampaignEvent, dispatchCampaignMessages } from '@/lib/campaigns/server'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -45,7 +46,7 @@ function extractText(md: GreenWebhook['messageData']): string | null {
 
 export async function POST(request: NextRequest) {
   // Autenticación por secret en la URL
-  const token = new URL(request.url).searchParams.get('token')
+  const token = request.headers.get('authorization')?.replace(/^Bearer /, '') ?? new URL(request.url).searchParams.get('token')
   if (!SECRET || token !== SECRET) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -55,6 +56,21 @@ export async function POST(request: NextRequest) {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
+  }
+
+  // Campañas usa la misma URL, sin ejecutar también el agente anterior.
+  if (process.env.CAMPAIGNS_ENABLED === 'true') {
+    try {
+      await ingestCampaignEvent(body)
+    } catch {
+      // No confirmar recepción hasta persistir: el reintento se deduplica en SQL.
+      return NextResponse.json({ error: 'Persistence unavailable' }, { status: 503 })
+    }
+    try { await dispatchCampaignMessages(undefined, 1) } catch { /* la cola persistida queda para el cron */ }
+    return NextResponse.json({ status: 'campaigns' })
   }
 
   // Entrantes y salientes manuales; ignorar ecos de API y estados.

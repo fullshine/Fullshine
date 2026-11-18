@@ -1,5 +1,7 @@
 import { getAllBookings } from '@/actions/admin'
 import KanbanBoard from '@/components/admin/KanbanBoard'
+import CampaignBoard from '@/components/admin/CampaignBoard'
+import { getCampaignLeads } from '@/actions/campaigns'
 
 export const metadata = { title: 'CRM Kanban | Fullshine Admin' }
 export const dynamic = 'force-dynamic'
@@ -7,6 +9,7 @@ export const dynamic = 'force-dynamic'
 export default async function KanbanPage() {
   const result = await getAllBookings()
   const bookings = result.data ?? []
+  const campaigns = await getCampaignLeads()
 
   return (
     <div className="p-6">
@@ -19,6 +22,8 @@ export default async function KanbanPage() {
           </p>
         )}
       </div>
+      <CampaignBoard leads={campaigns.data} error={campaigns.error} enabled={process.env.CAMPAIGNS_ENABLED === 'true' && process.env.CAMPAIGNS_SEND_ENABLED === 'true'} />
+      <h2 className="text-xl font-bold mb-4">Reservas y servicios</h2>
       <KanbanBoard initialBookings={bookings} />
     </div>
   )
